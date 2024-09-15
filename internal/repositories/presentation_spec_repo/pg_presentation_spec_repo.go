@@ -3,6 +3,7 @@ package presentation_spec_repo
 import (
 	"context"
 	"export-service/internal/core/domain"
+	"export-service/internal/core/ports"
 
 	"github.com/jackc/pgx/v5"
 	"go.uber.org/zap"
@@ -10,24 +11,28 @@ import (
 
 type PgPresentationSpecRepository struct {
 	conn   *pgx.Conn
-	logger *zap.SugaredLogger
+	logger *zap.Logger
 }
 
-func NewPgPresentationSpecRepository(conn *pgx.Conn) *PgPresentationSpecRepository {
-	logger := zap.NewExample().Sugar().Named("PgPresentationSpecRepository")
+func NewPgPresentationSpecRepository(conn *pgx.Conn, logger *zap.Logger) *PgPresentationSpecRepository {
 	return &PgPresentationSpecRepository{
 		conn:   conn,
-		logger: logger,
+		logger: logger.Named("PgPresentationSpecRepository"),
 	}
 }
 
-func (r *PgPresentationSpecRepository) Get(ctx context.Context, userEmail string, userCompany string, service string, dataSource string) (domain.PresentationSpec, error) {
+func (r *PgPresentationSpecRepository) Get(ctx context.Context, params ports.PresentationSpecQueryParams) (domain.PresentationSpec, error) {
 	defer r.logger.Sync()
-	rows, _ := r.conn.Query(ctx, getQuery, userEmail, userCompany, service, dataSource)
+
+	if params.UserEmail == "" || params.UserCompany == "" || params.Service == "" || params.DataSource == "" {
+		return domain.PresentationSpec{}, ports.ErrInvalidParams
+	}
+
+	rows, _ := r.conn.Query(ctx, getQuery, params.UserEmail, params.UserCompany, params.Service, params.DataSource)
 
 	spec, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[domain.PresentationSpec])
 	if err != nil {
-		r.logger.Errorw("Got error when collecting one row", "error", err, "userEmail", userEmail, "userCompany", userCompany, "service", service, "dataSource", dataSource)
+		r.logger.Error("Got error when collecting one row", zap.Error(err), zap.Any("params", params))
 		return domain.PresentationSpec{}, err
 	}
 	return spec, nil

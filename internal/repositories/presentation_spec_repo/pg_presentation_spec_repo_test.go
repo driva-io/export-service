@@ -3,6 +3,7 @@ package presentation_spec_repo_test
 import (
 	"context"
 	"export-service/internal/core/domain"
+	"export-service/internal/core/ports"
 	"export-service/internal/repositories/presentation_spec_repo"
 	"log"
 	"testing"
@@ -13,6 +14,7 @@ import (
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
 	"github.com/testcontainers/testcontainers-go/wait"
+	"go.uber.org/zap"
 )
 
 func TestGet(t *testing.T) {
@@ -50,10 +52,10 @@ func TestGet(t *testing.T) {
 	}
 
 	defer conn.Close(ctx)
-
+	logger, _ := zap.NewProduction()
+	repo := presentation_spec_repo.NewPgPresentationSpecRepository(conn, logger)
 	// Begin testing
 	t.Run("Should return user's custom spec", func(t *testing.T) {
-		repo := presentation_spec_repo.NewPgPresentationSpecRepository(conn)
 
 		presentationSpec := domain.PresentationSpec{
 			ID:          "123e4567-e89b-12d3-a456-426655440000",
@@ -80,14 +82,13 @@ func TestGet(t *testing.T) {
 			},
 		}
 
-		result, err := repo.Get(ctx, "victor@driva.com.br", "Driva", "enrichment_test", "empresas")
+		result, err := repo.Get(ctx, ports.PresentationSpecQueryParams{UserEmail: "victor@driva.com.br", UserCompany: "Driva", Service: "enrichment_test", DataSource: "empresas"})
 
 		require.NoError(t, err)
 		require.Equal(t, presentationSpec, result)
 	})
 
 	t.Run("Should return the default spec for user without custom spec", func(t *testing.T) {
-		repo := presentation_spec_repo.NewPgPresentationSpecRepository(conn)
 
 		defaultSheetOptions := []domain.PresentationSpecSheetOptions{
 			{
@@ -104,7 +105,7 @@ func TestGet(t *testing.T) {
 			},
 		}
 
-		result, err := repo.Get(ctx, "user_sem_spec@driva.com.br", "Driva", "enrichment_test", "empresas")
+		result, err := repo.Get(ctx, ports.PresentationSpecQueryParams{UserEmail: "user_sem_spec@driva.com.br", UserCompany: "Driva", Service: "enrichment_test", DataSource: "empresas"})
 
 		require.NoError(t, err)
 		require.Equal(t, result.IsDefault, true)
@@ -114,10 +115,17 @@ func TestGet(t *testing.T) {
 	})
 
 	t.Run("Should return error if not spec found", func(t *testing.T) {
-		repo := presentation_spec_repo.NewPgPresentationSpecRepository(conn)
 
-		_, err := repo.Get(ctx, "user_sem_spec@driva.com.br", "Driva", "enrichment_test", "base_que_nao_existe")
+		_, err := repo.Get(ctx, ports.PresentationSpecQueryParams{UserEmail: "user_sem_spec@driva.com.br", UserCompany: "Driva", Service: "enrichment_test", DataSource: "base_que_nao_existe"})
 
 		require.Error(t, err)
+	})
+
+	t.Run("Should return error if invalid params", func(t *testing.T) {
+
+		_, err := repo.Get(ctx, ports.PresentationSpecQueryParams{})
+
+		require.Error(t, err)
+		require.ErrorIs(t, err, ports.ErrInvalidParams)
 	})
 }
