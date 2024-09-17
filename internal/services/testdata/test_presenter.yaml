@@ -1,0 +1,7 @@
+- name: Test single field
+  spec:
+    RFB:
+      Titulo: razao_social
+  expected:
+    RFB:
+      Titulo: RAZAO SOCIAL
