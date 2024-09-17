@@ -74,11 +74,8 @@ func TestGet(t *testing.T) {
 					ShouldExplode: false,
 				},
 			},
-			Spec: []domain.PresentationSpecSpec{
-				{
-					Key:   "RFB",
-					Value: map[string]any{"CNPJ": "cnpj"},
-				},
+			Spec: domain.PresentationSpecSpec{
+				"RFB": map[string]any{"CNPJ": "cnpj"},
 			},
 		}
 
@@ -98,11 +95,8 @@ func TestGet(t *testing.T) {
 				ShouldExplode: false,
 			},
 		}
-		defaultSpec := []domain.PresentationSpecSpec{
-			{
-				Key:   "RFB",
-				Value: map[string]any{"CNPJ": "cnpj", "Nome": "razao_social"},
-			},
+		defaultSpec := domain.PresentationSpecSpec{
+			"RFB": map[string]any{"CNPJ": "cnpj", "Nome": "razao_social"},
 		}
 
 		result, err := repo.Get(ctx, ports.PresentationSpecQueryParams{UserEmail: "user_sem_spec@driva.com.br", UserCompany: "Driva", Service: "enrichment_test", DataSource: "empresas"})

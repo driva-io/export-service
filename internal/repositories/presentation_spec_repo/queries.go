@@ -2,7 +2,7 @@ package presentation_spec_repo
 
 const getQuery = `
 	with spec as (
-		select presentation_spec_id as id, jsonb_agg(jsonb_build_object('key', key, 'value', value)) as spec from presentation_spec.specs
+		select presentation_spec_id as id, jsonb_object_agg(key, value) as spec from presentation_spec.specs
 		group by presentation_spec_id
 	),
 	options as (
