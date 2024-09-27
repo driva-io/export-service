@@ -75,17 +75,22 @@ func insertDataAsMap(values any, sh *xlsx.Sheet, sheetOption domain.Presentation
 	if valMap, ok := values.(map[string]any); ok {
 		addRow(valMap, sh, sheetOption.ActiveColumns)
 	} else {
-		log.Println("Wrong type for key", sheetOption.Key)
+		log.Println("Wrong type for key in map", sheetOption.Key)
 	}
 }
 
 func insertDataAsList(values any, sh *xlsx.Sheet, sheetOption domain.PresentationSpecSheetOptions) {
-	if valList, ok := values.([]map[string]any); ok {
+	if valList, ok := values.([]any); ok {
 		for _, v := range valList {
-			addRow(v, sh, sheetOption.ActiveColumns)
+			vMap, ok := v.(map[string]any)
+			if !ok {
+				log.Println("Wrong type for key inside list", sheetOption.Key)
+				continue
+			}
+			addRow(vMap, sh, sheetOption.ActiveColumns)
 		}
 	} else {
-		log.Println("Wrong type for key", sheetOption.Key)
+		log.Println("Wrong type for key in list", sheetOption.Key)
 	}
 }
 
@@ -94,6 +99,12 @@ func addRow(data map[string]any, sh *xlsx.Sheet, activeColumns []string) {
 	for _, c := range activeColumns {
 		cell := row.AddCell() // adiciona célula mesmo que não tenha o valor para pular a coluna
 		if value, ok := data[c]; ok {
+			if valueAsList, ok := value.([]any); ok { // caso temporário pra corrigir email vindo como lista
+				value = ""
+				if len(valueAsList) > 0 {
+					value = valueAsList[0]
+				}
+			}
 			cell.Value = fmt.Sprintf("%v", value)
 		}
 		cell.SetStyle(cellStyle)
