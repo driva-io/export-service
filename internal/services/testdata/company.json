@@ -1,651 +1,614 @@
 {
-    "ramo_de_atividade": "RAMO DE ATIVIDADE",
-    "cod_uf": 22,
-    "dv_cnpj": 2,
-    "data_situacao_cadastral": "2005-11-03",
-    "data_timestamp": 1700049024,
-    "cnae_texto": "0123456",
-    "telefone_teste": "41 99999-9999",
-    "capital_uf": false,
-    "fluxo_cbos": [
-        {
-            "cbo": 141205,
-            "ano_mes": "2018-01-01",
-            "funcionarios_ativos": 0
-        },
-        {
-            "cbo": 141205,
-            "ano_mes": "2018-02-01",
-            "funcionarios_ativos": 0
-        },
-        {
-            "cbo": 141205,
-            "ano_mes": "2018-03-01",
-            "funcionarios_ativos": 0
-        },
-        {
-            "cbo": 41205,
-            "ano_mes": "2018-04-01",
-            "funcionarios_ativos": 0
-        }
-    ],
-    "qtde_processos_justica_do_trabalho": 1510,
-    "qtde_processos_justica_estadual": 1510,
-    "qtde_processos_justica_federal": 1510,
-    "qtde_processos_justica_eleitoral": 1510,
-    "qtde_processos_socios_total": 1510,
-    "sucessoes_qsa": [
-        {
-            "sucessor": "SUC 1",
-            "antecessor": "ANT 1"
-        },
-        {
-            "sucessor": "SUC 2",
-            "antecessor": "ANT 2"
-        }
-    ],
-    "socios_analises_detalhadas": [
-        {
-            "grupos": [
-                {
-                    "contagem_processos": 1,
-                    "chave": [
-                        "JUSTICA DO TRABALHO",
-                        "DIREITO DO TRABALHO"
-                    ]
-                }
-            ],
-            "campo": [
-                "segmento",
-                "ramo_direito"
-            ]
-        },
-        {
-            "grupos": [
-                {
-                    "contagem_processos": 1,
-                    "chave": [
-                        "DIREITO DO TRABALHO"
-                    ]
-                }
-            ],
-            "campo": [
-                "ramo_direito"
-            ]
-        },
-        {
-            "grupos": [
-                {
-                    "contagem_processos": 1,
-                    "chave": [
-                        "JUSTICA DO TRABALHO"
-                    ]
-                }
-            ],
-            "campo": [
-                "segmento"
-            ]
-        },
-        {
-            "grupos": [
-                {
-                    "contagem_processos": 1,
-                    "chave": [
-                        "ARQUIVAMENTO DEFINITIVO",
-                        "JUSTICA DO TRABALHO",
-                        "DIREITO DO TRABALHO"
-                    ]
-                }
-            ],
-            "campo": [
-                "status_processo",
-                "segmento",
-                "ramo_direito"
-            ]
-        }
-    ],
-    "sites": [
-        {
-            "site": "example1.com",
-            "pertence_contador": false,
-            "tecnologias": [
-                "MYSQL",
-                "UBUNTU"
-            ],
-            "confiabilidade": 0.4498
-        },
-        {
-            "site": "example2.com.br",
-            "pertence_contador": false,
-            "tecnologias": [
-                "WORDPRESS",
-                "PHP"
-            ],
-            "confiabilidade": 0.2998
-        }
-    ],
-    "cnpj": 1111,
-    "instagram": [
-        {
-            "url": "instagram.com/instagram1"
-        },
-        {
-            "url": "instagram.com/instagram2"
-        }
-    ],
-    "data_exclusao_simples": "2011-11-18",
-    "cnae_principal_subclasse": 2222222,
-    "data_opcao_pelo_mei": "2011-11-18",
-    "data_atualizacao": "2011-11-18",
-    "uf": "ESTADO",
-    "sigla_uf": "UF",
-    "faixa_faturamento_grupo": "7M A 10M",
-    "coords": {
-        "lat": 123,
-        "lon": 456
+  "ramo_de_atividade": "RAMO DE ATIVIDADE",
+  "cod_uf": 22,
+  "dv_cnpj": 2,
+  "data_situacao_cadastral": "2005-11-03",
+  "data_timestamp": 1700049024,
+  "cnae_texto": "0123456",
+  "telefone_teste": "41 99999-9999",
+  "capital_uf": false,
+  "fluxo_cbos": [
+    {
+      "cbo": 141205,
+      "ano_mes": "2018-01-01",
+      "funcionarios_ativos": 0
     },
-    "twitter": [
-        {
-            "url": "twitter.com/twitter1"
-        },
-        {
-            "url": "twitter.com/twitter2"
-        }
-    ],
-    "regiao_saude": "REGIAO_SAUDE",
-    "cod_regiao_saude": 22222,
-    "razao_social": "RAZAO SOCIAL",
-    "cnae_principal_desc_subclasse": "222222 - DESCRIÇÃO DA SUBCLASSE DO CNAE PRINCIPAL",
-    "faturamento": 222222,
-    "cod_regiao_intermediaria": 2222,
-    "empresa_publico_privada": "PRIVADA",
-    "qtde_socios": 2,
-    "bairro": "BAIRRO",
-    "municipio": "MUNICIPIO",
-    "qtde_filiais": 1,
-    "historico_funcionarios_grupo": [
-        {
-            "ano": 2020,
-            "qtde_funcionarios_grupo": 34
-        }
-    ],
-    "qtde_funcionarios_grupo": 34,
-    "comex": [
-        {
-            "importacao": true,
-            "ano_importacao": 1997,
-            "exportacao": false,
-            "ano_exportacao": null
-        },
-        {
-            "importacao": false,
-            "ano_importacao": null,
-            "exportacao": true,
-            "ano_exportacao": 1998
-        }
-    ],
-    "cnes": {
-        "atividade": "INTERNACAO",
-        "qtde_leitos_sus": 0,
-        "qtde_total_de_leitos": 4,
-        "estabelecimento": "HOSPITAL",
-        "qtde_leitos_nao_sus": 4,
-        "tipo_estabelecimento": "PJ"
+    {
+      "cbo": 141205,
+      "ano_mes": "2018-02-01",
+      "funcionarios_ativos": 0
     },
-    "cbo": [
+    {
+      "cbo": 141205,
+      "ano_mes": "2018-03-01",
+      "funcionarios_ativos": 0
+    },
+    {
+      "cbo": 41205,
+      "ano_mes": "2018-04-01",
+      "funcionarios_ativos": 0
+    }
+  ],
+  "qtde_processos_justica_do_trabalho": 1510,
+  "qtde_processos_justica_estadual": 1510,
+  "qtde_processos_justica_federal": 1510,
+  "qtde_processos_justica_eleitoral": 1510,
+  "qtde_processos_socios_total": 1510,
+  "sucessoes_qsa": [
+    {
+      "sucessor": "SUC 1",
+      "antecessor": "ANT 1"
+    },
+    {
+      "sucessor": "SUC 2",
+      "antecessor": "ANT 2"
+    }
+  ],
+  "socios_analises_detalhadas": [
+    {
+      "grupos": [
         {
-            "codigo": 123456,
-            "descricao": "Descrição CBO 1",
-            "qtde_funcionarios": 12
+          "contagem_processos": 1,
+          "chave": ["JUSTICA DO TRABALHO", "DIREITO DO TRABALHO"]
+        }
+      ],
+      "campo": ["segmento", "ramo_direito"]
+    },
+    {
+      "grupos": [
+        {
+          "contagem_processos": 1,
+          "chave": ["DIREITO DO TRABALHO"]
+        }
+      ],
+      "campo": ["ramo_direito"]
+    },
+    {
+      "grupos": [
+        {
+          "contagem_processos": 1,
+          "chave": ["JUSTICA DO TRABALHO"]
+        }
+      ],
+      "campo": ["segmento"]
+    },
+    {
+      "grupos": [
+        {
+          "contagem_processos": 1,
+          "chave": [
+            "ARQUIVAMENTO DEFINITIVO",
+            "JUSTICA DO TRABALHO",
+            "DIREITO DO TRABALHO"
+          ]
+        }
+      ],
+      "campo": ["status_processo", "segmento", "ramo_direito"]
+    }
+  ],
+  "sites": [
+    {
+      "site": "example1.com",
+      "pertence_contador": false,
+      "tecnologias": ["MYSQL", "UBUNTU"],
+      "confiabilidade": 0.4498
+    },
+    {
+      "site": "example2.com.br",
+      "pertence_contador": false,
+      "tecnologias": ["WORDPRESS", "PHP"],
+      "confiabilidade": 0.2998
+    }
+  ],
+  "cnpj": 1111,
+  "instagram": [
+    {
+      "url": "instagram.com/instagram1"
+    },
+    {
+      "url": "instagram.com/instagram2"
+    }
+  ],
+  "data_exclusao_simples": "2011-11-18",
+  "cnae_principal_subclasse": 2222222,
+  "data_opcao_pelo_mei": "2011-11-18",
+  "data_atualizacao": "2011-11-18",
+  "uf": "ESTADO",
+  "sigla_uf": "UF",
+  "faixa_faturamento_grupo": "7M A 10M",
+  "coords": {
+    "lat": 123,
+    "lon": 456
+  },
+  "twitter": [
+    {
+      "url": "twitter.com/twitter1"
+    },
+    {
+      "url": "twitter.com/twitter2"
+    }
+  ],
+  "regiao_saude": "REGIAO_SAUDE",
+  "cod_regiao_saude": 22222,
+  "razao_social": "RAZAO SOCIAL",
+  "cnae_principal_desc_subclasse": "222222 - DESCRIÇÃO DA SUBCLASSE DO CNAE PRINCIPAL",
+  "faturamento": 222222,
+  "cod_regiao_intermediaria": 2222,
+  "empresa_publico_privada": "privada",
+  "qtde_socios": 2,
+  "bairro": "BAIRRO",
+  "municipio": "MUNICIPIO",
+  "qtde_filiais": 1,
+  "historico_funcionarios_grupo": [
+    {
+      "ano": 2020,
+      "qtde_funcionarios_grupo": 34
+    }
+  ],
+  "qtde_funcionarios_grupo": 34,
+  "comex": [
+    {
+      "importacao": true,
+      "ano_importacao": 1997,
+      "exportacao": false,
+      "ano_exportacao": null
+    },
+    {
+      "importacao": false,
+      "ano_importacao": null,
+      "exportacao": true,
+      "ano_exportacao": 1998
+    }
+  ],
+  "cnes": {
+    "atividade": "INTERNACAO",
+    "outro_obj": {
+      "alo": "ALO",
+      "alo2": "ALO2"
+    },
+    "qtde_leitos_sus": 0,
+    "qtde_total_de_leitos": 4,
+    "estabelecimento": "hospital",
+    "qtde_leitos_nao_sus": 4,
+    "tipo_estabelecimento": "PJ"
+  },
+  "cbo": [
+    {
+      "codigo": 123456,
+      "descricao": "Descrição CBO 1",
+      "qtde_funcionarios": 12
+    },
+    {
+      "codigo": 654321,
+      "descricao": "Descrição CBO 2",
+      "qtde_funcionarios": 13
+    }
+  ],
+  "socios": [
+    {
+      "cod_qualificacao_socio": 22,
+      "data_entrada_sociedade": "2011-11-18",
+      "identificador_socio": "PESSOA FISICA",
+      "qualificacao_socio": "SOCIO-ADMINISTRADOR",
+      "cpf_representante_legal": null,
+      "pais": "BRASIL",
+      "nome_com_cnpj_cpf": "NOME PRIMEIRO SOCIO | ***123456**",
+      "nome_socio": "NOME PRIMEIRO SOCIO",
+      "nome_representante_legal": "",
+      "cnpj_cpf_socio": "***123456**",
+      "qualificacao_representante_legal": "NAO INFORMADA",
+      "cod_identificador_socio": 2,
+      "cod_qualificacao_representante": 0,
+      "cod_pais": 999,
+      "cod_faixa_etaria": 4,
+      "faixa_etaria_socio": "31 A 40 ANOS"
+    },
+    {
+      "cod_qualificacao_socio": 22,
+      "data_entrada_sociedade": "2011-11-18",
+      "identificador_socio": "PESSOA FISICA",
+      "qualificacao_socio": "SOCIO-ADMINISTRADOR",
+      "cpf_representante_legal": null,
+      "pais": "BRASIL",
+      "nome_com_cnpj_cpf": "NOME SEGUNDO SOCIO | ***123456**",
+      "nome_socio": "NOME SEGUNDO SOCIO",
+      "nome_representante_legal": "",
+      "cnpj_cpf_socio": "***123456**",
+      "qualificacao_representante_legal": "NAO INFORMADA",
+      "cod_identificador_socio": 2,
+      "cod_qualificacao_representante": 0,
+      "cod_pais": 999,
+      "cod_faixa_etaria": 4,
+      "faixa_etaria_socio": "31 A 40 ANOS"
+    }
+  ],
+  "cnae_fiscal_secundaria": [
+    1111111, 2222222, 3333333, 444444, 5555555, 6666666, 7777777
+  ],
+  "microrregiao": "MICRORREGIAO",
+  "cnae_principal_desc_grupo": "222 - DESCRIÇÃO CNAE PRINCIPAL",
+  "raiz_cnpj": 2222222,
+  "capital_social": 110000,
+  "cod_municipio_tse": 22222,
+  "cod_municipio_bcb": 22222,
+  "cnae_principal_divisao": 22,
+  "nome_fantasia": "NOME FANTASIA",
+  "cod_comarca": 2222222,
+  "cnae_principal_desc_secao": "A - SEÇÃO CNAE PRINCIPAL",
+  "cnae_principal_classe": 22222,
+  "cod_regiao_imediata": 222222,
+  "numero": 222,
+  "situacao_cadastral": "ATIVA",
+  "data_exclusao_mei": "2011-11-18",
+  "origem": "RFB",
+  "mesorregiao": "MESOREGIAO",
+  "faixa_funcionarios_grupo": "20 A 49",
+  "produto_ncm": ["PRODUTO 1", "PRODUTO 2"],
+  "empresas_analises_detalhadas": [
+    {
+      "grupos": [
+        {
+          "contagem_processos": 4,
+          "chave": ["ARQUIVAMENTO DEFINITIVO"]
         },
         {
-            "codigo": 654321,
-            "descricao": "Descrição CBO 2",
-            "qtde_funcionarios": 13
+          "contagem_processos": 1,
+          "chave": ["SUSPENSO"]
         }
-    ],
-    "socios": [
+      ],
+      "campo": ["status_processo"]
+    }
+  ],
+  "linkedin": [
+    {
+      "area_atuacao": "AREA DE ATUACAO LINKEDIN",
+      "dominio": "https://example.com.br/",
+      "empresas_similares": [
+        "https://br.linkedin.com/company/company1",
+        "https://br.linkedin.com/company/company2"
+      ],
+      "faixa_funcionarios": "11-50 employees",
+      "funcionarios": [
         {
-            "cod_qualificacao_socio": 22,
-            "data_entrada_sociedade": "2011-11-18",
-            "identificador_socio": "PESSOA FISICA",
-            "qualificacao_socio": "SOCIO-ADMINISTRADOR",
-            "cpf_representante_legal": null,
-            "pais": "BRASIL",
-            "nome_com_cnpj_cpf": "NOME PRIMEIRO SOCIO | ***123456**",
-            "nome_socio": "NOME PRIMEIRO SOCIO",
-            "nome_representante_legal": "",
-            "cnpj_cpf_socio": "***123456**",
-            "qualificacao_representante_legal": "NAO INFORMADA",
-            "cod_identificador_socio": 2,
-            "cod_qualificacao_representante": 0,
-            "cod_pais": 999,
-            "cod_faixa_etaria": 4,
-            "faixa_etaria_socio": "31 A 40 ANOS"
-        },
-        {
-            "cod_qualificacao_socio": 22,
-            "data_entrada_sociedade": "2011-11-18",
-            "identificador_socio": "PESSOA FISICA",
-            "qualificacao_socio": "SOCIO-ADMINISTRADOR",
-            "cpf_representante_legal": null,
-            "pais": "BRASIL",
-            "nome_com_cnpj_cpf": "NOME SEGUNDO SOCIO | ***123456**",
-            "nome_socio": "NOME SEGUNDO SOCIO",
-            "nome_representante_legal": "",
-            "cnpj_cpf_socio": "***123456**",
-            "qualificacao_representante_legal": "NAO INFORMADA",
-            "cod_identificador_socio": 2,
-            "cod_qualificacao_representante": 0,
-            "cod_pais": 999,
-            "cod_faixa_etaria": 4,
-            "faixa_etaria_socio": "31 A 40 ANOS"
-        }
-    ],
-    "cnae_fiscal_secundaria": [
-        1111111,
-        2222222,
-        3333333,
-        444444,
-        5555555,
-        6666666,
-        7777777
-    ],
-    "microrregiao": "MICRORREGIAO",
-    "cnae_principal_desc_grupo": "222 - DESCRIÇÃO CNAE PRINCIPAL",
-    "raiz_cnpj": 2222222,
-    "capital_social": 110000,
-    "cod_municipio_tse": 22222,
-    "cod_municipio_bcb": 22222,
-    "cnae_principal_divisao": 22,
-    "nome_fantasia": "NOME FANTASIA",
-    "cod_comarca": 2222222,
-    "cnae_principal_desc_secao": "A - SEÇÃO CNAE PRINCIPAL",
-    "cnae_principal_classe": 22222,
-    "cod_regiao_imediata": 222222,
-    "numero": 222,
-    "situacao_cadastral": "ATIVA",
-    "data_exclusao_mei": "2011-11-18",
-    "origem": "RFB",
-    "mesorregiao": "MESOREGIAO",
-    "faixa_funcionarios_grupo": "20 A 49",
-    "produto_ncm": [
-        "PRODUTO 1",
-        "PRODUTO 2"
-    ],
-    "empresas_analises_detalhadas": [
-        {
-            "grupos": [
+          "id": "ID DO FUNCIONARIO 1",
+          "nome": "NOME DO FUNCIONARIO 1",
+          "qtde_seguindo": 11,
+          "sobre": "SOBRE O FUNCIONARIO 1",
+          "url_funcionario": "linkedin.com/in/funcionario1",
+          "cargo": "CARGO DO FUNCIONARIO 1",
+          "cursos": ["curso1", "curso2"],
+          "certificacoes": ["certificacoes 1", "certificacoes 2"],
+          "municipio_funcionario": "MUNICIPIO DO FUNCIONARIO 1",
+          "idiomas": [
+            {
+              "idioma": "JAPONES",
+              "proficiencia": "LIMITED WORKING PROFICIENCY"
+            },
+            {
+              "idioma": "ALEMAO",
+              "proficiencia": "LIMITED WORKING PROFICIENCY"
+            }
+          ],
+          "educacao_completa": [
+            {
+              "campo": "CAMPO DE ESTUDO 1",
+              "grau": "GRADUACAO 1",
+              "lugar": "LOCAL DE ESTUDO 1"
+            },
+            {
+              "campo": "CAMPO DE ESTUDO 2",
+              "grau": "GRADUACAO 2",
+              "lugar": "LOCAL DE ESTUDO 2"
+            }
+          ],
+          "experiencias": [
+            {
+              "empresa": "NOME DA EMPRESA 1",
+              "posicoes": [
                 {
-                    "contagem_processos": 4,
-                    "chave": [
-                        "ARQUIVAMENTO DEFINITIVO"
-                    ]
+                  "cargo": "CARGO 1 NA EMPRESA 1",
+                  "data_fim": "Present",
+                  "data_inicio": "Jun 2016",
+                  "duracao": "5 years 6 months"
                 },
                 {
-                    "contagem_processos": 1,
-                    "chave": [
-                        "SUSPENSO"
-                    ]
+                  "cargo": "CARGO 2 NA EMPRESA 1",
+                  "data_fim": "Present",
+                  "data_inicio": "Jun 2016",
+                  "duracao": "5 years 6 months"
                 }
-            ],
-            "campo": [
-                "status_processo"
-            ]
-        }
-    ],
-    "linkedin": [
+              ]
+            }
+          ]
+        },
         {
-            "area_atuacao": "AREA DE ATUACAO LINKEDIN",
-            "dominio": "https://example.com.br/",
-            "empresas_similares": [
-                "https://br.linkedin.com/company/company1",
-                "https://br.linkedin.com/company/company2"
-            ],
-            "faixa_funcionarios": "11-50 employees",
-            "funcionarios": [
+          "id": "ID DO FUNCIONARIO 2",
+          "nome": "NOME DO FUNCIONARIO 2",
+          "qtde_seguindo": 22,
+          "sobre": "SOBRE O FUNCIONARIO 2",
+          "url_funcionario": "linkedin.com/in/funcionario2",
+          "cargo": "CARGO DO FUNCIONARIO 2",
+          "certificacoes": ["certificacoes 3", "certificacoes 4"],
+          "idiomas": [
+            {
+              "idioma": "INGLES",
+              "proficiencia": "LIMITED WORKING PROFICIENCY"
+            },
+            {
+              "idioma": "ESPANHOL",
+              "proficiencia": "LIMITED WORKING PROFICIENCY"
+            }
+          ],
+          "municipio_funcionario": "MUNICIPIO DO FUNCIONARIO 2",
+          "educacao_completa": [
+            {
+              "campo": "CAMPO DE ESTUDO 3 ",
+              "grau": "GRADUACAO 3",
+              "lugar": "LOCAL DE ESTUDO 3"
+            },
+            {
+              "campo": "CAMPO DE ESTUDO 4",
+              "grau": "GRADUACAO 4",
+              "lugar": "LOCAL DE ESTUDO 4"
+            }
+          ],
+          "experiencias": [
+            {
+              "empresa": "NOME DA EMPRESA 3",
+              "posicoes": [
                 {
-                    "id": "ID DO FUNCIONARIO 1",
-                    "nome": "NOME DO FUNCIONARIO 1",
-                    "qtde_seguindo": 11,
-                    "sobre": "SOBRE O FUNCIONARIO 1",
-                    "url_funcionario": "linkedin.com/in/funcionario1",
-                    "cargo": "CARGO DO FUNCIONARIO 1",
-                    "cursos": [
-                        "curso1",
-                        "curso2"
-                    ],
-                    "certificacoes": [
-                        "certificacoes 1",
-                        "certificacoes 2"
-                    ],
-                    "municipio_funcionario": "MUNICIPIO DO FUNCIONARIO 1",
-                    "idiomas": [
-                        {
-                            "idioma": "JAPONES",
-                            "proficiencia": "LIMITED WORKING PROFICIENCY"
-                        },
-                        {
-                            "idioma": "ALEMAO",
-                            "proficiencia": "LIMITED WORKING PROFICIENCY"
-                        }
-                    ],
-                    "educacao_completa": [
-                        {
-                            "campo": "CAMPO DE ESTUDO 1",
-                            "grau": "GRADUACAO 1",
-                            "lugar": "LOCAL DE ESTUDO 1"
-                        },
-                        {
-                            "campo": "CAMPO DE ESTUDO 2",
-                            "grau": "GRADUACAO 2",
-                            "lugar": "LOCAL DE ESTUDO 2"
-                        }
-                    ],
-                    "experiencias": [
-                        {
-                            "empresa": "NOME DA EMPRESA 1",
-                            "posicoes": [
-                                {
-                                    "cargo": "CARGO 1 NA EMPRESA 1",
-                                    "data_fim": "Present",
-                                    "data_inicio": "Jun 2016",
-                                    "duracao": "5 years 6 months"
-                                },
-                                {
-                                    "cargo": "CARGO 2 NA EMPRESA 1",
-                                    "data_fim": "Present",
-                                    "data_inicio": "Jun 2016",
-                                    "duracao": "5 years 6 months"
-                                }
-                            ]
-                        }
-                    ]
+                  "cargo": "CARGO 1 NA EMPRESA 3",
+                  "data_fim": "Present",
+                  "data_inicio": "Jun 2016",
+                  "duracao": "5 years 6 months"
                 },
                 {
-                    "id": "ID DO FUNCIONARIO 2",
-                    "nome": "NOME DO FUNCIONARIO 2",
-                    "qtde_seguindo": 22,
-                    "sobre": "SOBRE O FUNCIONARIO 2",
-                    "url_funcionario": "linkedin.com/in/funcionario2",
-                    "cargo": "CARGO DO FUNCIONARIO 2",
-                    "certificacoes": [
-                        "certificacoes 3",
-                        "certificacoes 4"
-                    ],
-                    "idiomas": [
-                        {
-                            "idioma": "INGLES",
-                            "proficiencia": "LIMITED WORKING PROFICIENCY"
-                        },
-                        {
-                            "idioma": "ESPANHOL",
-                            "proficiencia": "LIMITED WORKING PROFICIENCY"
-                        }
-                    ],
-                    "municipio_funcionario": "MUNICIPIO DO FUNCIONARIO 2",
-                    "educacao_completa": [
-                        {
-                            "campo": "CAMPO DE ESTUDO 3 ",
-                            "grau": "GRADUACAO 3",
-                            "lugar": "LOCAL DE ESTUDO 3"
-                        },
-                        {
-                            "campo": "CAMPO DE ESTUDO 4",
-                            "grau": "GRADUACAO 4",
-                            "lugar": "LOCAL DE ESTUDO 4"
-                        }
-                    ],
-                    "experiencias": [
-                        {
-                            "empresa": "NOME DA EMPRESA 3",
-                            "posicoes": [
-                                {
-                                    "cargo": "CARGO 1 NA EMPRESA 3",
-                                    "data_fim": "Present",
-                                    "data_inicio": "Jun 2016",
-                                    "duracao": "5 years 6 months"
-                                },
-                                {
-                                    "cargo": "CARGO 2 NA EMPRESA 3",
-                                    "data_fim": "Present",
-                                    "data_inicio": "Jun 2016",
-                                    "duracao": "5 years 6 months"
-                                }
-                            ]
-                        },
-                        {
-                            "empresa": "NOME DA EMPRESA 4 ",
-                            "posicoes": [
-                                {
-                                    "cargo": "CARGO 1 NA EMPRESA 4",
-                                    "data_fim": "Present",
-                                    "data_inicio": "Jun 2016",
-                                    "duracao": "5 years 6 months"
-                                },
-                                {
-                                    "cargo": "CARGO 2 NA EMPRESA 4",
-                                    "data_fim": "Present",
-                                    "data_inicio": "Jun 2016",
-                                    "duracao": "5 years 6 months"
-                                }
-                            ]
-                        }
-                    ]
+                  "cargo": "CARGO 2 NA EMPRESA 3",
+                  "data_fim": "Present",
+                  "data_inicio": "Jun 2016",
+                  "duracao": "5 years 6 months"
                 }
-            ],
-            "funcionarios_no_linkedin": 22,
-            "industrias": "INDUSTRIAS",
-            "qtde_seguidores": 164,
-            "slogan": "#SLOGAN",
-            "sobre": "SOBRE A EMPRESA",
-            "tipo_organizacao": "COMPANY",
-            "url": "linkedin.com/company/company"
+              ]
+            },
+            {
+              "empresa": "NOME DA EMPRESA 4 ",
+              "posicoes": [
+                {
+                  "cargo": "CARGO 1 NA EMPRESA 4",
+                  "data_fim": "Present",
+                  "data_inicio": "Jun 2016",
+                  "duracao": "5 years 6 months"
+                },
+                {
+                  "cargo": "CARGO 2 NA EMPRESA 4",
+                  "data_fim": "Present",
+                  "data_inicio": "Jun 2016",
+                  "duracao": "5 years 6 months"
+                }
+              ]
+            }
+          ]
         }
-    ],
-    "qualificacao_responsavel": "SOCIO-ADMINISTRADOR",
-    "matriz": true,
-    "cep": 2222222,
-    "atividades_secundarias": [
-        {
-            "ramo_de_atividade": "RAMO DE ATIVIDADE",
-            "desc_secao": "A - DESCRICAO SECAO",
-            "classe": 11111,
-            "desc_subclasse": "111111 - DESCRICAO SUBCLASSE",
-            "segmento": "SEGMENTO",
-            "desc_divisao": "11 - DESCRICAO DIVISAO",
-            "subclasse": 1111111,
-            "divisao": 11,
-            "desc_grupo": "111 - DESCRICAO GRUPO",
-            "grupo": 111,
-            "desc_classe": "11111 - DESCRICAO CLASSE",
-            "secao": "A"
-        },
-        {
-            "ramo_de_atividade": "RAMO DE ATIVIDADE",
-            "desc_secao": "B - DESCRICAO SECAO",
-            "classe": 22222,
-            "desc_subclasse": "222222 - DESCRICAO SUBCLASSE",
-            "segmento": "SEGMENTO",
-            "desc_divisao": "22 - DESCRICAO DIVISAO",
-            "subclasse": 2222211,
-            "divisao": 11,
-            "desc_grupo": "222 - DESCRICAO GRUPO",
-            "grupo": 222,
-            "desc_classe": "22222 - DESCRICAO CLASSE",
-            "secao": "B"
-        }
-    ],
-    "emails": [
-        {
-            "pertence_contador": false,
-            "email": "EMAIL1@EXAMPLE.COM.BR"
-        },
-        {
-            "pertence_contador": true,
-            "email": "EMAIL2@EXAMPLE.COM.BR",
-            "nome": "NOME EMAIL 2",
-            "cargo": "CARGO EMAIL 2",
-            "linkedin": "linedin/email.com"
-        }
-    ],
-    "emails_nao_filtrados": [
-        {
-            "pertence_contador": false,
-            "email": "EMAIL1@EXAMPLE.COM.BR"
-        },
-        {
-            "pertence_contador": false,
-            "email": "EMAIL2@EXAMPLE.COM.BR",
-            "nome": "NOME EMAIL 2",
-            "cargo": "CARGO EMAIL 2",
-            "linkedin": "linedin/email.com"
-        }
-    ],
-    "regiao_intermediaria": "REGIAO INTERMEDIARIA",
-    "cod_mesorregiao": 22222,
-    "natureza_juridica": "SOCIEDADE EMPRESARIA LIMITADA",
-    "cod_municipio_ibge_6": 222222,
-    "cod_microrregiao": 22222,
-    "cnae_principal_grupo": 222,
-    "regiao_imediata": "REGIAO IMEDIATA",
-    "porte": "PORTE",
-    "opcao_pelo_mei": false,
-    "cod_municipio_ibge": 2222222,
-    "ordem_cnpj": 1,
-    "motivo_situacao_cadastral": "SEM MOTIVO",
-    "cnae_principal_desc_classe": "22222 - DESCRICAO CLASSE CNAE PRINCIPAL",
-    "cnae_principal_secao": "A",
-    "qtde_funcionarios": 22,
-    "anp": {
-        "data_inicio_situacao": "2010-03-12",
-        "numero_autorizacao": "222",
-        "situacao": "CANCELADA",
-        "cod_agente_i_simp": 12345678,
-        "data_fim_situacao": "2010-03-15",
-        "data_publicacao": "2010-03-12",
-        "cod_agente": 2222,
-        "tipo_ato": "DESPACHO"
+      ],
+      "funcionarios_no_linkedin": 22,
+      "industrias": "INDUSTRIAS",
+      "qtde_seguidores": 164,
+      "slogan": "#SLOGAN",
+      "sobre": "SOBRE A EMPRESA",
+      "tipo_organizacao": "COMPANY",
+      "url": "linkedin.com/company/company"
+    }
+  ],
+  "qualificacao_responsavel": "SOCIO-ADMINISTRADOR",
+  "matriz": true,
+  "cep": "2222222",
+  "atividades_secundarias": [
+    {
+      "ramo_de_atividade": "RAMO DE ATIVIDADE",
+      "desc_secao": "A - DESCRICAO SECAO",
+      "classe": 11111,
+      "desc_subclasse": "111111 - DESCRICAO SUBCLASSE",
+      "segmento": "SEGMENTO",
+      "desc_divisao": "11 - DESCRICAO DIVISAO",
+      "subclasse": 1111111,
+      "divisao": 11,
+      "desc_grupo": "111 - DESCRICAO GRUPO",
+      "grupo": 111,
+      "desc_classe": "11111 - DESCRICAO CLASSE",
+      "secao": "A"
     },
-    "descricao_tipo_logradouro": "RUA",
-    "endereco": "ENDERECO",
-    "facebook": [
-        {
-            "url": "facebook.com/facebook1"
-        },
-        {
-            "url": "facebook.com/facebook2"
-        }
-    ],
-    "opcao_pelo_simples": false,
-    "populacao": 222222,
-    "ufiso31662": "UFISO31662",
-    "telefones": [
-        {
-            "whatsapp": false,
-            "origem": "RFB",
-            "telefone": 11111111,
-            "telefone_completo": "99 11111111",
-            "fixo_movel": "FIXO",
-            "pertence_contador": true,
-            "ddd": 99
-        },
-        {
-            "whatsapp": true,
-            "telefone": 22222222,
-            "origem": "PLACES",
-            "telefone_completo": "99 922222222",
-            "fixo_movel": "MOVEL",
-            "pertence_contador": false,
-            "ddd": 99
-        }
-    ],
-    "pais": "BRASIL",
-    "faturamento_grupo": 2222222,
-    "data_inicio_atividade": "2011-11-18",
-    "cod_municipio": 2222,
-    "cnae_principal_desc_divisao": "11 - DESCRICAO DIVISAO CNAE PRINCIPAL",
-    "segmento": "SEGMENTO",
-    "data_situacao_especial": "2011-11-18",
-    "macrorregiao": "MACRORREGIAO",
-    "logradouro": "LOGRADOURO",
-    "data_opcao_pelo_simples": "2011-11-18",
-    "historico_funcionarios": [
-        {
-            "ano": 2020,
-            "qtde_funcionarios": 34
-        },
-        {
-            "ano": 2019,
-            "qtde_funcionarios": 20
-        }
-    ],
-    "forma_tributacao": [
-        {
-            "ano": 2014,
-            "forma_de_tributacao": "LUCRO PRESUMIDO"
-        },
-        {
-            "ano": 2016,
-            "forma_de_tributacao": "LUCRO PRESUMIDO"
-        }
-    ],
-    "veiculos": [
-        {
-            "veiculo": "VOLKSWAGEN, MODELO: 10.160 DRC 4X2",
-            "ano": 2013,
-            "numero_de_serie": "09042853",
-            "redutor": "-",
-            "nome_posto_de_selagem": "VIALOG EQUIPAMENTOS AUTOMOTIVOS LTDA",
-            "renavam": 997412100,
-            "nome_posto_pac": "VIALOG EQUIPAMENTOS AUTOMOTIVOS LTDA",
-            "data_emissao_certificado": "2022-03-14",
-            "modelo": "MTCO 1390",
-            "certificado": "0008442531",
-            "marca": "VDO",
-            "executor": 294,
-            "data_validade_certificado": "2024-02-15",
-            "constante_k": 13805,
-            "nome_proprietario": "HM COUTINHO PETROLEO LTDA",
-            "chassi": "9531M62P7ER406541",
-            "pneu": "235/75",
-            "marcas_de_selagem": [
-                "J80225411",
-                "F87604823",
-                "F87604836",
-                "F87604849"
-            ],
-            "tipo_veiculo": "CAMINHAO",
-            "aro": 17.5,
-            "placa": "KWH8947"
-        },
-        {
-            "veiculo": "VW, MODELO: 30.280 CRM 8X2",
-            "ano": 2019,
-            "numero_de_serie": "40239152",
-            "redutor": "-",
-            "nome_posto_de_selagem": "VIALOG EQUIPAMENTOS AUTOMOTIVOS LTDA",
-            "renavam": 1185967882,
-            "nome_posto_pac": "VIALOG EQUIPAMENTOS AUTOMOTIVOS LTDA",
-            "data_emissao_certificado": "2021-04-13",
-            "modelo": "BVDR",
-            "certificado": "0007631381",
-            "marca": "CONTINENTAL",
-            "executor": 294,
-            "data_validade_certificado": "2023-03-29",
-            "constante_k": 7055,
-            "nome_proprietario": "HM COUTINHO PETROLEO LTDA",
-            "chassi": "953658243LR000838",
-            "pneu": "275/80",
-            "marcas_de_selagem": [
-                "J70108121",
-                "F68565342",
-                "F68565355",
-                "F68565368"
-            ],
-            "tipo_veiculo": "CAMINHAO",
-            "aro": 22.5,
-            "placa": "LMU1C22"
-        }
-    ]
+    {
+      "ramo_de_atividade": "RAMO DE ATIVIDADE",
+      "desc_secao": "B - DESCRICAO SECAO",
+      "classe": 22222,
+      "desc_subclasse": "222222 - DESCRICAO SUBCLASSE",
+      "segmento": "SEGMENTO",
+      "desc_divisao": "22 - DESCRICAO DIVISAO",
+      "subclasse": 2222211,
+      "divisao": 11,
+      "desc_grupo": "222 - DESCRICAO GRUPO",
+      "grupo": 222,
+      "desc_classe": "22222 - DESCRICAO CLASSE",
+      "secao": "B"
+    }
+  ],
+  "emails": [
+    {
+      "pertence_contador": false,
+      "email": "EMAIL1@EXAMPLE.COM.BR"
+    },
+    {
+      "pertence_contador": true,
+      "email": "EMAIL2@EXAMPLE.COM.BR",
+      "nome": "NOME EMAIL 2",
+      "cargo": "CARGO EMAIL 2",
+      "linkedin": "linedin/email.com"
+    }
+  ],
+  "emails_nao_filtrados": [
+    {
+      "pertence_contador": false,
+      "email": "EMAIL1@EXAMPLE.COM.BR"
+    },
+    {
+      "pertence_contador": false,
+      "email": "EMAIL2@EXAMPLE.COM.BR",
+      "nome": "NOME EMAIL 2",
+      "cargo": "CARGO EMAIL 2",
+      "linkedin": "linedin/email.com"
+    }
+  ],
+  "regiao_intermediaria": "REGIAO INTERMEDIARIA",
+  "cod_mesorregiao": 22222,
+  "natureza_juridica": "SOCIEDADE EMPRESARIA LIMITADA",
+  "cod_municipio_ibge_6": 222222,
+  "cod_microrregiao": 22222,
+  "cnae_principal_grupo": 222,
+  "regiao_imediata": "REGIAO IMEDIATA",
+  "porte": "PORTE",
+  "opcao_pelo_mei": false,
+  "cod_municipio_ibge": 2222222,
+  "ordem_cnpj": 1,
+  "motivo_situacao_cadastral": "SEM MOTIVO",
+  "cnae_principal_desc_classe": "22222 - DESCRICAO CLASSE CNAE PRINCIPAL",
+  "cnae_principal_secao": "A",
+  "qtde_funcionarios": 22,
+  "anp": {
+    "data_inicio_situacao": "2010-03-12",
+    "numero_autorizacao": "222",
+    "situacao": "CANCELADA",
+    "cod_agente_i_simp": 12345678,
+    "data_fim_situacao": "2010-03-15",
+    "data_publicacao": "2010-03-12",
+    "cod_agente": 2222,
+    "tipo_ato": "DESPACHO"
+  },
+  "descricao_tipo_logradouro": "RUA",
+  "endereco": "ENDERECO",
+  "facebook": [
+    {
+      "url": "facebook.com/facebook1"
+    },
+    {
+      "url": "facebook.com/facebook2"
+    }
+  ],
+  "opcao_pelo_simples": false,
+  "populacao": 222222,
+  "ufiso31662": "UFISO31662",
+  "telefones": [
+    {
+      "whatsapp": false,
+      "origem": "RFB",
+      "telefone": 11111111,
+      "telefone_completo": "99 11111111",
+      "fixo_movel": "FIXO",
+      "pertence_contador": true,
+      "ddd": 99
+    },
+    {
+      "whatsapp": true,
+      "telefone": 22222222,
+      "origem": "PLACES",
+      "telefone_completo": "99 922222222",
+      "fixo_movel": "MOVEL",
+      "pertence_contador": false,
+      "ddd": 99
+    },
+    {
+      "whatsapp": true,
+      "telefone": 22222222,
+      "origem": "PLACES",
+      "telefone_completo": "99 944444444",
+      "fixo_movel": "FIXO",
+      "pertence_contador": false,
+      "ddd": 99
+    },
+    {
+      "whatsapp": false,
+      "telefone": 11111111,
+      "telefone_completo": "99 333333333",
+      "fixo_movel": "FIXO",
+      "pertence_contador": false,
+      "ddd": 99
+    }
+  ],
+  "pais": "BRASIL",
+  "faturamento_grupo": 2222222,
+  "data_inicio_atividade": "2011-11-18",
+  "cod_municipio": 2222,
+  "cnae_principal_desc_divisao": "11 - DESCRICAO DIVISAO CNAE PRINCIPAL",
+  "segmento": "SEGMENTO",
+  "data_situacao_especial": "2011-11-18",
+  "macrorregiao": "MACRORREGIAO",
+  "logradouro": "LOGRADOURO",
+  "data_opcao_pelo_simples": "2011-11-18",
+  "historico_funcionarios": [
+    {
+      "ano": 2020,
+      "qtde_funcionarios": 34
+    },
+    {
+      "ano": 2019,
+      "qtde_funcionarios": 20
+    }
+  ],
+  "forma_tributacao": [
+    {
+      "ano": 2014,
+      "forma_de_tributacao": "LUCRO PRESUMIDO"
+    },
+    {
+      "ano": 2016,
+      "forma_de_tributacao": "LUCRO PRESUMIDO"
+    }
+  ],
+  "veiculos": [
+    {
+      "veiculo": "VOLKSWAGEN, MODELO: 10.160 DRC 4X2",
+      "ano": 2013,
+      "numero_de_serie": "09042853",
+      "redutor": "-",
+      "nome_posto_de_selagem": "VIALOG EQUIPAMENTOS AUTOMOTIVOS LTDA",
+      "renavam": 997412100,
+      "nome_posto_pac": "VIALOG EQUIPAMENTOS AUTOMOTIVOS LTDA",
+      "data_emissao_certificado": "2022-03-14",
+      "modelo": "MTCO 1390",
+      "certificado": "0008442531",
+      "marca": "VDO",
+      "executor": 294,
+      "data_validade_certificado": "2024-02-15",
+      "constante_k": 13805,
+      "nome_proprietario": "HM COUTINHO PETROLEO LTDA",
+      "chassi": "9531M62P7ER406541",
+      "pneu": "235/75",
+      "marcas_de_selagem": ["J80225411", "F87604823", "F87604836", "F87604849"],
+      "tipo_veiculo": "CAMINHAO",
+      "aro": 17.5,
+      "placa": "KWH8947"
+    },
+    {
+      "veiculo": "VW, MODELO: 30.280 CRM 8X2",
+      "ano": 2019,
+      "numero_de_serie": "40239152",
+      "redutor": "-",
+      "nome_posto_de_selagem": "VIALOG EQUIPAMENTOS AUTOMOTIVOS LTDA",
+      "renavam": 1185967882,
+      "nome_posto_pac": "VIALOG EQUIPAMENTOS AUTOMOTIVOS LTDA",
+      "data_emissao_certificado": "2021-04-13",
+      "modelo": "BVDR",
+      "certificado": "0007631381",
+      "marca": "CONTINENTAL",
+      "executor": 294,
+      "data_validade_certificado": "2023-03-29",
+      "constante_k": 7055,
+      "nome_proprietario": "HM COUTINHO PETROLEO LTDA",
+      "chassi": "953658243LR000838",
+      "pneu": "275/80",
+      "marcas_de_selagem": ["J70108121", "F68565342", "F68565355", "F68565368"],
+      "tipo_veiculo": "CAMINHAO",
+      "aro": 22.5,
+      "placa": "LMU1C22"
+    }
+  ]
 }

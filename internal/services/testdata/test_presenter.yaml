@@ -1,7 +1,195 @@
 - name: Test single field
   spec:
     RFB:
-      Titulo: razao_social
+      testeSwitch:
+        $switch:
+          $cases:
+            - $case: 
+                matriz: true
+              $use: 
+                $literal: "Sim"
+            - $case: 
+                matriz: false
+              $use: 
+                $literal: "Não"
+      testeCnpj: 
+        $cnpj: cnpj
+      testePhone:
+        $phone: telefone_teste
+      testeCompositeString:
+        $compositestring:
+          Chave1: "razao_social"
+          Chave2:
+            $stringify: emails.email
+      testeFlat:
+        $flat:
+          - $for:
+              $prop: instagram
+              $format: 
+                url_insta: url
+                cnpj: super$.cnpj
+          - $for:
+              $prop: historico_funcionarios
+              $format: 
+                ano: ano
+          - obj_avulso: faixa_faturamento_grupo
+      testeTemplateComFor:
+        $template:
+          $for: telefones
+          $filter:
+            pertence_contador: false
+          $variables:
+            var1: telefone_completo
+          $format: "tel: {var1} \n"      
+      testeTemplateSemFor:
+        $template:
+          $variables: 
+            var1: razao_social
+            var2: 
+              $lower: cnes.outro_obj.alo
+          $format: "testando template: {var1} --- {var2}!!!"
+      testeStringify: 
+        $stringify: instagram.url
+      Telefones Concatenados:
+        $joinby:
+          $prop:
+            $for:
+              $prop: telefones
+              $filter:
+                pertence_contador: false
+              $format: telefone_completo
+          $separator: ", "
+      testeDate:
+        $date: data_inicio_atividade
+      testeNcnpj:
+        $ncnpj: cnpj
+      testeFor2: 
+        $for:
+          $prop: instagram
+          $format: url
+      testeFor:
+        $for:
+          $prop: telefones
+          $format:  
+            telefone: telefone_completo
+            origem: 
+              $lower: origem
+            cnpj: super$.cnpj
+          $filter:
+            origem: PLACES
+            fixo_movel: MOVEL
+      testeArray: linkedin.funcionarios.nome
+      testeNestedTags:
+        $lower:
+          $upper:
+            cnes.estabelecimento
+      testeLower: 
+        $lower: razao_social
+      testeUpper: 
+        $upper: cnes.estabelecimento
+      Titulo: 
+        teste:
+          teste2:
+            teste3: razao_social
+      Municipio: municipio
+      testeSuper:
+        $for:
+          $prop: instagram
+          $format:
+            insta: url
+            ramo:
+              $lower: super$.ramo_de_atividade
+      testePonto: cnes.atividade
+      testePonto2: cnes.outro_obj.alo
+      Faixa de faturamento: faixa_faturamento_grupo
+      testeString:
+        $string: cod_regiao_saude
+      testeNumber:
+        $number: cep
+      testeCapitalize:
+        $capitalize: razao_social
+      testeLiteral:
+        $literal: DRIVA
+      testeFallback:
+        $fallback:
+          - campo_inexistente
+          - $capitalize: razao_social
+      testeJoinBy:
+        $joinby:
+          $prop: emails.email
+          $separator: "; "
+    Tab2:
+      Titulo: 
+        teste:
+          teste2:
+            teste3: razao_social
+      Municipio: 
+        mun2: municipio
+      Faixa de faturamento: 
+        campo1:
+          - faixa: faixa_faturamento_grupo
+          - faixa2: uf
+      
   expected:
     RFB:
-      Titulo: RAZAO SOCIAL
+      testeSwitch: "Sim"
+      testeCnpj: "00.000.000/0011-11"
+      testePhone: "+55 41 99999-9999"
+      testeCompositeString: "Chave1: RAZAO SOCIAL\nChave2: EMAIL1@EXAMPLE.COM.BR, EMAIL2@EXAMPLE.COM.BR\n"
+      testeFlat: 
+        - url_insta: instagram.com/instagram1
+          cnpj: 1111.0
+        - url_insta: instagram.com/instagram2
+          cnpj: 1111.0
+        - ano: 2020.0
+        - ano: 2019.0
+        - obj_avulso: "7M A 10M"
+      testeTemplateComFor: "tel: 99 922222222 \ntel: 99 944444444 \ntel: 99 333333333 \n"
+      testeTemplateSemFor: "testando template: RAZAO SOCIAL --- alo!!!"
+      testeStringify: "instagram.com/instagram1, instagram.com/instagram2"
+      Telefones Concatenados: "99 922222222, 99 944444444, 99 333333333"
+      testeDate: "18-11-2011"
+      testeNcnpj: "00000000001111"
+      testeFor2:
+        - instagram.com/instagram1
+        - instagram.com/instagram2
+      testeFor:
+        - telefone: "99 922222222"
+          origem: "places"
+          cnpj: 1111.0
+      testeArray: 
+        - NOME DO FUNCIONARIO 1
+        - NOME DO FUNCIONARIO 2
+      testeNestedTags: hospital
+      testeLower: razao social
+      testeUpper: HOSPITAL
+      Titulo: 
+        teste:
+          teste2:
+            teste3: RAZAO SOCIAL
+      Municipio: MUNICIPIO
+      testeSuper: 
+        - insta: instagram.com/instagram1
+          ramo: ramo de atividade
+        - insta: instagram.com/instagram2
+          ramo: ramo de atividade
+      testePonto: INTERNACAO
+      testePonto2: ALO
+      Faixa de faturamento: 7M A 10M
+      testeString: "22222"
+      testeNumber: 2222222
+      testeCapitalize: Razao Social
+      testeLiteral: DRIVA
+      testeFallback: Razao Social
+      testeJoinBy: EMAIL1@EXAMPLE.COM.BR; EMAIL2@EXAMPLE.COM.BR
+    Tab2:
+      Titulo: 
+        teste:
+          teste2:
+            teste3: RAZAO SOCIAL
+      Municipio: 
+        mun2: MUNICIPIO
+      Faixa de faturamento:
+        campo1:
+          - faixa: 7M A 10M
+          - faixa2: ESTADO

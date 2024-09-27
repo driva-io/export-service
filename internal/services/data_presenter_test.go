@@ -42,6 +42,7 @@ func getTestCases() []TestCase {
 	}
 	return cases
 }
+
 func TestPresentSingle(t *testing.T) {
 	data := getTestData()
 	testCases := getTestCases()
