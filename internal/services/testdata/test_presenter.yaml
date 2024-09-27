@@ -193,3 +193,15 @@
         campo1:
           - faixa: 7M A 10M
           - faixa2: ESTADO
+
+- name: Test $firstname and $lastname
+  spec:
+    RFB:
+      Nome 1:
+        $firstname: razao_social
+      Nome 2:
+        $lastname: razao_social
+  expected:
+    RFB:
+      Nome 1: RAZAO
+      Nome 2: SOCIAL

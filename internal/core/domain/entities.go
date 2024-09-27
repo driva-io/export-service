@@ -1,6 +1,9 @@
 package domain
 
-import "time"
+import (
+	"sort"
+	"time"
+)
 
 type PresentationSpecSheetOptions struct {
 	Key           string   `json:"key"`
@@ -23,4 +26,11 @@ type PresentationSpec struct {
 	CreatedAt    time.Time                      `json:"created_at"  binding:"required"`
 	UpdatedAt    time.Time                      `json:"updated_at"  binding:"required"`
 	IsDefault    bool                           `json:"is_default"  binding:"required"`
+}
+
+func (ps *PresentationSpec) GetOrderedSheetOptions() []PresentationSpecSheetOptions {
+	sort.Slice(ps.SheetOptions, func(i, j int) bool {
+		return ps.SheetOptions[i].Position < ps.SheetOptions[j].Position
+	})
+	return ps.SheetOptions
 }
