@@ -1,4 +1,4 @@
-package services
+package data_presenter
 
 import (
 	"errors"
@@ -19,6 +19,25 @@ func flatMap(nestedArray []any) []any {
 	}
 
 	return flatResult
+}
+
+func copyValue(value any) any {
+	switch v := value.(type) {
+	case map[string]any:
+		copyMap := make(map[string]any)
+		for key, val := range v {
+			copyMap[key] = copyValue(val)
+		}
+		return copyMap
+	case []any:
+		copySlice := make([]any, len(v))
+		for i, val := range v {
+			copySlice[i] = copyValue(val)
+		}
+		return copySlice
+	default:
+		return v
+	}
 }
 
 // source is an object or array of objects and location is a string or array of strings
@@ -51,7 +70,7 @@ func getNestedValue(source any, location any) (any, error) {
 		}
 	}
 
-	return source, nil
+	return copyValue(source), nil
 }
 
 func Apply(source map[string]any, spec any, target map[string]any) (any, error) {
@@ -84,14 +103,14 @@ func buildStructure(keys []string, source, spec map[string]any, target map[strin
 		//Calls recursion or get value depending on received mapping
 		switch v := spec[k].(type) {
 		case []any:
-			target[k] = make([]any, len(v))
-			for i, prop := range v {
-				result, err := Apply(source, prop.(map[string]any), make(map[string]any))
+			target[k] = []any{}
+			for _, prop := range v {
+				result, err := Apply(source, prop, make(map[string]any))
 				if err != nil {
 					return nil, err
 				}
 				if result != nil {
-					target[k].([]any)[i] = result
+					target[k] = append(target[k].([]any), result)
 				}
 			}
 		case map[string]any:
@@ -124,6 +143,20 @@ func PresentSingle(data map[string]any, spec domain.PresentationSpecSpec) (map[s
 			return nil, err
 		}
 		result[key] = tabResult
+	}
+	return result, nil
+}
+
+func PresentMultiple(data []map[string]any, spec domain.PresentationSpecSpec) (map[string]any, error) {
+	result := make(map[string]any)
+	for _, values := range data {
+		for specKey, mapping := range spec {
+			tabResult, err := Apply(values, mapping, make(map[string]any))
+			if err != nil {
+				return nil, err
+			}
+			result[specKey] = tabResult
+		}
 	}
 	return result, nil
 }
