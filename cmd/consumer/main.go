@@ -3,6 +3,11 @@ package main
 import (
 	"fmt"
 	_ "github.com/joho/godotenv/autoload"
+	amqp "github.com/rabbitmq/amqp091-go"
+	"go.elastic.co/apm/module/apmhttp/v2"
+	"go.elastic.co/apm/module/apmzap/v2"
+	"go.opentelemetry.io/otel/trace"
+	"go.uber.org/zap/zapcore"
 	"net/url"
 
 	"context"
@@ -19,6 +24,8 @@ import (
 	"go.uber.org/zap"
 )
 
+var mainLogger = getLogger()
+
 func main() {
 	con, err := messaging.Connect(os.Getenv("RABBITMQ_USERNAME"), os.Getenv("RABBITMQ_PASSWORD"), os.Getenv("RABBITMQ_HOST"))
 	failOnError(err, "Failed to connect to RabbitMQ")
@@ -31,11 +38,8 @@ func main() {
 
 	defer conn.Close(ctx)
 
-	logger := zap.NewExample()
-	client := messaging.NewRabbitMQClient(con, logger)
+	client := messaging.NewRabbitMQClient(con, mainLogger)
 	defer client.Close()
-
-	sheetUc := getSheetUseCase(logger, conn)
 
 	// Create queues
 	exports := "exports.excel"
@@ -49,6 +53,8 @@ func main() {
 
 	go func() {
 		for d := range exportsBus {
+			ctx := getMessageContext(d)
+			logger := mainLogger.With(apmzap.TraceContext(ctx)...)
 			logger.Info("Received message on exports queue", zap.Any("message", d))
 
 			// Unmarshal Body into DTO
@@ -58,6 +64,7 @@ func main() {
 				failOnError(d.Nack(false, false), "Failed to nack message")
 			}
 
+			sheetUc := getSheetUseCase(logger, conn)
 			downloadUrl, err := sheetUc.Execute(req)
 			publishResult(client, logger, req, downloadUrl, err)
 
@@ -65,7 +72,7 @@ func main() {
 		}
 	}()
 
-	logger.Info("Consuming messages, press CTRL+C to stop")
+	mainLogger.Info("Consuming messages, press CTRL+C to stop")
 	// Blocks forever
 	<-blocking
 }
@@ -126,4 +133,63 @@ func failOnError(err error, msg string) {
 	if err != nil {
 		log.Fatalf("%s: %s", msg, err)
 	}
+}
+
+func getMessageContext(msg amqp.Delivery) context.Context {
+	tp := getTraceParent(msg)
+	if tp == "" {
+		return context.Background()
+	}
+	t, err := apmhttp.ParseTraceparentHeader(tp)
+	if err != nil {
+		return context.Background()
+	}
+	traceState, err := trace.ParseTraceState(t.State.String())
+	if err != nil {
+		return context.Background()
+	}
+	sc := trace.NewSpanContext(trace.SpanContextConfig{
+		TraceID:    trace.TraceID(t.Trace),
+		SpanID:     trace.SpanID(t.Span),
+		TraceFlags: trace.TraceFlags(t.Options),
+		TraceState: traceState,
+	})
+
+	if !sc.IsValid() {
+		return context.Background()
+	}
+
+	return trace.ContextWithSpanContext(context.Background(), sc)
+}
+
+func getTraceParent(msg amqp.Delivery) string {
+	rawTp, ok := msg.Headers["traceparent"]
+	if !ok {
+		log.Println("traceparent not found in headers")
+		return ""
+	}
+	tp, ok := rawTp.(string)
+	if !ok {
+		log.Println("traceparent is not a string")
+		return ""
+	}
+	return tp
+}
+
+func getLogger() *zap.Logger {
+	encoderCfg := zapcore.EncoderConfig{
+		MessageKey:     "message",
+		LevelKey:       "level",
+		NameKey:        "logger",
+		EncodeLevel:    zapcore.LowercaseLevelEncoder,
+		EncodeTime:     zapcore.ISO8601TimeEncoder,
+		EncodeDuration: zapcore.StringDurationEncoder,
+	}
+
+	logger := zap.New(zapcore.NewCore(
+		zapcore.NewJSONEncoder(encoderCfg),
+		os.Stdout,
+		zap.DebugLevel,
+	))
+	return logger.With(zap.String("service.name", os.Getenv("ELASTIC_APM_SERVICE_NAME")), zap.String("service.environment", os.Getenv("ELASTIC_APM_ENVIRONMENT")))
 }
