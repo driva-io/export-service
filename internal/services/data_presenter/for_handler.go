@@ -35,11 +35,14 @@ func handleFor(source map[string]any, location any) (any, error) {
 	var index int
 	indexKey, indexExists := mapLocation["$index"]
 	if indexExists {
-		intIndex, isInt := indexKey.(int)
-		if !isInt {
+		switch v := indexKey.(type) {
+		case float64:
+			index = int(v)
+		case int:
+			index = v
+		default:
 			return nil, errors.New("invalid data type for $index keyword. must be an int")
 		}
-		index = intIndex
 	}
 
 	var limit int
@@ -48,15 +51,14 @@ func handleFor(source map[string]any, location any) (any, error) {
 		if indexExists {
 			return nil, errors.New("$limit and $index cant exist simultaneously in $for keyword")
 		}
-		intLimit, isInt := limitKey.(int)
-		if !isInt {
+		switch v := limitKey.(type) {
+		case float64:
+			limit = int(v)
+		case int:
+			limit = v
+		default:
 			return nil, errors.New("invalid data type for $limit keyword. must be an int")
 		}
-
-		if intLimit == 0 {
-			return nil, errors.New("$limit must be greater than 0")
-		}
-		limit = intLimit
 	}
 
 	var result any
