@@ -1,0 +1,250 @@
+- name: Test linkedin mapping
+  spec:
+    Empresa:
+      columns:
+        $literal:
+          - column: Linkedin
+            active: true
+          - column: Website
+            active: true
+          - column: Empresa
+            active: true
+          - column: Segmento
+            active: true
+          - column: Faixa de Funcionários
+            active: true
+          - column: Faixa de Faturamento
+            active: true
+          - column: Investimento
+            active: true
+          - column: Cidade
+            active: true
+          - column: Estado
+            active: true
+          - column: País
+            active: true
+          - column: Endereço
+            active: true
+          - column: CEP
+            active: true
+      values:
+        - Linkedin: url
+          Website: website
+          Empresa: name
+          Segmento: sector
+          Faixa de Funcionários: staff_count_range
+          Faixa de Faturamento: ""
+          Investimento: funding_value
+          Cidade: city
+          Estado: state
+          País: country
+          Endereço: address
+          CEP: postal_code
+      active:
+        $literal: true
+      position:
+        $literal: 0
+    Contatos:
+      columns:
+        $literal:
+          - column: Linkedin da Empresa
+            active: true
+          - column: Empresa
+            active: true
+          - column: Nome
+            active: true
+          - column: Sobrenome
+            active: true
+          - column: Nome Completo
+            active: true
+          - column: Cargo
+            active: true
+          - column: Validado
+            active: true
+          - column: Email
+            active: true
+          - column: Linkedin
+            active: true
+      values:
+        $for:
+          $prop: profiles
+          $format:
+            Linkedin da Empresa: super$.url
+            Empresa: super$.name
+            Nome:
+              $firstname: name
+            Sobrenome:
+              $lastname: name
+            Nome Completo: name
+            Cargo: role
+            Validado:
+              $for:
+                $prop: emails
+                $index: 0
+                $format: validation
+            Email:
+              $for:
+                $prop: emails
+                $index: 0
+                $format: email
+            Linkedin: profile_url
+      active:
+        $literal: true
+      position:
+        $literal: 1
+    Telefones:
+      columns:
+        $literal:
+          - column: Linkedin
+            active: true
+          - column: Empresa
+            active: true
+          - column: Validado
+            active: true
+          - column: Telefone Completo
+            active: true
+          - column: Fixo ou Móvel
+            active: true
+          - column: Whatsapp
+            active: true
+      values:
+        $for:
+          $prop: phones
+          $limit: 3
+          $format:
+            Linkedin: super$.url
+            Empresa: super$.name
+            Validado: validation
+            Telefone Completo: phone
+            Fixo ou Móvel: type
+            Whatsapp:
+              $switch:
+                $cases:
+                  - $use:
+                      $literal: "Sim"
+                    $case:
+                      has_whatsapp: true
+                  - $use:
+                      $literal: "Não"
+                    $case:
+                      has_whatsapp: false
+      active:
+        $literal: true
+      position:
+        $literal: 2
+      
+  expected:
+    Empresa:
+      columns:        
+        - column: Linkedin
+          active: true
+        - column: Website
+          active: true
+        - column: Empresa
+          active: true
+        - column: Segmento
+          active: true
+        - column: Faixa de Funcionários
+          active: true
+        - column: Faixa de Faturamento
+          active: true
+        - column: Investimento
+          active: true
+        - column: Cidade
+          active: true
+        - column: Estado
+          active: true
+        - column: País
+          active: true
+        - column: Endereço
+          active: true
+        - column: CEP
+          active: true
+      values:
+        - Linkedin: linkedin.com/company/driva-tech
+          Website: driva.io
+          Empresa: Driva
+          Segmento: ""
+          Faixa de Funcionários: "51-200"
+          Investimento: ""
+          Cidade: Curitiba
+          Estado: Paraná
+          País: BR
+          Endereço: Avenida Cândido de Abreu 526 - 15 andar
+          CEP: "80530-000"
+      active: true
+      position: 0
+    Contatos:
+      columns:
+        - column: Linkedin da Empresa
+          active: true
+        - column: Empresa
+          active: true
+        - column: Nome
+          active: true
+        - column: Sobrenome
+          active: true
+        - column: Nome Completo
+          active: true
+        - column: Cargo
+          active: true
+        - column: Validado
+          active: true
+        - column: Email
+          active: true
+        - column: Linkedin
+          active: true
+      values:
+        - Linkedin da Empresa: linkedin.com/company/driva-tech
+          Empresa: Driva
+          Nome: Livia
+          Sobrenome: Alves
+          Nome Completo: Livia Alves
+          Cargo: EXECUTIVE BOARD MEMBER
+          Linkedin: linkedin.com/in/liviaalves-
+        - Linkedin da Empresa: linkedin.com/company/driva-tech
+          Empresa: Driva
+          Nome: Wagner
+          Sobrenome: Agostinho
+          Nome Completo: Wagner Rodrigues Ulian Agostinho
+          Cargo: CTO
+          Linkedin: linkedin.com/in/wagnerrua
+          Email: wagner@datadriva.com
+          Validado: ENTREGAVEL
+      active: true
+      position: 1
+    Telefones:
+      columns:
+        - column: Linkedin
+          active: true
+        - column: Empresa
+          active: true
+        - column: Validado
+          active: true
+        - column: Telefone Completo
+          active: true
+        - column: Fixo ou Móvel
+          active: true
+        - column: Whatsapp
+          active: true
+      values:
+        - Linkedin: linkedin.com/company/driva-tech
+          Empresa: Driva
+          Validado: ATENDIDA
+          Telefone Completo: "4140028922"
+          Fixo ou Móvel: FIXO
+          Whatsapp: Não
+        - Linkedin: linkedin.com/company/driva-tech
+          Empresa: Driva
+          Validado: NUMERO_NAO_ALOCADO
+          Telefone Completo: "41984568595"
+          Fixo ou Móvel: MOVEL
+          Whatsapp: Sim
+        - Linkedin: linkedin.com/company/driva-tech
+          Empresa: Driva
+          Validado: NUMERO_NAO_ALOCADO
+          Telefone Completo: "41999999999"
+          Fixo ou Móvel: MOVEL
+          Whatsapp: Sim
+      active: true
+      position: 2

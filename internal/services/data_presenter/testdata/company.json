@@ -469,7 +469,7 @@
   "opcao_pelo_mei": false,
   "cod_municipio_ibge": 2222222,
   "ordem_cnpj": 1,
-  "motivo_situacao_cadastral": "SEM MOTIVO",
+  "motivo_situacao_cadastral": "sem motivo",
   "cnae_principal_desc_classe": "22222 - DESCRICAO CLASSE CNAE PRINCIPAL",
   "cnae_principal_secao": "A",
   "qtde_funcionarios": 22,

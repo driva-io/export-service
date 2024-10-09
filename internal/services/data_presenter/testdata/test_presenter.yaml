@@ -1,0 +1,281 @@
+- name: Test $for
+  spec:
+    Tab1:
+      testeForSimples: 
+        $for: 
+          $prop: instagram
+          $format: url
+      testeForObjeto: 
+        $for: 
+          $prop: instagram
+          $format: 
+            url: url
+            cnpj: super$.cnpj
+      testeForIndex:
+        $for: 
+          $prop: instagram
+          $format: url
+          $index: 1
+      testeForLimit:
+        $for: 
+          $prop: instagram
+          $format: url
+          $limit: 1
+      testeForFilter:
+        $for: 
+          $prop: telefones
+          $format: telefone_completo
+          $filter:
+            fixo_movel: "MOVEL"
+            whatsapp: true
+      testeForVazio:
+        $for: 
+          $prop: campo_inexistente
+          $format: telefone_completo
+          $filter:
+            fixo_movel: "MOVEL"
+            whatsapp: true 
+      
+  expected:
+    Tab1:
+      testeForSimples: 
+        - instagram.com/instagram1
+        - instagram.com/instagram2
+      testeForObjeto: 
+        - url: instagram.com/instagram1
+          cnpj: 1111.0
+        - url: instagram.com/instagram2
+          cnpj: 1111.0
+      testeForIndex: instagram.com/instagram2
+      testeForLimit:        
+        - instagram.com/instagram1
+      testeForFilter:
+        - "99 922222222"
+
+- name: Test $template
+  spec:
+    Tab1:
+      testeTemplateSimples:
+        $template:
+          $variables:
+            rs: razao_social
+            addr: endereco
+            inexistente: campo_inexistente
+          $format: "RS: {rs}, END: {addr}, INEXISTENTE: {inexistente}"
+      testeTemplateComFor:
+        $template:
+          $for: telefones
+          $variables:
+            tipo: fixo_movel
+            tel: telefone_completo
+          $format: "telefone: {tel}, tipo: {tipo}\n"
+      testeTemplateComFilter:
+        $template:
+          $for: telefones
+          $filter:
+            fixo_movel: "MOVEL"
+            whatsapp: true
+          $variables:
+            tipo: fixo_movel
+            tel: telefone_completo
+          $format: "telefone: {tel}, tipo: {tipo}\n"
+
+  expected:
+    Tab1:
+      testeTemplateComFor: "telefone: 99 11111111, tipo: FIXO\ntelefone: 99 922222222, tipo: MOVEL\ntelefone: 99 944444444, tipo: FIXO\ntelefone: 99 333333333, tipo: FIXO\n"
+      testeTemplateSimples: "RS: RAZAO SOCIAL, END: ENDERECO, INEXISTENTE: "
+      testeTemplateComFilter: "telefone: 99 922222222, tipo: MOVEL\n"
+
+- name: Test $joinby
+  spec:
+    Tab1:
+      testeJoinbySimples:
+        $joinby:
+          $prop: instagram.url
+      testeJoinbySeparator:
+        $joinby:
+          $prop: instagram.url
+          $separator: "---"
+  
+  expected:
+    Tab1:
+      testeJoinbySimples: "instagram.com/instagram1, instagram.com/instagram2"
+      testeJoinbySeparator: "instagram.com/instagram1---instagram.com/instagram2"
+
+- name: Test $switch
+  spec:
+    Tab1:
+      testeSwitch:
+        $switch:
+          $cases: 
+            - $use: razao_social
+              $case: 
+                endereco: ENDERECO
+            - $use: endereco
+              $case: 
+                razao_social: RAZAO SOCIAL
+
+  expected:
+    Tab1:
+      testeSwitch: RAZAO SOCIAL
+
+- name: Test $stringify
+  spec:
+    Tab1:
+      testeStringify:
+        $stringify: facebook.url
+
+  expected:
+    Tab1:
+      testeStringify: "facebook.com/facebook1, facebook.com/facebook2"
+
+- name: Test $capitalize
+  spec:
+    Tab1:
+      testeCapitalize:
+        $capitalize: razao_social
+
+  expected:
+    Tab1:
+      testeCapitalize: Razao Social
+
+- name: Test $fallback
+  spec:
+    Tab1:
+      testeFallback:
+        $fallback:
+          - campo_inexistente
+          - nome_fantasia
+          - razao_social
+
+  expected:
+    Tab1:
+      testeFallback: NOME FANTASIA
+
+- name: Test $cnpj
+  spec:
+    Tab1:
+      testeCNPJ:
+        $cnpj: cnpj
+
+  expected:
+    Tab1:
+      testeCNPJ: "00.000.000/0011-11"
+
+- name: Test $ncnpj
+  spec:
+    Tab1:
+      testeNCNPJ:
+        $ncnpj: cnpj
+
+  expected:
+    Tab1:
+      testeNCNPJ: "00000000001111"
+
+- name: Test $date
+  spec:
+    Tab1:
+      testeDate:
+        $date: data_inicio_atividade
+
+  expected:
+    Tab1:
+      testeDate: 18-11-2011
+
+- name: Test $upper
+  spec:
+    Tab1:
+      testeUpper:
+        $upper: motivo_situacao_cadastral
+
+  expected:
+    Tab1:
+      testeUpper: SEM MOTIVO
+
+- name: Test $lower
+  spec:
+    Tab1:
+      testeLower:
+        $lower: razao_social
+
+  expected:
+    Tab1:
+      testeLower: razao social
+
+- name: Test $firstname
+  spec:
+    Tab1:
+      testeFirstname:
+        $firstname: natureza_juridica
+
+  expected:
+    Tab1:
+      testeFirstname: SOCIEDADE
+
+- name: Test $lastname
+  spec:
+    Tab1:
+      testeLastname:
+        $lastname: natureza_juridica
+
+  expected:
+    Tab1:
+      testeLastname: LIMITADA
+
+- name: Test $number
+  spec:
+    Tab1:
+      testeNumber:
+        $number: anp.numero_autorizacao
+
+  expected:
+    Tab1:
+      testeNumber: 222
+ 
+- name: Test $string
+  spec:
+    Tab1:
+      testeString:
+        $string: anp.cod_agente_i_simp
+
+  expected:
+    Tab1:
+      testeString: "12345678"
+
+- name: Test $phone
+  spec:
+    Tab1:
+      testePhone:
+        $phone: telefone_teste
+
+  expected:
+    Tab1:
+      testePhone: "+55 41 99999-9999"
+
+- name: Test $compositestring
+  spec:
+    Tab1:
+      testeCompositeString:
+        $compositestring: 
+          VALOR1: razao_social
+          VALOR2: nome_fantasia
+  
+  expected: 
+    Tab1:
+      testeCompositeString: "VALOR1: RAZAO SOCIAL\nVALOR2: NOME FANTASIA\n"
+
+- name: Test $flat
+  spec:
+    Tab1:
+      testeFlat:
+        $flat:
+          - instagram
+          - facebook
+
+  expected:
+    Tab1:
+      testeFlat: 
+        - url: "instagram.com/instagram1"
+        - url: "instagram.com/instagram2"
+        - url: "facebook.com/facebook1"
+        - url: "facebook.com/facebook2"

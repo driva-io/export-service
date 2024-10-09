@@ -5,8 +5,9 @@ import (
 	"encoding/json"
 	"export-service/internal/core/domain"
 	"export-service/internal/core/ports"
-	"export-service/internal/services"
+	"export-service/internal/services/data_presenter"
 	"fmt"
+
 	"github.com/google/uuid"
 	"go.uber.org/zap"
 )
@@ -99,7 +100,7 @@ func (s *SheetExportUseCase) applyPresentationSpec(request ExportRequest, data [
 	result := make([]map[string]any, 0)
 
 	for _, d := range data {
-		dd, err := services.PresentSingle(d, spec.Spec)
+		dd, err := data_presenter.PresentSingle(d, spec.Spec)
 		if err != nil {
 			return nil, err
 		}

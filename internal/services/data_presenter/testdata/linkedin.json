@@ -1,0 +1,87 @@
+[
+  {
+    "id": 52163831,
+    "public_id": "driva-tech",
+    "name": "Driva",
+    "url": "linkedin.com/company/driva-tech",
+    "tagline": "Venda mais e melhor com a empresa de Inteligência Comercial que mais cresce no Brasil!",
+    "picture_url": "https://media.licdn.com/dms/image/v2/D4D0BAQEwbXBBAHrajg/company-logo_200_200/company-logo_200_200/0/1691499793056/driva_tech_logo?e=1735171200&v=beta&t=ehBPEIUQtY_T7p6iKQEn0ui5uKMThwxbiuFPaQ-EXjA",
+    "banner_url": "https://media.licdn.com/dms/image/v2/D4D3DAQG3SSw49BniiA/image-scale_127_750/image-scale_127_750/0/1693338849355/driva_tech_cover?e=1727895600&v=beta&t=wQmqSXrx5ll3xFk6EAKcPWMVyBhC3A1EEFzGPp2o3xs",
+    "industries": "Atividades dos serviços de tecnologia da informação",
+    "follower_count": 6395,
+    "staff_count": 80,
+    "staff_count_range": "51-200",
+    "description": "Driva é a solução de Inteligência de Mercado perfeita que otimiza todos os aspectos da sua jornada de vendas. Mapeie seu mercado, descubra as melhores oportunidades e conecte-se com seus clientes com uma tecnologia inovadora de big data e inteligência de mercado.",
+    "website": "driva.io",
+    "phone_number": "(41) 985198510",
+    "founded_on": "2020",
+    "address": "Avenida Cândido de Abreu 526 - 15 andar",
+    "postal_code": "80530-000",
+    "city": "Curitiba",
+    "state": "Paraná",
+    "country": "BR",
+    "funding_type": "",
+    "funding_date": "",
+    "funding_value": "",
+    "operates_in_brazil": true,
+    "specialities": "",
+    "sector": "",
+    "profiles": [
+      {
+        "id": "liviaalves-",
+        "area": "",
+        "headline": "Chief Revenue Officer at iSystems | Professora de Liderança e Gestão de Pessoas na Conquer | Mentora de Carreiras | Formação de Líderes | Gestão de Times de Vendas | SaaS | Customer Success | Marketing",
+        "location": "Curitiba, PR",
+        "name": "Livia Alves",
+        "picture_url": "https://media.licdn.com/dms/image/v2/D4D03AQHzLuRSLkpgnQ/profile-displayphoto-shrink_100_100/profile-displayphoto-shrink_100_100/0/1712709061744?e=1732752000&v=beta&t=-TejQOUNDDKquWeCEGzbgmdA0FHjkhWxewk43SA0TVY",
+        "profile_url": "linkedin.com/in/liviaalves-",
+        "role": "EXECUTIVE BOARD MEMBER",
+        "seniority": "C-SUITE / DIRETOR",
+        "emails": []
+      },
+      {
+        "id": "wagnerrua",
+        "area": "TECNOLOGIA DA INFORMACAO",
+        "headline": "CTO | Driva",
+        "location": "Curitiba, PR",
+        "name": "Wagner Rodrigues Ulian Agostinho",
+        "picture_url": "https://media.licdn.com/dms/image/v2/D4D03AQFuVYBFf_veLg/profile-displayphoto-shrink_100_100/profile-displayphoto-shrink_100_100/0/1726657366032?e=1732752000&v=beta&t=I_62WRT3VsquWm6Lqjhr_WitbAgfaPARHURIShtdQG0",
+        "profile_url": "linkedin.com/in/wagnerrua",
+        "role": "CTO",
+        "seniority": "C-SUITE / DIRETOR",
+        "emails": [
+          {
+            "email": "wagner@datadriva.com",
+            "validation": "ENTREGAVEL"
+          }
+        ]
+      }
+    ],
+    "phones": [
+      {
+        "phone": "4140028922",
+        "type": "FIXO",
+        "has_whatsapp": false,
+        "validation": "ATENDIDA"
+      },
+      {
+        "phone": "41984568595",
+        "type": "MOVEL",
+        "has_whatsapp": true,
+        "validation": "NUMERO_NAO_ALOCADO"
+      },
+      {
+        "phone": "41999999999",
+        "type": "MOVEL",
+        "has_whatsapp": true,
+        "validation": "NUMERO_NAO_ALOCADO"
+      },
+      {
+        "phone": "41999999999",
+        "type": "MOVEL",
+        "has_whatsapp": true,
+        "validation": "NUMERO_NAO_ALOCADO"
+      }
+    ]
+  }
+]
