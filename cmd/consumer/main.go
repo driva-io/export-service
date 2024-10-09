@@ -66,7 +66,7 @@ func main() {
 
 			sheetUc := getSheetUseCase(logger, conn)
 			downloadUrl, err := sheetUc.Execute(req)
-			publishResult(client, logger, req, downloadUrl, err)
+			publishResult(ctx, client, logger, req, downloadUrl, err)
 
 			failOnError(d.Ack(false), "Failed to ack message")
 		}
@@ -77,7 +77,7 @@ func main() {
 	<-blocking
 }
 
-func publishResult(c *messaging.RabbitClient, logger *zap.Logger, req usecases.ExportRequest, downloadUrl string, err error) {
+func publishResult(ctx context.Context, c *messaging.RabbitClient, logger *zap.Logger, req usecases.ExportRequest, downloadUrl string, err error) {
 	response := struct {
 		ListID      string `json:"list_id,omitempty"`
 		DownloadUrl string `json:"download_url,omitempty"`
@@ -99,7 +99,7 @@ func publishResult(c *messaging.RabbitClient, logger *zap.Logger, req usecases.E
 		logger.Error("Failed to marshal response", zap.Error(err))
 	}
 
-	failOnError(c.Publish("exports.results.excel", b), "Failed to publish response message")
+	failOnError(c.Publish(ctx, "exports.results.excel", b), "Failed to publish response message")
 }
 
 func getPostgresConnStr() string {

@@ -1,7 +1,10 @@
 package messaging
 
 import (
+	"context"
 	"fmt"
+	"go.elastic.co/apm/module/apmhttp/v2"
+	"go.elastic.co/apm/v2"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 	"go.uber.org/zap"
@@ -57,7 +60,7 @@ func (c *RabbitClient) Consume(queue string) (<-chan amqp.Delivery, error) {
 	)
 }
 
-func (c *RabbitClient) Publish(queue string, body []byte) error {
+func (c *RabbitClient) Publish(ctx context.Context, queue string, body []byte) error {
 	return c.ch.Publish(
 		"",
 		queue,
@@ -66,6 +69,9 @@ func (c *RabbitClient) Publish(queue string, body []byte) error {
 		amqp.Publishing{
 			ContentType: "application/json",
 			Body:        body,
+			Headers: amqp.Table{
+				"traceparent": apmhttp.FormatTraceparentHeader(apm.TransactionFromContext(ctx).TraceContext()),
+			},
 		},
 	)
 }
