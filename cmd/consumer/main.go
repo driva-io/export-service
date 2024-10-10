@@ -6,7 +6,7 @@ import (
 	amqp "github.com/rabbitmq/amqp091-go"
 	"go.elastic.co/apm/module/apmhttp/v2"
 	"go.elastic.co/apm/module/apmzap/v2"
-	"go.opentelemetry.io/otel/trace"
+	"go.elastic.co/apm/v2"
 	"go.uber.org/zap/zapcore"
 	"net/url"
 
@@ -140,26 +140,17 @@ func getMessageContext(msg amqp.Delivery) context.Context {
 	if tp == "" {
 		return context.Background()
 	}
+
 	t, err := apmhttp.ParseTraceparentHeader(tp)
 	if err != nil {
 		return context.Background()
 	}
-	traceState, err := trace.ParseTraceState(t.State.String())
-	if err != nil {
-		return context.Background()
-	}
-	sc := trace.NewSpanContext(trace.SpanContextConfig{
-		TraceID:    trace.TraceID(t.Trace),
-		SpanID:     trace.SpanID(t.Span),
-		TraceFlags: trace.TraceFlags(t.Options),
-		TraceState: traceState,
+
+	tx := apm.DefaultTracer().StartTransactionOptions("Exporting Sheet", "message", apm.TransactionOptions{
+		TraceContext: t,
 	})
 
-	if !sc.IsValid() {
-		return context.Background()
-	}
-
-	return trace.ContextWithSpanContext(context.Background(), sc)
+	return apm.ContextWithTransaction(context.Background(), tx)
 }
 
 func getTraceParent(msg amqp.Delivery) string {
