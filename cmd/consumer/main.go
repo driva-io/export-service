@@ -53,28 +53,38 @@ func main() {
 
 	go func() {
 		for d := range exportsBus {
-			ctx := getMessageContext(d)
-			logger := mainLogger.With(apmzap.TraceContext(ctx)...)
-			logger.Info("Received message on exports queue", zap.Any("message", d))
-
-			// Unmarshal Body into DTO
-			var req usecases.ExportRequest
-			if err = json.Unmarshal(d.Body, &req); err != nil {
-				logger.Error("Failed to unmarshal message", zap.Error(err))
-				failOnError(d.Nack(false, false), "Failed to nack message")
-			}
-
-			sheetUc := getSheetUseCase(logger, conn)
-			downloadUrl, err := sheetUc.Execute(req)
-			publishResult(ctx, client, logger, req, downloadUrl, err)
-
-			failOnError(d.Ack(false), "Failed to ack message")
+			handleExportRequest(d, conn, client)
 		}
 	}()
 
 	mainLogger.Info("Consuming messages, press CTRL+C to stop")
 	// Blocks forever
 	<-blocking
+}
+
+func handleExportRequest(d amqp.Delivery, conn *pgx.Conn, client *messaging.RabbitClient) {
+	ctx := getMessageContext(d)
+	defer func(ctx context.Context) {
+		tx := apm.TransactionFromContext(ctx)
+		if tx != nil {
+			tx.End()
+		}
+	}(ctx)
+
+	logger := mainLogger.With(apmzap.TraceContext(ctx)...)
+	logger.Info("Received message on exports queue", zap.Any("message", d))
+
+	var req usecases.ExportRequest
+	if err := json.Unmarshal(d.Body, &req); err != nil {
+		logger.Error("Failed to unmarshal message", zap.Error(err))
+		failOnError(d.Nack(false, false), "Failed to nack message")
+	}
+
+	sheetUc := getSheetUseCase(logger, conn)
+	downloadUrl, err := sheetUc.Execute(req)
+	publishResult(ctx, client, logger, req, downloadUrl, err)
+
+	failOnError(d.Ack(false), "Failed to ack message")
 }
 
 func publishResult(ctx context.Context, c *messaging.RabbitClient, logger *zap.Logger, req usecases.ExportRequest, downloadUrl string, err error) {
