@@ -119,7 +119,161 @@ func TestGet(t *testing.T) {
 
 		_, err := repo.Get(ctx, ports.PresentationSpecQueryParams{})
 
+		var invalidErr ports.InvalidQueryParamsError
 		require.Error(t, err)
-		require.ErrorIs(t, err, ports.ErrInvalidParams)
+		require.ErrorAs(t, err, &invalidErr)
+	})
+}
+
+func TestAdd(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+
+	// Setup postgres container
+
+	postgresContainer, err := postgres.Run(ctx,
+		"docker.io/postgres:15-alpine",
+		postgres.WithDatabase("exports"),
+		postgres.WithUsername("user"),
+		postgres.WithPassword("password"),
+		postgres.WithInitScripts("seed.sql"),
+		testcontainers.WithWaitStrategy(
+			wait.ForLog("database system is ready to accept connections").
+				WithOccurrence(2).
+				WithStartupTimeout(5*time.Second)),
+	)
+	if err != nil {
+		log.Fatalf("failed to start container: %s", err)
+	}
+
+	// Clean up the container
+	defer func() {
+		if err := postgresContainer.Terminate(ctx); err != nil {
+			log.Fatalf("failed to terminate container: %s", err)
+		}
+	}()
+	url, _ := postgresContainer.ConnectionString(ctx)
+	conn, err := pgx.Connect(ctx, url)
+	if err != nil {
+		panic(err)
+	}
+
+	defer conn.Close(ctx)
+	logger, _ := zap.NewProduction()
+	repo := presentation_spec_repo.NewPgPresentationSpecRepository(conn, logger)
+
+	sheetOptions := []domain.PresentationSpecSheetOptions{
+		{
+			Key:           "RFB",
+			ActiveColumns: []string{"CNPJ", "Razão Social", "Endereço"},
+			Position:      0,
+			ShouldExplode: false,
+		},
+		{
+			Key:           "Telefones",
+			ActiveColumns: []string{"CNPJ", "Razão Social", "Telefone Completo"},
+			Position:      1,
+			ShouldExplode: true,
+		},
+	}
+
+	spec := domain.PresentationSpecSpec{
+		"RFB":       {"CNPJ": "cnpj", "Razão Social": "razao_social", "Endereço": "endereco"},
+		"Telefones": {"CNPJ": "cnpj", "Razão Social": "razao_social", "Telefone Completo": "1111-1111"},
+	}
+
+	// Begin testing
+	t.Run("Should add user's custom spec", func(t *testing.T) {
+
+		result, err := repo.Add(ctx, ports.PresentationSpecQueryParams{UserEmail: "francisco.becheli@driva.com.br", UserCompany: "Driva", Service: "enrichment", DataSource: "empresas"}, ports.PresentationSpecAddBody{SpecOptions: sheetOptions, PresentationSpec: spec})
+
+		require.NoError(t, err)
+		require.Equal(t, result.SheetOptions, sheetOptions)
+		require.Equal(t, result.Spec, spec)
+		require.Equal(t, result.UserEmail, "francisco.becheli@driva.com.br")
+		require.Equal(t, result.UserCompany, "Driva")
+		require.Equal(t, result.Service, "enrichment")
+		require.Equal(t, result.Base, "empresas")
+	})
+
+	t.Run("Should return error if invalid params", func(t *testing.T) {
+
+		_, err := repo.Add(ctx, ports.PresentationSpecQueryParams{UserCompany: "Driva", Service: "enrichment", DataSource: "empresas"}, ports.PresentationSpecAddBody{SpecOptions: sheetOptions, PresentationSpec: spec})
+
+		var invalidErr ports.InvalidQueryParamsError
+		require.Error(t, err)
+		require.ErrorAs(t, err, &invalidErr)
+	})
+}
+
+func TestDelete(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+
+	// Setup postgres container
+
+	postgresContainer, err := postgres.Run(ctx,
+		"docker.io/postgres:15-alpine",
+		postgres.WithDatabase("exports"),
+		postgres.WithUsername("user"),
+		postgres.WithPassword("password"),
+		postgres.WithInitScripts("seed.sql"),
+		testcontainers.WithWaitStrategy(
+			wait.ForLog("database system is ready to accept connections").
+				WithOccurrence(2).
+				WithStartupTimeout(5*time.Second)),
+	)
+	if err != nil {
+		log.Fatalf("failed to start container: %s", err)
+	}
+
+	// Clean up the container
+	defer func() {
+		if err := postgresContainer.Terminate(ctx); err != nil {
+			log.Fatalf("failed to terminate container: %s", err)
+		}
+	}()
+	url, _ := postgresContainer.ConnectionString(ctx)
+	conn, err := pgx.Connect(ctx, url)
+	if err != nil {
+		panic(err)
+	}
+
+	defer conn.Close(ctx)
+	logger, _ := zap.NewProduction()
+	repo := presentation_spec_repo.NewPgPresentationSpecRepository(conn, logger)
+
+	sheetOptions := []domain.PresentationSpecSheetOptions{
+		{
+			Key:           "RFB",
+			ActiveColumns: []string{"CNPJ", "Razão Social", "Endereço"},
+			Position:      0,
+			ShouldExplode: false,
+		},
+		{
+			Key:           "Telefones",
+			ActiveColumns: []string{"CNPJ", "Razão Social", "Telefone Completo"},
+			Position:      1,
+			ShouldExplode: true,
+		},
+	}
+
+	spec := domain.PresentationSpecSpec{
+		"RFB":       {"CNPJ": "cnpj", "Razão Social": "razao_social", "Endereço": "endereco"},
+		"Telefones": {"CNPJ": "cnpj", "Razão Social": "razao_social", "Telefone Completo": "1111-1111"},
+	}
+
+	result, _ := repo.Add(ctx, ports.PresentationSpecQueryParams{UserEmail: "francisco.becheli@driva.com.br", UserCompany: "Driva", Service: "enrichment", DataSource: "empresas"}, ports.PresentationSpecAddBody{SpecOptions: sheetOptions, PresentationSpec: spec})
+
+	specId := result.ID
+
+	// Begin testing
+	t.Run("Should delete user's custom spec", func(t *testing.T) {
+
+		err := repo.Delete(ctx, specId)
+
+		require.NoError(t, err)
 	})
 }

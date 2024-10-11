@@ -2,14 +2,14 @@ create schema presentation_spec;
 
 create table presentation_spec.basic_info (
     id UUID primary key,
-    version int not null,
+    version int not null default 2,
     base text not null,
     created_at timestamp
     with
-        time zone not null,
+        time zone not null DEFAULT now(),
         updated_at timestamp
     with
-        time zone not null,
+        time zone not null DEFAULT now(),
         user_email text not null,
         user_company text not null,
         service text not null,
@@ -25,10 +25,10 @@ create table presentation_spec.basic_info (
 create unique index unique_default_spec_idx on presentation_spec.basic_info (service, base)
 where (is_default);
 
-create table presentation_spec.sheet_options (presentation_spec_id UUID references presentation_spec.basic_info (id), key text, active_columns text[], position integer, should_explode bool);
+create table presentation_spec.sheet_options (presentation_spec_id UUID references presentation_spec.basic_info (id) on delete cascade, key text, active_columns text[], position integer, should_explode bool);
 
 create table presentation_spec.specs (
-    presentation_spec_id UUID references presentation_spec.basic_info (id),
+    presentation_spec_id UUID references presentation_spec.basic_info (id) on delete cascade,
     key text,
     value JSONB
 );

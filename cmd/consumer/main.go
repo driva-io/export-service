@@ -2,13 +2,16 @@ package main
 
 import (
 	"fmt"
+	"net/url"
+
 	_ "github.com/joho/godotenv/autoload"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"go.elastic.co/apm/module/apmhttp/v2"
 	"go.elastic.co/apm/module/apmzap/v2"
 	"go.elastic.co/apm/v2"
 	"go.uber.org/zap/zapcore"
-	"net/url"
+
+	_ "github.com/joho/godotenv/autoload"
 
 	"context"
 	"encoding/json"
@@ -17,9 +20,10 @@ import (
 	"export-service/internal/repositories/presentation_spec_repo"
 	"export-service/internal/usecases"
 	"export-service/internal/writers"
-	"github.com/jackc/pgx/v5"
 	"log"
 	"os"
+
+	"github.com/jackc/pgx/v5"
 
 	"go.uber.org/zap"
 )
@@ -49,7 +53,7 @@ func main() {
 	exportsBus, err := client.Consume(exports)
 	failOnError(err, "Failed to consume bus")
 
-	var blocking chan struct{}
+	blocking := make(chan struct{})
 
 	go func() {
 		for d := range exportsBus {

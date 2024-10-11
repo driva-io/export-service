@@ -2,7 +2,6 @@ package ports
 
 import (
 	"context"
-	"errors"
 	"export-service/internal/core/domain"
 )
 
@@ -13,10 +12,19 @@ type PresentationSpecQueryParams struct {
 	DataSource  string
 }
 
-var ErrInvalidParams = errors.New("invalid query params provided")
+type PresentationSpecAddBody struct {
+	PresentationSpec domain.PresentationSpecSpec           `json:"spec" validate:"required"`
+	SpecOptions      []domain.PresentationSpecSheetOptions `json:"sheet_options" validate:"required"`
+}
+
+type PresentationSpecPatchKey struct {
+	PresentationSpec map[string]any                           `json:"spec" validate:"required"`
+	SpecOptions      domain.PresentationSpecPatchSheetOptions `json:"sheet_options" validate:"required"`
+}
 
 type PresentationSpecRepository interface {
 	Get(ctx context.Context, params PresentationSpecQueryParams) (domain.PresentationSpec, error)
+	Add(ctx context.Context, params PresentationSpecQueryParams, body PresentationSpecAddBody) (domain.PresentationSpec, error)
 }
 
 type DataWriter interface {

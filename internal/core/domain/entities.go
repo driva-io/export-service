@@ -12,6 +12,13 @@ type PresentationSpecSheetOptions struct {
 	ShouldExplode bool     `json:"should_explode"`
 }
 
+type PresentationSpecPatchSheetOptions struct {
+	Key           string   `json:"key"`
+	ActiveColumns []string `json:"active_columns"`
+	Position      int      `json:"position"`
+	ShouldExplode bool     `json:"should_explode"`
+}
+
 type PresentationSpecSpec map[string]map[string]any
 
 type PresentationSpec struct {
