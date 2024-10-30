@@ -5,6 +5,11 @@ import (
 	"export-service/internal/core/domain"
 )
 
+type CrmCompanyQueryParams struct {
+	Crm     string
+	Company string
+}
+
 type PresentationSpecQueryParams struct {
 	UserEmail   string
 	UserCompany string

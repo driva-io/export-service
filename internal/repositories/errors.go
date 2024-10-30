@@ -14,6 +14,16 @@ func (e RFC7807Error) Error() string {
 	return fmt.Sprintf("%s: %s", e.Title, e.Detail)
 }
 
+type CompanyNotFoundError struct {
+	RFC7807Error
+	//Aditional fields
+}
+
+type CompanyNotUniqueError struct {
+	RFC7807Error
+	//Aditional fields
+}
+
 type PresentationSpecNotFoundError struct {
 	RFC7807Error
 	//Aditional fields
@@ -48,6 +58,26 @@ func NewInternalServerError() RFC7807Error {
 		Type:   "InternalServerError",
 		Title:  "Internal Server Error",
 		Detail: "Internal Server Error.",
+	}
+}
+
+func NewCompanyNotFoundError() CompanyNotFoundError {
+	return CompanyNotFoundError{
+		RFC7807Error: RFC7807Error{
+			Type:   "CompanyNotFoundError",
+			Title:  "Company Not Found",
+			Detail: "The requested company could not be found.",
+		},
+	}
+}
+
+func NewCompanyNotUniqueError() CompanyNotUniqueError {
+	return CompanyNotUniqueError{
+		RFC7807Error: RFC7807Error{
+			Type:   "CompanyNotUniqueError",
+			Title:  "Company Not Unique",
+			Detail: "More than one company was found for given parameters.",
+		},
 	}
 }
 

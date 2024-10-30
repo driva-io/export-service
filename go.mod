@@ -4,6 +4,7 @@ go 1.23.0
 
 require (
 	github.com/aws/aws-sdk-go v1.55.5
+	github.com/belong-inc/go-hubspot v0.9.0
 	github.com/go-playground/validator/v10 v10.22.1
 	github.com/gofiber/fiber/v2 v2.52.5
 	github.com/google/uuid v1.6.0
@@ -48,6 +49,7 @@ require (
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/google/btree v1.1.2 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
+	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/joeshaw/multierror v0.0.0-20140124173710-69b34d4ec901 // indirect
 	github.com/klauspost/compress v1.17.4 // indirect
