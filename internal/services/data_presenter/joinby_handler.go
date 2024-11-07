@@ -38,6 +38,10 @@ func handleJoinBy(source map[string]any, location any) (any, error) {
 		return nil, err
 	}
 
+	if result == nil {
+		return nil, nil
+	}
+
 	stringValues := make([]string, 0, len(result.([]any)))
 	for _, value := range result.([]any) {
 		strValue, ok := value.(string)
