@@ -26,7 +26,10 @@ func handleDate(source map[string]any, location any) (any, error) {
 	inputLayout := "2006-01-02"
 	date, err := time.Parse(inputLayout, dateInput)
 	if err != nil {
-		return nil, errors.New("$date location must be a date formatted YYYY-MM-DD")
+		date, err = time.Parse("2006-01-02T15:04:05Z", dateInput)
+		if err != nil {
+			return nil, errors.New("$date location must be a date formatted YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ")
+		}
 	}
 
 	outputLayout := "02-01-2006"
