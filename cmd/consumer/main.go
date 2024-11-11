@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/url"
+	"time"
 
 	_ "github.com/joho/godotenv/autoload"
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -10,8 +11,6 @@ import (
 	"go.elastic.co/apm/module/apmzap/v2"
 	"go.elastic.co/apm/v2"
 	"go.uber.org/zap/zapcore"
-
-	_ "github.com/joho/godotenv/autoload"
 
 	"context"
 	"encoding/json"
@@ -50,20 +49,23 @@ func main() {
 	failOnError(client.CreateQueue("exports.excel", false), "Failed to create exports queue")
 	failOnError(client.CreateQueue("exports.results.excel", false), "Failed to create exports result queue")
 
-	exportsBus, err := client.Consume(exports)
-	failOnError(err, "Failed to consume bus")
-
-	blocking := make(chan struct{})
-
 	go func() {
-		for d := range exportsBus {
-			handleExportRequest(d, conn, client)
+		for {
+			exportsBus, err := client.Consume(exports)
+			failOnError(err, "Failed to consume bus")
+
+			for d := range exportsBus {
+				handleExportRequest(d, conn, client)
+			}
+
+			mainLogger.Warn("Queue closed, retrying in 60 seconds")
+			time.Sleep(60 * time.Second)
 		}
 	}()
 
 	mainLogger.Info("Consuming messages, press CTRL+C to stop")
 	// Blocks forever
-	<-blocking
+	<-make(chan struct{})
 }
 
 func handleExportRequest(d amqp.Delivery, conn *pgx.Conn, client *messaging.RabbitClient) {
