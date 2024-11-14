@@ -3,6 +3,8 @@ package crm_exporter
 import (
 	"context"
 	"export-service/internal/repositories/crm_company_repo"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 type Status string
@@ -30,7 +32,8 @@ type CreatedLead struct {
 
 type Crm interface {
 	Authorize(ctx context.Context, companyName string) (any, error)
-	Install()
+	Install(installData any) (any, error)
+	OAuthCallback(c *fiber.Ctx, params ...any) (any, error)
 
 	SendLead(client any, mappedStorageData map[string]any) (CreatedLead, error)
 	GetPipelines(client any) ([]Pipeline, error)

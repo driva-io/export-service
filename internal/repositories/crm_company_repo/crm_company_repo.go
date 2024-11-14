@@ -45,6 +45,22 @@ func (r *PgCrmCompanyRepository) Get(ctx context.Context, params ports.CrmCompan
 	return company, nil
 }
 
+func (r *PgCrmCompanyRepository) AddHubspot(ctx context.Context, params ports.CrmAddHubspotCompanyQueryParams) (Company, error) {
+	defer r.logger.Sync()
+
+	if params.Company == "" || params.RefreshToken == "" || params.AccessToken == "" || params.UserId == "" || params.WorkspaceId == "" {
+		return Company{}, ports.NewInvalidQueryParamsError()
+	}
+
+	rows, _ := r.conn.Query(ctx, addHubspotQuery, params.Company, params.UserId, params.WorkspaceId, params.RefreshToken, params.AccessToken)
+
+	company, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[Company])
+	if err != nil {
+		return Company{}, err
+	}
+	return company, nil
+}
+
 // func (r *PgPresentationSpecRepository) GetById(ctx context.Context, id string) (domain.PresentationSpec, error) {
 // 	defer r.logger.Sync()
 
@@ -62,76 +78,6 @@ func (r *PgCrmCompanyRepository) Get(ctx context.Context, params ports.CrmCompan
 // 		return domain.PresentationSpec{}, err
 // 	}
 // 	return spec, nil
-// }
-
-// func (r *PgPresentationSpecRepository) Add(ctx context.Context, params ports.PresentationSpecQueryParams, body ports.PresentationSpecAddBody) (domain.PresentationSpec, error) {
-// 	defer r.logger.Sync()
-
-// 	if params.UserEmail == "" || params.UserCompany == "" || params.Service == "" || params.DataSource == "" {
-// 		return domain.PresentationSpec{}, ports.NewInvalidQueryParamsError()
-// 	}
-
-// 	presentationSpec := body.PresentationSpec
-// 	sheetOptions := body.SpecOptions
-
-// 	for _, value := range sheetOptions {
-// 		keyName := value.Key
-// 		_, exists := presentationSpec[keyName]
-// 		if !exists {
-// 			return domain.PresentationSpec{}, errors.New("key " + keyName + "in sheet_options is not present in spec.")
-// 		}
-// 	}
-
-// 	for key := range presentationSpec {
-// 		found := false
-// 		for _, value := range sheetOptions {
-// 			if key == value.Key {
-// 				if found {
-// 					return domain.PresentationSpec{}, errors.New("duplicate key " + key + " in sheet_options.")
-// 				}
-// 				found = true
-// 			}
-// 		}
-// 		if !found {
-// 			return domain.PresentationSpec{}, errors.New("sheet " + key + "in spec is not present in sheet_options.")
-// 		}
-// 	}
-
-// 	new_id := uuid.New().String()
-// 	rows, err := r.conn.Query(ctx, addBasicInfoQuery, new_id, params.DataSource, params.UserEmail, params.UserCompany, params.Service)
-// 	if err != nil {
-// 		r.logger.Error("Got error when inserting basic info", zap.Error(err), zap.Any("params", params))
-// 		return domain.PresentationSpec{}, err
-// 	}
-// 	rows.Close()
-
-// 	for tab, tabSpec := range presentationSpec {
-// 		var correspondingOptions domain.PresentationSpecSheetOptions
-// 		for _, options := range sheetOptions {
-// 			if tab == options.Key {
-// 				correspondingOptions = options
-// 				break
-// 			}
-// 		}
-
-// 		rows, err := r.conn.Query(ctx, addOptionsQuery, new_id, correspondingOptions.Key, correspondingOptions.ActiveColumns, correspondingOptions.Position, correspondingOptions.ShouldExplode)
-// 		if err != nil {
-// 			r.logger.Error("Got error when inserting options", zap.Error(err), zap.Any("params", params))
-// 			return domain.PresentationSpec{}, err
-// 		}
-// 		rows.Close()
-
-// 		rows, err = r.conn.Query(ctx, addSpecQuery, new_id, correspondingOptions.Key, tabSpec)
-// 		if err != nil {
-// 			r.logger.Error("Got error when inserting specs", zap.Error(err), zap.Any("params", params))
-// 			return domain.PresentationSpec{}, err
-// 		}
-// 		rows.Close()
-// 	}
-
-// 	result, _ := r.GetById(ctx, new_id)
-
-// 	return result, nil
 // }
 
 // func (r *PgPresentationSpecRepository) Patch(ctx context.Context, id string, body ports.PresentationSpecAddBody) (domain.PresentationSpec, error) {

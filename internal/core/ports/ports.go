@@ -10,6 +10,14 @@ type CrmCompanyQueryParams struct {
 	Company string
 }
 
+type CrmAddHubspotCompanyQueryParams struct {
+	Company      string
+	WorkspaceId  string
+	UserId       string
+	RefreshToken string
+	AccessToken  string
+}
+
 type PresentationSpecQueryParams struct {
 	UserEmail   string
 	UserCompany string

@@ -2,14 +2,20 @@ package crm_exporter
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"export-service/internal/core/ports"
 	"export-service/internal/repositories/crm_company_repo"
 	"fmt"
+	"io"
+	"log"
+	"net/http"
+	"net/url"
 	"os"
 	"strings"
 
 	"github.com/belong-inc/go-hubspot"
+	"github.com/gofiber/fiber/v2"
 )
 
 type HubspotService struct {
@@ -537,8 +543,53 @@ func (h HubspotService) Authorize(ctx context.Context, companyName string) (any,
 	return client, nil
 }
 
-func (h HubspotService) Install() {
-	fmt.Println("Method not implemented")
+func (h HubspotService) Install(installData any) (any, error) {
+	baseURL := "https://app.hubspot.com/oauth/authorize"
+	clientID := url.QueryEscape(os.Getenv("HUBSPOT_CLIENT_ID"))
+	scope := url.QueryEscape(os.Getenv("HUBSPOT_SCOPE"))
+	redirectURI := os.Getenv("HUBSPOT_REDIRECT_URI")
+
+	authURL := fmt.Sprintf("%s?client_id=%s&scope=%s&redirect_uri=%s", baseURL, clientID, scope, url.QueryEscape(redirectURI))
+
+	return map[string]string{"url": authURL}, nil
+}
+
+func (h HubspotService) OAuthCallback(c *fiber.Ctx, params ...any) (any, error) {
+	if len(params) != 3 {
+		return nil, errors.New("expected 4 parms in oauth callback")
+	}
+
+	hubspotCode := c.Query("code")
+	workspaceId := params[0].(string)
+	userId := params[1].(string)
+	company := params[2].(string)
+
+	formData := url.Values{}
+	formData.Set("grant_type", "authorization_code")
+	formData.Set("client_id", os.Getenv("HUBSPOT_CLIENT_ID"))
+	formData.Set("client_secret", os.Getenv("HUBSPOT_CLIENT_SECRET"))
+	formData.Set("redirect_uri", os.Getenv("HUBSPOT_REDIRECT_URI"))
+	formData.Set("code", hubspotCode)
+
+	resp, err := http.PostForm("https://api.hubapi.com/oauth/v1/token", formData)
+	if err != nil {
+		log.Fatalf("Error making request: %v", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalf("Error reading response: %v", err)
+	}
+
+	var responseData map[string]string
+	if err := json.Unmarshal(body, &responseData); err != nil {
+		log.Fatalf("Error unmarshaling JSON: %v", err)
+	}
+
+	h.companyRepo.AddHubspot(context.Background(), ports.CrmAddHubspotCompanyQueryParams{Company: company, WorkspaceId: workspaceId, UserId: userId, RefreshToken: responseData["refresh_token"], AccessToken: responseData["access_token"]})
+
+	return nil, nil
 }
 
 // func refreshToken(ctx context.Context, company any) (string, error) {
