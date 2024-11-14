@@ -13,7 +13,10 @@ COPY . .
 ARG TARGETARCH
 
 RUN --mount=type=cache,target=/go/pkg/mod/ \
-    CGO_ENABLED=0 GOARCH=$TARGETARCH go build -o /bin/app ./cmd/consumer
+    CGO_ENABLED=0 GOARCH=$TARGETARCH go build -o /bin/consumer ./cmd/consumer
+
+RUN --mount=type=cache,target=/go/pkg/mod/ \
+    CGO_ENABLED=0 GOARCH=$TARGETARCH go build -o /bin/http ./cmd/http
 
 FROM alpine:latest AS final
 
@@ -22,6 +25,9 @@ RUN apk --no-cache add \
         tzdata \
         && update-ca-certificates
 
-COPY --from=build /bin/app /bin/
+COPY --from=build /bin/consumer /bin/
+COPY --from=build /bin/http /bin/
+COPY start.sh /bin/
 
-CMD [ "/bin/app" ]
+# Run start.sh
+CMD sh /bin/start.sh
