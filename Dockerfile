@@ -29,7 +29,7 @@ COPY --from=build /bin/consumer /bin/
 COPY --from=build /bin/http /bin/
 COPY start.sh /bin/
 
-EXPOSE 23544
+EXPOSE 23545
 
 # Run start.sh
 CMD sh /bin/start.sh
