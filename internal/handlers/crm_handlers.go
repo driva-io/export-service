@@ -2,12 +2,19 @@ package handlers
 
 import (
 	"export-service/internal/services/crm_exporter"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/session"
 )
 
-var store = session.New()
+var store = session.New(session.Config{
+	CookieSecure:   true,           
+	CookieSameSite: "None",         
+	CookieHTTPOnly: true,          
+	Expiration:     24 * time.Hour, 
+})
+
 
 func InstallHandler(c *fiber.Ctx, crmService crm_exporter.Crm) error {
 	//hubspot doesnt require install data like a token (its oauth), other CRMs may require
@@ -51,15 +58,15 @@ func OAuthCallBackHandler(c *fiber.Ctx, crmService crm_exporter.Crm) error {
 		return c.Status(fiber.StatusBadRequest).SendString("necessary session data not found")
 	}
 
-	response, err := crmService.OAuthCallback(c, workspaceID, userID, company)
+	_ , err = crmService.OAuthCallback(c, workspaceID, userID, company)
 
-	status := fiber.StatusOK
-	returnBody := response
+	status := fiber.StatusNoContent
 	if err != nil {
-		return err
+		status = fiber.StatusInternalServerError
+		return c.Status(status).JSON(err);
 	}
 
-	return c.Status(status).JSON(returnBody)
+	return c.SendStatus(status)
 }
 
 func GetPipelinesHandler(c *fiber.Ctx, crmService crm_exporter.Crm, client any) error {

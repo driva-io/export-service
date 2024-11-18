@@ -582,12 +582,12 @@ func (h HubspotService) OAuthCallback(c *fiber.Ctx, params ...any) (any, error) 
 		log.Fatalf("Error reading response: %v", err)
 	}
 
-	var responseData map[string]string
+	var responseData map[string]any
 	if err := json.Unmarshal(body, &responseData); err != nil {
 		log.Fatalf("Error unmarshaling JSON: %v", err)
 	}
 
-	h.companyRepo.AddHubspot(context.Background(), ports.CrmAddHubspotCompanyQueryParams{Company: company, WorkspaceId: workspaceId, UserId: userId, RefreshToken: responseData["refresh_token"], AccessToken: responseData["access_token"]})
+	h.companyRepo.AddHubspot(context.Background(), ports.CrmAddHubspotCompanyQueryParams{Company: company, WorkspaceId: workspaceId, UserId: userId, RefreshToken: responseData["refresh_token"].(string), AccessToken: responseData["access_token"].(string)})
 
 	return nil, nil
 }
