@@ -12,22 +12,23 @@ import (
 )
 
 func RegisterCrmRoutes(s *server.FiberServer, a gateways.AuthServiceGateway, co *crm_company_repo.PgCrmCompanyRepository) {
+	noAuthRoutes := s.App.Group("/crm/v1")
+	noAuthRoutes.Use("/:crm/*", middlewares.ValidateCrmMiddleware(co))
+	noAuthRoutes.Post("/:crm/oauth_callback", func(c *fiber.Ctx) error {
+		return handlers.OAuthCallBackHandler(c, c.Locals("crm").(crm_exporter.Crm))
+	})
+
 	noCrmAuthRoutes := s.App.Group("/crm/v1")
 	noCrmAuthRoutes.Use(middlewares.AuthMiddleware(a))
 	noCrmAuthRoutes.Use("/:crm/*", middlewares.ValidateCrmMiddleware(co))
-
 	noCrmAuthRoutes.Post("/:crm/install", func(c *fiber.Ctx) error {
 		return handlers.InstallHandler(c, c.Locals("crm").(crm_exporter.Crm))
-	})
-	noCrmAuthRoutes.Post("/:crm/oauth_callback", func(c *fiber.Ctx) error {
-		return handlers.OAuthCallBackHandler(c, c.Locals("crm").(crm_exporter.Crm))
 	})
 
 	crmRoutes := s.App.Group("/crm/v1")
 	crmRoutes.Use(middlewares.AuthMiddleware(a))
 	crmRoutes.Use("/:crm/*", middlewares.ValidateCrmMiddleware(co))
 	crmRoutes.Use("/:crm/*", middlewares.AuthenticateCrmMiddleware())
-
 	crmRoutes.Get("/:crm/pipelines", func(c *fiber.Ctx) error {
 		return handlers.GetPipelinesHandler(c, c.Locals("crm").(crm_exporter.Crm), c.Locals("crmClient"))
 	})
@@ -37,5 +38,5 @@ func RegisterCrmRoutes(s *server.FiberServer, a gateways.AuthServiceGateway, co 
 	crmRoutes.Get("/:crm/owners", func(c *fiber.Ctx) error {
 		return handlers.GetOwnersHandler(c, c.Locals("crm").(crm_exporter.Crm), c.Locals("crmClient"))
 	})
-
 }
+
