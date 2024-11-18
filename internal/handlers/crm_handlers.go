@@ -1,24 +1,22 @@
 package handlers
 
 import (
+	"errors"
 	"export-service/internal/services/crm_exporter"
-	"time"
+	"net/url"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/session"
 )
-
-var store = session.New(session.Config{
-	CookieSecure:   true,           
-	CookieSameSite: "None",         
-	CookieHTTPOnly: true,          
-	Expiration:     24 * time.Hour, 
-})
-
 
 func InstallHandler(c *fiber.Ctx, crmService crm_exporter.Crm) error {
 	//hubspot doesnt require install data like a token (its oauth), other CRMs may require
-	response, err := crmService.Install(nil)
+	installData := map[string]any{
+		"workspace_id": c.Query("workspace_id"),
+		"user_id":      c.Query("user_id"),
+		"company":      c.Query("company"),
+	}
+	response, err := crmService.Install(installData)
 
 	status := fiber.StatusOK
 	returnBody := response
@@ -26,44 +24,32 @@ func InstallHandler(c *fiber.Ctx, crmService crm_exporter.Crm) error {
 		return err
 	}
 
-	sess, err := store.Get(c)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).SendString("Session error")
-	}
-	defer sess.Save()
-
-	sess.Set("workspace_id", c.Query("workspace_id"))
-	sess.Set("user_id", c.Query("user_id"))
-	sess.Set("company", c.Query("company"))
-
 	return c.Status(status).JSON(returnBody)
 }
 
 func OAuthCallBackHandler(c *fiber.Ctx, crmService crm_exporter.Crm) error {
-	sess, err := store.Get(c)
+	state := c.Query("state")
+	unescapedState, err := url.QueryUnescape(state)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).SendString("session error")
+		return err
 	}
-	defer sess.Save()
-
-	workspaceID := sess.Get("workspace_id")
-	userID := sess.Get("user_id")
-	company := sess.Get("company")
-
-	defer sess.Delete("workspace_id")
-	defer sess.Delete("user_id")
-	defer sess.Delete("company")
-
-	if workspaceID == nil || userID == nil || company == nil {
-		return c.Status(fiber.StatusBadRequest).SendString("necessary session data not found")
+	parts := strings.Split(unescapedState, "|")
+	if len(parts) != 3 {
+		return errors.New("invalid state parameters")
 	}
 
-	_ , err = crmService.OAuthCallback(c, workspaceID, userID, company)
+	workspaceID, userID, company := parts[0], parts[1], parts[2]
+
+	if workspaceID == "" || userID == "" || company == "" {
+		return errors.New("invalid state parameters")
+	}
+
+	_, err = crmService.OAuthCallback(c, workspaceID, userID, company)
 
 	status := fiber.StatusNoContent
 	if err != nil {
 		status = fiber.StatusInternalServerError
-		return c.Status(status).JSON(err);
+		return c.Status(status).JSON(err)
 	}
 
 	return c.SendStatus(status)

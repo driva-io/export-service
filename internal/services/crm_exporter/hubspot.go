@@ -548,8 +548,10 @@ func (h HubspotService) Install(installData any) (any, error) {
 	clientID := url.QueryEscape(os.Getenv("HUBSPOT_CLIENT_ID"))
 	scope := url.QueryEscape(os.Getenv("HUBSPOT_SCOPE"))
 	redirectURI := os.Getenv("HUBSPOT_REDIRECT_URI")
+	installDataMap := installData.(map[string]any)
+	state := fmt.Sprintf("%s|%s|%s", installDataMap["workspace_id"], installDataMap["user_id"], installDataMap["company"])
 
-	authURL := fmt.Sprintf("%s?client_id=%s&scope=%s&redirect_uri=%s", baseURL, clientID, scope, url.QueryEscape(redirectURI))
+	authURL := fmt.Sprintf("%s?client_id=%s&scope=%s&redirect_uri=%s&state=%s", baseURL, clientID, scope, url.QueryEscape(redirectURI), url.QueryEscape(state))
 
 	return map[string]string{"url": authURL}, nil
 }

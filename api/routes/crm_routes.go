@@ -39,4 +39,3 @@ func RegisterCrmRoutes(s *server.FiberServer, a gateways.AuthServiceGateway, co 
 		return handlers.GetOwnersHandler(c, c.Locals("crm").(crm_exporter.Crm), c.Locals("crmClient"))
 	})
 }
-

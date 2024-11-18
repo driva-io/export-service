@@ -16,8 +16,6 @@ func New() *FiberServer {
 	app := fiber.New(fiber.Config{
 		ServerHeader: "export-service",
 		AppName:      "export-service",
-		ProxyHeader: fiber.HeaderXForwardedFor,
-		EnableTrustedProxyCheck: true,
 	})
 	app.Use(apmfiber.Middleware())
 
