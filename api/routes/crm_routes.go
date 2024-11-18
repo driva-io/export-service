@@ -14,7 +14,7 @@ import (
 func RegisterCrmRoutes(s *server.FiberServer, a gateways.AuthServiceGateway, co *crm_company_repo.PgCrmCompanyRepository) {
 	noAuthRoutes := s.App.Group("/crm/v1")
 	noAuthRoutes.Use("/:crm/*", middlewares.ValidateCrmMiddleware(co))
-	noAuthRoutes.Post("/:crm/oauth_callback", func(c *fiber.Ctx) error {
+	noAuthRoutes.Get("/:crm/oauth_callback", func(c *fiber.Ctx) error {
 		return handlers.OAuthCallBackHandler(c, c.Locals("crm").(crm_exporter.Crm))
 	})
 
