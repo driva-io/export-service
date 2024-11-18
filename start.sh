@@ -1,6 +1,6 @@
 #!/bin/bash
 if [[ $DYNO == "web"* ]]; then
-  ./http 
+  ./bin/http 
 elif [[ $DYNO == "worker"* ]]; then
-  ./consumer 
+  ./bin/consumer 
 fi
