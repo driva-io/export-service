@@ -4,6 +4,7 @@ import (
 	"errors"
 	"export-service/internal/repositories/crm_company_repo"
 	"export-service/internal/services/crm_exporter"
+	"log"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -29,6 +30,8 @@ func AuthenticateCrmMiddleware() fiber.Handler {
 
 		companyName := c.Query("company")
 		crm := c.Locals("crm").(crm_exporter.Crm)
+
+		log.Printf("Authenticating CRM for company: %v", companyName)
 
 		crmClient, err := crm.Authorize(ctx, companyName)
 		if err != nil {

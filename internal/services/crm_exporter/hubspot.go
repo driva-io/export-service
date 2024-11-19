@@ -540,6 +540,8 @@ func (h HubspotService) Authorize(ctx context.Context, companyName string) (any,
 		RefreshToken: company.RefreshToken.String,
 	}))
 
+	log.Printf("Authenticated hubspot for company %s - workspaceId: %s", company.Name.String, company.WorkspaceId.String)
+
 	return client, nil
 }
 
