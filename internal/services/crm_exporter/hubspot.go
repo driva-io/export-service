@@ -544,6 +544,15 @@ func (h HubspotService) Authorize(ctx context.Context, companyName string) (any,
 
 	return client, nil
 }
+func (h HubspotService) Validate(c *fiber.Ctx, client any) (bool) {
+
+	_ , err := h.GetPipelines(client)
+	if err != nil {
+        return false
+    }
+
+	return true
+}
 
 func (h HubspotService) Install(installData any) (any, error) {
 	baseURL := "https://app.hubspot.com/oauth/authorize"

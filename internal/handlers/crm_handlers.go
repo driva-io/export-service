@@ -68,6 +68,18 @@ func GetPipelinesHandler(c *fiber.Ctx, crmService crm_exporter.Crm, client any) 
 	return c.Status(status).JSON(returnBody)
 }
 
+func ValidateHandler(c *fiber.Ctx, crmService crm_exporter.Crm, client any) error {
+
+	isValid := crmService.Validate(c, client)
+
+	status := fiber.StatusOK
+	returnBody := map[string]bool{
+		"valid": isValid,
+	}
+
+	return c.Status(status).JSON(returnBody)
+}
+
 func GetFieldsHandler(c *fiber.Ctx, crmService crm_exporter.Crm, client any) error {
 	fields, err := crmService.GetFields(client)
 

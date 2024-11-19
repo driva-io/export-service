@@ -32,6 +32,7 @@ type CreatedLead struct {
 
 type Crm interface {
 	Authorize(ctx context.Context, companyName string) (any, error)
+	Validate(c *fiber.Ctx, client any) (bool)
 	Install(installData any) (any, error)
 	OAuthCallback(c *fiber.Ctx, params ...any) (any, error)
 

@@ -38,4 +38,7 @@ func RegisterCrmRoutes(s *server.FiberServer, a gateways.AuthServiceGateway, co 
 	crmRoutes.Get("/:crm/owners", func(c *fiber.Ctx) error {
 		return handlers.GetOwnersHandler(c, c.Locals("crm").(crm_exporter.Crm), c.Locals("crmClient"))
 	})
+	crmRoutes.Get("/:crm/validate", func(c *fiber.Ctx) error {
+		return handlers.ValidateHandler(c, c.Locals("crm").(crm_exporter.Crm), c.Locals("crmClient"))
+	})
 }
