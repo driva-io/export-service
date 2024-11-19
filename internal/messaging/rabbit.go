@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"go.elastic.co/apm/module/apmhttp/v2"
 	"go.elastic.co/apm/v2"
+	"time"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 	"go.uber.org/zap"
@@ -56,7 +57,9 @@ func (c *RabbitClient) Consume(queue string) (<-chan amqp.Delivery, error) {
 		false, // exclusive
 		false, // no-local
 		false, // no-wait
-		nil,   // args
+		amqp.Table{
+			"x-priority": int(time.Now().Unix()),
+		}, // args
 	)
 }
 

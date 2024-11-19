@@ -55,6 +55,11 @@ func main() {
 			failOnError(err, "Failed to consume bus")
 
 			for d := range exportsBus {
+				if conn.IsClosed() {
+					conn, err = pgx.Connect(ctx, getPostgresConnStr())
+					failOnError(err, "Failed to connect to database")
+				}
+
 				handleExportRequest(d, conn, client)
 			}
 
