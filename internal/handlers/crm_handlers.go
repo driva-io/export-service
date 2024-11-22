@@ -98,7 +98,10 @@ func TestLeadHandler(c *fiber.Ctx, crmService crm_exporter.Crm, client any, p *p
 	result, err := crmService.SendLead(client, mappedLead, configs)
 
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(err)
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": err.Error(),
+			"lead": result,
+		})
 	}
 
 	return c.Status(fiber.StatusOK).JSON(result)

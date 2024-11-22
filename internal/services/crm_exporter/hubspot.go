@@ -188,7 +188,7 @@ func sendCompany(client *hubspot.Client, mappedCompanyData map[string]any, owner
 
 	companyEntityMap["hubspot_owner_id"] = ownerId
 
-	existingCompany, err := searchForExistingCompany(client, map[string]any{"cnpj": companyEntityMap["cnpj"]})
+	existingCompany, err := searchForExistingCompany(client, map[string]any{"name": companyEntityMap["razao_social"]})
 	if err != nil {
 		return ObjectStatus{}, err
 	}
