@@ -176,7 +176,7 @@ func searchForExistingContact(client *hubspot.Client, fields ...map[string]any) 
 	return res.(map[string]any)["results"].([]any)[0], nil
 }
 
-func sendCompany(client *hubspot.Client, mappedCompanyData map[string]any) (ObjectStatus, error) {
+func sendCompany(client *hubspot.Client, mappedCompanyData map[string]any, ownerId string) (ObjectStatus, error) {
 	companyEntity, exists := mappedCompanyData["entity"]
 	if !exists {
 		return ObjectStatus{}, errors.New("company entity not found in mapped company data")
@@ -186,7 +186,9 @@ func sendCompany(client *hubspot.Client, mappedCompanyData map[string]any) (Obje
 		return ObjectStatus{}, errors.New("company entity is not a map")
 	}
 
-	existingCompany, err := searchForExistingCompany(client, map[string]any{"cnpj_empresa": companyEntityMap["cnpj_empresa"]})
+	companyEntityMap["hubspot_owner_id"] = ownerId
+
+	existingCompany, err := searchForExistingCompany(client, map[string]any{"cnpj": companyEntityMap["cnpj"]})
 	if err != nil {
 		return ObjectStatus{}, err
 	}
@@ -201,6 +203,7 @@ func sendCompany(client *hubspot.Client, mappedCompanyData map[string]any) (Obje
 		}
 		status = Updated
 		company = updatedCompany
+		message = "Searched fields: cnpj"
 	} else {
 		createdCompany, err := client.CRM.Company.Create(companyEntityMap)
 		if err != nil {
@@ -217,7 +220,7 @@ func sendCompany(client *hubspot.Client, mappedCompanyData map[string]any) (Obje
 	}, nil
 }
 
-func sendDeal(client *hubspot.Client, mappedDealData map[string]any) (ObjectStatus, error) {
+func sendDeal(client *hubspot.Client, mappedDealData map[string]any, ownerId string, pipelineId string, stageId string) (ObjectStatus, error) {
 	dealEntity, exists := mappedDealData["entity"]
 	if !exists {
 		return ObjectStatus{}, errors.New("deal entity not found in mapped deal data")
@@ -226,6 +229,10 @@ func sendDeal(client *hubspot.Client, mappedDealData map[string]any) (ObjectStat
 	if !isMap {
 		return ObjectStatus{}, errors.New("deal entity is not a map")
 	}
+
+	dealEntityMap["pipeline"] = pipelineId
+	dealEntityMap["dealstage"] = stageId
+	dealEntityMap["hubspot_owner_id"] = ownerId
 
 	existingDeal, err := searchForExistingDeal(client, map[string]any{"dealname": dealEntityMap["dealname"]})
 	if err != nil {
@@ -242,6 +249,7 @@ func sendDeal(client *hubspot.Client, mappedDealData map[string]any) (ObjectStat
 		}
 		status = Updated
 		deal = updatedDeal
+		message = "Searched fields: dealname"
 	} else {
 		createdDeal, err := client.CRM.Deal.Create(dealEntityMap)
 		if err != nil {
@@ -258,7 +266,7 @@ func sendDeal(client *hubspot.Client, mappedDealData map[string]any) (ObjectStat
 	}, nil
 }
 
-func sendContact(client *hubspot.Client, mappedContactData map[string]any) (ObjectStatus, error) {
+func sendContact(client *hubspot.Client, mappedContactData map[string]any, ownerId string) (ObjectStatus, error) {
 	contactEntity, exists := mappedContactData["entity"]
 	if !exists {
 		return ObjectStatus{}, errors.New("contact entity not found in mapped contact data")
@@ -268,7 +276,9 @@ func sendContact(client *hubspot.Client, mappedContactData map[string]any) (Obje
 		return ObjectStatus{}, errors.New("contact entity is not a map")
 	}
 
-	existingContact, err := searchForExistingContact(client, map[string]any{"firstname": contactEntityMap["firstname"]})
+	contactEntityMap["hubspot_owner_id"] = ownerId
+
+	existingContact, err := searchForExistingContact(client, map[string]any{"email": contactEntityMap["email"]})
 	if err != nil {
 		return ObjectStatus{}, err
 	}
@@ -283,6 +293,7 @@ func sendContact(client *hubspot.Client, mappedContactData map[string]any) (Obje
 		}
 		status = Updated
 		contact = updatedContact
+		message = "Searched fields: email"
 	} else {
 		createdContact, err := client.CRM.Contact.Create(contactEntityMap)
 		if err != nil {
@@ -301,25 +312,25 @@ func sendContact(client *hubspot.Client, mappedContactData map[string]any) (Obje
 
 func createLeadAssociations(client *hubspot.Client, lead CreatedLead) error {
 
-	if lead.company != nil && lead.deal != nil {
-		_, err := client.CRM.Deal.AssociateAnotherObj(lead.deal.Id.(string), &hubspot.AssociationConfig{ToObject: hubspot.ObjectTypeCompany, ToObjectID: lead.company.Id.(string), Type: hubspot.AssociationTypeDealToCompany})
+	if lead.Company != nil && lead.Deal != nil {
+		_, err := client.CRM.Deal.AssociateAnotherObj(lead.Deal.Id.(string), &hubspot.AssociationConfig{ToObject: hubspot.ObjectTypeCompany, ToObjectID: lead.Company.Id.(string), Type: hubspot.AssociationTypeDealToCompany})
 		if err != nil {
 			return err
 		}
 	}
 
-	if lead.deal != nil && lead.contacts != nil {
-		for _, contact := range *lead.contacts {
-			_, err := client.CRM.Deal.AssociateAnotherObj(lead.deal.Id.(string), &hubspot.AssociationConfig{ToObject: hubspot.ObjectTypeContact, ToObjectID: contact.Id.(string), Type: hubspot.AssociationTypeDealToContact})
+	if lead.Deal != nil && lead.Contacts != nil {
+		for _, contact := range *lead.Contacts {
+			_, err := client.CRM.Deal.AssociateAnotherObj(lead.Deal.Id.(string), &hubspot.AssociationConfig{ToObject: hubspot.ObjectTypeContact, ToObjectID: contact.Id.(string), Type: hubspot.AssociationTypeDealToContact})
 			if err != nil {
 				return err
 			}
 		}
 	}
 
-	if lead.company != nil && lead.contacts != nil {
-		for _, contact := range *lead.contacts {
-			_, err := client.CRM.Company.AssociateAnotherObj(lead.company.Id.(string), &hubspot.AssociationConfig{ToObject: hubspot.ObjectTypeContact, ToObjectID: contact.Id.(string), Type: hubspot.AssociationTypeCompanyToContact})
+	if lead.Company != nil && lead.Contacts != nil {
+		for _, contact := range *lead.Contacts {
+			_, err := client.CRM.Company.AssociateAnotherObj(lead.Company.Id.(string), &hubspot.AssociationConfig{ToObject: hubspot.ObjectTypeContact, ToObjectID: contact.Id.(string), Type: hubspot.AssociationTypeCompanyToContact})
 			if err != nil {
 				return err
 			}
@@ -329,78 +340,100 @@ func createLeadAssociations(client *hubspot.Client, lead CreatedLead) error {
 	return nil
 }
 
-func (h HubspotService) SendLead(client any, mappedLead map[string]any) (CreatedLead, error) {
+func (h HubspotService) SendLead(client any, mappedLead map[string]any, configs map[string]any) (CreatedLead, error) {
+
+	ownerId, exists := configs["owner_id"].(string)
+	if !exists {
+		return CreatedLead{}, errors.New("owner_id config is required to send a hubspot lead")
+	}
+
+	stageId, exists := configs["stage_id"].(string)
+	if !exists {
+		return CreatedLead{}, errors.New("stage_id config is required to send a hubspot lead")
+	}
+
+	pipelineId, exists := configs["pipeline_id"].(string)
+	if !exists {
+		return CreatedLead{}, errors.New("pipeline_id config is required to send a hubspot lead")
+	}
+
+	createDeal := configs["create_deal"].(bool)
+
 	husbpotClient := client.(*hubspot.Client)
 	lead := CreatedLead{
-		company:  nil,
-		contacts: nil,
-		deal:     nil,
-		other:    nil,
+		Company:  nil,
+		Contacts: nil,
+		Deal:     nil,
+		Other:    nil,
 	}
 
 	company, exists := mappedLead["company"]
 	if exists {
 		companyData, isMap := company.(map[string]any)
 		if !isMap {
-			return CreatedLead{}, errors.New("invalid company data to send crm. must be a map")
+			return lead, errors.New("invalid company data to send crm. must be a map")
 		}
-		sentCompany, err := sendCompany(husbpotClient, companyData)
+		sentCompany, err := sendCompany(husbpotClient, companyData, ownerId)
 		if err != nil {
-			return CreatedLead{}, err
+			return lead, err
 		}
-		lead.company = &sentCompany
+		lead.Company = &sentCompany
 	}
 
 	deal, exists := mappedLead["deal"]
-	if exists {
+	if exists && createDeal {
 		dealData, isMap := deal.(map[string]any)
 		if !isMap {
-			return CreatedLead{}, errors.New("invalid deal data to send to crm. must be a map")
+			return lead, errors.New("invalid deal data to send to crm. must be a map")
 		}
-		sentDeal, err := sendDeal(husbpotClient, dealData)
+		sentDeal, err := sendDeal(husbpotClient, dealData, ownerId, pipelineId, stageId)
 		if err != nil {
-			return CreatedLead{}, err
+			return lead, err
 		}
-		lead.deal = &sentDeal
+		lead.Deal = &sentDeal
 	}
 
 	contact, exists := mappedLead["contact"]
 	if exists {
 		contactData, isMap := contact.(map[string]any)
 		if !isMap {
-			return CreatedLead{}, errors.New("invalid contact data to send to crm. must be a map")
+			return lead, errors.New("invalid contact data to send to crm. must be a map")
 		}
-		sentContact, err := sendContact(husbpotClient, contactData)
+		sentContact, err := sendContact(husbpotClient, contactData, ownerId)
 		if err != nil {
-			return CreatedLead{}, err
+			return lead, err
 		}
-		if lead.contacts == nil {
-			lead.contacts = &[]ObjectStatus{}
+		if lead.Contacts == nil {
+			lead.Contacts = &[]ObjectStatus{}
 		}
-		*lead.contacts = append(*lead.contacts, sentContact)
+		*lead.Contacts = append(*lead.Contacts, sentContact)
 	}
 
 	contacts, exists := mappedLead["contacts"]
 	if exists {
-		contactsData, isArray := contacts.([]map[string]any)
+		contactsData, isArray := contacts.([]any)
 		if !isArray {
-			return CreatedLead{}, errors.New("invalid contacts data to send to crm. must be an array of maps")
+			return lead, errors.New("invalid contacts data to send to crm. must be an array of maps")
 		}
 		for _, contact := range contactsData {
-			sentContact, err := sendContact(husbpotClient, contact)
+			mapContact, isMap := contact.(map[string]any)
+			if !isMap {
+                return lead, errors.New("invalid contact data in contacts to send to crm. must be a map")
+            }
+			sentContact, err := sendContact(husbpotClient, mapContact, ownerId)
 			if err != nil {
-				return CreatedLead{}, err
+				return lead, err
 			}
-			if lead.contacts == nil {
-				lead.contacts = &[]ObjectStatus{}
+			if lead.Contacts == nil {
+				lead.Contacts = &[]ObjectStatus{}
 			}
-			*lead.contacts = append(*lead.contacts, sentContact)
+			*lead.Contacts = append(*lead.Contacts, sentContact)
 		}
 	}
 
 	err := createLeadAssociations(husbpotClient, lead)
 	if err != nil {
-		return CreatedLead{}, err
+		return lead, err
 	}
 
 	return lead, nil
@@ -544,12 +577,12 @@ func (h HubspotService) Authorize(ctx context.Context, companyName string) (any,
 
 	return client, nil
 }
-func (h HubspotService) Validate(c *fiber.Ctx, client any) (bool) {
+func (h HubspotService) Validate(c *fiber.Ctx, client any) bool {
 
-	_ , err := h.GetPipelines(client)
+	_, err := h.GetPipelines(client)
 	if err != nil {
-        return false
-    }
+		return false
+	}
 
 	return true
 }

@@ -32,7 +32,7 @@ func main() {
 
 	routes.RegisterServerRoutes(server, auth)
 	routes.RegisterPresentationSpecRoutes(server, presentationSpecRepo, auth)
-	routes.RegisterCrmRoutes(server, auth, crmCompanyRepo)
+	routes.RegisterCrmRoutes(server, auth, crmCompanyRepo, presentationSpecRepo)
 
 	port, _ := strconv.Atoi(os.Getenv("PORT"))
 	err = server.Listen(fmt.Sprintf(":%d", port))

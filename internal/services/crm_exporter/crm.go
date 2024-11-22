@@ -18,25 +18,25 @@ const (
 )
 
 type ObjectStatus struct {
-	Id      any
-	Status  Status
-	Message string
+	Id      any    `json:"id"`
+	Status  Status `json:"status"`
+	Message string `json:"message,omitempty"`
 }
 
 type CreatedLead struct {
-	company  *ObjectStatus
-	deal     *ObjectStatus
-	contacts *[]ObjectStatus
-	other    *[]ObjectStatus
+	Company  *ObjectStatus   `json:"company"`
+	Deal     *ObjectStatus   `json:"deal"`
+	Contacts *[]ObjectStatus `json:"contacts"`
+	Other    *[]ObjectStatus `json:"other"`
 }
 
 type Crm interface {
 	Authorize(ctx context.Context, companyName string) (any, error)
-	Validate(c *fiber.Ctx, client any) (bool)
+	Validate(c *fiber.Ctx, client any) bool
 	Install(installData any) (any, error)
 	OAuthCallback(c *fiber.Ctx, params ...any) (any, error)
 
-	SendLead(client any, mappedStorageData map[string]any) (CreatedLead, error)
+	SendLead(client any, mappedStorageData map[string]any, configs map[string]any) (CreatedLead, error)
 	GetPipelines(client any) ([]Pipeline, error)
 	GetFields(client any) (CrmFields, error)
 	GetOwners(client any) ([]Owner, error)
