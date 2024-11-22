@@ -34,9 +34,7 @@ func TestSendLead(t *testing.T) {
 		},
 		"deal": map[string]any{
 			"entity": map[string]any{
-				"dealname":  "deal teste",
-				"pipeline":  "default",
-				"dealstage": "appointmentscheduled",
+				"dealname": "deal teste",
 			},
 		},
 		"contacts": []map[string]any{
@@ -64,9 +62,15 @@ func TestSendLead(t *testing.T) {
 
 	t.Run("Should send lead", func(t *testing.T) {
 		t.Skip("Skipping hubspot prod test")
-		result, err := hubspotService.SendLead(client, lead)
+		configs := map[string]any{
+			"owner_id":    "718806932",
+			"pipeline_id": "default",
+			"stage_id":    "appointmentscheduled",
+			"create_deal": true,
+		}
+		result, err := hubspotService.SendLead(client, lead, configs)
 
-		println(result.company)
+		println(result.Company)
 		require.NoError(t, err)
 	})
 }

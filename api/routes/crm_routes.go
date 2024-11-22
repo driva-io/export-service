@@ -5,13 +5,14 @@ import (
 	"export-service/internal/gateways"
 	"export-service/internal/handlers"
 	"export-service/internal/repositories/crm_company_repo"
+	"export-service/internal/repositories/presentation_spec_repo"
 	"export-service/internal/server"
 	"export-service/internal/services/crm_exporter"
 
 	"github.com/gofiber/fiber/v2"
 )
 
-func RegisterCrmRoutes(s *server.FiberServer, a gateways.AuthServiceGateway, co *crm_company_repo.PgCrmCompanyRepository) {
+func RegisterCrmRoutes(s *server.FiberServer, a gateways.AuthServiceGateway, co *crm_company_repo.PgCrmCompanyRepository, p *presentation_spec_repo.PgPresentationSpecRepository) {
 	noAuthRoutes := s.App.Group("/crm/v1")
 	noAuthRoutes.Use("/:crm/*", middlewares.ValidateCrmMiddleware(co))
 	noAuthRoutes.Get("/:crm/oauth_callback", func(c *fiber.Ctx) error {
@@ -40,5 +41,8 @@ func RegisterCrmRoutes(s *server.FiberServer, a gateways.AuthServiceGateway, co 
 	})
 	crmRoutes.Get("/:crm/validate", func(c *fiber.Ctx) error {
 		return handlers.ValidateHandler(c, c.Locals("crm").(crm_exporter.Crm), c.Locals("crmClient"))
+	})
+	crmRoutes.Post("/:crm/test-lead", func(c *fiber.Ctx) error {
+		return handlers.TestLeadHandler(c, c.Locals("crm").(crm_exporter.Crm), c.Locals("crmClient"), p)
 	})
 }

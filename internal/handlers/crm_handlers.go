@@ -1,8 +1,12 @@
 package handlers
 
 import (
+	"context"
 	"errors"
+	"export-service/internal/core/ports"
+	"export-service/internal/repositories/presentation_spec_repo"
 	"export-service/internal/services/crm_exporter"
+	"export-service/internal/services/data_presenter"
 	"net/url"
 	"strings"
 
@@ -66,6 +70,38 @@ func GetPipelinesHandler(c *fiber.Ctx, crmService crm_exporter.Crm, client any) 
 	}
 
 	return c.Status(status).JSON(returnBody)
+}
+
+func TestLeadHandler(c *fiber.Ctx, crmService crm_exporter.Crm, client any, p *presentation_spec_repo.PgPresentationSpecRepository) error {
+	getSpecParms := ports.PresentationSpecQueryParams{
+		UserEmail:   c.Query("user_email"),
+        UserCompany: c.Query("company"),
+        Service:     "crm_" + c.Params("crm"),
+        DataSource:  c.Query("base"),
+	}
+	
+	var configs map[string]any
+	if err := c.BodyParser(&configs); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(ports.NewInvalidBodyError())
+	}
+
+	spec, err := p.Get(context.Background(), getSpecParms)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(err)
+	}
+
+	mappedLead, err := data_presenter.PresentSingle(crm_exporter.DrivaTestLead, spec.Spec)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(err)
+	}
+
+	result, err := crmService.SendLead(client, mappedLead, configs)
+
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(err)
+	}
+
+	return c.Status(fiber.StatusOK).JSON(result)
 }
 
 func ValidateHandler(c *fiber.Ctx, crmService crm_exporter.Crm, client any) error {
