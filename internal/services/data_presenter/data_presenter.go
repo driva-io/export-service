@@ -142,6 +142,16 @@ func PresentSingle(data map[string]any, spec domain.PresentationSpecSpec) (map[s
 		if err != nil {
 			return nil, err
 		}
+
+		if tabResult == nil {
+			continue
+		}
+
+		arrayResult, isArray := tabResult.([]any)
+		if isArray && len(arrayResult) == 0 {
+			continue
+		}
+
 		result[key] = tabResult
 	}
 	return result, nil

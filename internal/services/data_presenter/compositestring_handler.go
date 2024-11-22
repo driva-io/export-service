@@ -1,6 +1,9 @@
 package data_presenter
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+)
 
 func handleCompositeString(source map[string]any, location any) (any, error) {
 	mapLocation, isMap := location.(map[string]any)
@@ -16,13 +19,10 @@ func handleCompositeString(source map[string]any, location any) (any, error) {
 			return nil, err
 		}
 
-		stringResult, isString := result.(string)
-		if !isString && result != nil {
-			return nil, errors.New("all $compositestring key's results must be a string")
-		}
+		resultStr := fmt.Sprintf("%v", result)
 
 		if result != nil {
-			fullResult = fullResult + key + ": " + stringResult + "\n"
+			fullResult = fullResult + key + ": " + resultStr + "\n"
 		}
 	}
 

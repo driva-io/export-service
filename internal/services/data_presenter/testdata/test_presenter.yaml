@@ -259,22 +259,53 @@
         $compositestring: 
           VALOR1: razao_social
           VALOR2: nome_fantasia
+          VALOR3: capital_social
   
   expected: 
     Tab1:
-      testeCompositeString: "VALOR1: RAZAO SOCIAL\nVALOR2: NOME FANTASIA\n"
+      testeCompositeString: "VALOR1: RAZAO SOCIAL\nVALOR2: NOME FANTASIA\nVALOR3: 110000\n"
 
 - name: Test $flat
   spec:
     Tab1:
       testeFlat:
         $flat:
+          - $for: 
+              $prop: instagram
+              $format:
+                url: url
+                cnpj: super$.cnpj
+          - $for: 
+              $prop: telefones
+              $format:
+                tc: telefone_completo
+                cnpj: super$.cnpj
+              $filter:
+                fixo_movel: "FIXO"
+                whatsapp: true
+
+  expected:
+    Tab1:
+      testeFlat: 
+        - url: "instagram.com/instagram1"
+          cnpj: 1111.0
+        - url: "instagram.com/instagram2"
+          cnpj: 1111.0
+        - tc: "99 944444444"
+          cnpj: 1111.0
+
+
+- name: Test $flat obj
+  spec:
+    Tab1:
+      testeFlatObj:
+        $flat:
           - instagram
           - facebook
 
   expected:
     Tab1:
-      testeFlat: 
+      testeFlatObj: 
         - url: "instagram.com/instagram1"
         - url: "instagram.com/instagram2"
         - url: "facebook.com/facebook1"
