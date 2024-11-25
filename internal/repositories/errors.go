@@ -19,6 +19,11 @@ type CompanyNotFoundError struct {
 	//Aditional fields
 }
 
+type SolicitationNotFoundError struct {
+	RFC7807Error
+	//Aditional fields
+}
+
 type CompanyNotUniqueError struct {
 	RFC7807Error
 	//Aditional fields
@@ -67,6 +72,16 @@ func NewCompanyNotFoundError() CompanyNotFoundError {
 			Type:   "CompanyNotFoundError",
 			Title:  "Company Not Found",
 			Detail: "The requested company could not be found.",
+		},
+	}
+}
+
+func NewSolicitationNotFoundError() SolicitationNotFoundError {
+	return SolicitationNotFoundError{
+		RFC7807Error: RFC7807Error{
+			Type:   "SolicitationNotFoundError",
+			Title:  "Solicitation Not Found",
+			Detail: "The requested solicitation could not be found.",
 		},
 	}
 }

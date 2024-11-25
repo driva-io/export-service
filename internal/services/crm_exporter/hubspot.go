@@ -188,7 +188,7 @@ func sendCompany(client *hubspot.Client, mappedCompanyData map[string]any, owner
 
 	companyEntityMap["hubspot_owner_id"] = ownerId
 
-	existingCompany, err := searchForExistingCompany(client, map[string]any{"name": companyEntityMap["razao_social"]})
+	existingCompany, err := searchForExistingCompany(client, map[string]any{"name": companyEntityMap["name"]})
 	if err != nil {
 		return ObjectStatus{}, err
 	}
@@ -413,21 +413,23 @@ func (h HubspotService) SendLead(client any, mappedLead map[string]any, configs 
 	if exists {
 		contactsData, isArray := contacts.([]any)
 		if !isArray {
-			return lead, errors.New("invalid contacts data to send to crm. must be an array of maps")
+			return lead, errors.New("invalid contacts data to send to crm. must be an array")
 		}
-		for _, contact := range contactsData {
-			mapContact, isMap := contact.(map[string]any)
-			if !isMap {
-                return lead, errors.New("invalid contact data in contacts to send to crm. must be a map")
-            }
-			sentContact, err := sendContact(husbpotClient, mapContact, ownerId)
-			if err != nil {
-				return lead, err
+		if len(contactsData) != 0 {
+			for _, contact := range contactsData {
+				mapContact, isMap := contact.(map[string]any)
+				if !isMap {
+					return lead, errors.New("every contact in contacts must be a map")
+				}
+				sentContact, err := sendContact(husbpotClient, mapContact, ownerId)
+				if err != nil {
+					return lead, err
+				}
+				if lead.Contacts == nil {
+					lead.Contacts = &[]ObjectStatus{}
+				}
+				*lead.Contacts = append(*lead.Contacts, sentContact)
 			}
-			if lead.Contacts == nil {
-				lead.Contacts = &[]ObjectStatus{}
-			}
-			*lead.Contacts = append(*lead.Contacts, sentContact)
 		}
 	}
 

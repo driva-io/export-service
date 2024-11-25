@@ -1,6 +1,9 @@
 package data_presenter
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+)
 
 func handleCnpj(source map[string]any, location any) (any, error) {
 
@@ -14,17 +17,17 @@ func handleCnpj(source map[string]any, location any) (any, error) {
 		return nil, nil
 	}
 
-	result, err = handleString(source, location)
-
-	if err != nil {
-		return nil, err
+	var stringResult string
+	switch v := result.(type) {
+	case string:
+		stringResult = v
+	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64, float32, float64:
+		stringResult = fmt.Sprintf("%v", v)
+	default:
+		return nil, errors.New("all $compositestring key's results must be stringifiable")
 	}
 
-	if result == nil {
-		return nil, nil
-	}
-
-	paddedCnpj := fmt.Sprintf("%014s", result)
+	paddedCnpj := fmt.Sprintf("%014s", stringResult)
 
 	return fmt.Sprintf("%s.%s.%s/%s-%s",
 		paddedCnpj[0:2],
