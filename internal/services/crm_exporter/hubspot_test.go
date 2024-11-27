@@ -4,11 +4,12 @@ import (
 	"context"
 	"export-service/internal/repositories/crm_company_repo"
 	"fmt"
+	"log"
 	"net/url"
 	"os"
 	"testing"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
@@ -54,7 +55,16 @@ func TestSendLead(t *testing.T) {
 	}
 
 	logger := zap.NewExample()
-	conn, _ := pgx.Connect(ctx, getPostgresConnStr())
+	config, err := pgxpool.ParseConfig(getPostgresConnStr())
+	if err != nil {
+		log.Fatalf("Unable to parse connection string: %v", err)
+	}
+
+	conn, err := pgxpool.NewWithConfig(ctx, config)
+	if err != nil {
+		log.Fatalf("Unable to create connection pool: %v", err)
+	}
+	defer conn.Close()
 
 	crmCompanyRepo := crm_company_repo.NewPgCrmCompanyRepository(conn, logger)
 	hubspotService := NewHubspotService(crmCompanyRepo)

@@ -7,15 +7,16 @@ import (
 	"export-service/internal/repositories"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"go.uber.org/zap"
 )
 
 type PgCrmCompanyRepository struct {
-	conn   *pgx.Conn
+	conn   *pgxpool.Pool
 	logger *zap.Logger
 }
 
-func NewPgCrmCompanyRepository(conn *pgx.Conn, logger *zap.Logger) *PgCrmCompanyRepository {
+func NewPgCrmCompanyRepository(conn *pgxpool.Pool, logger *zap.Logger) *PgCrmCompanyRepository {
 	return &PgCrmCompanyRepository{
 		conn:   conn,
 		logger: logger.Named("PgCrmCompanyRepository"),
