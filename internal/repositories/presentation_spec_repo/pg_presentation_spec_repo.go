@@ -44,6 +44,7 @@ func (r *PgPresentationSpecRepository) Get(ctx context.Context, params ports.Pre
 
 		return domain.PresentationSpec{}, err
 	}
+	defer rows.Close()
 	return spec, nil
 }
 
@@ -63,6 +64,7 @@ func (r *PgPresentationSpecRepository) GetById(ctx context.Context, id string) (
 
 		return domain.PresentationSpec{}, err
 	}
+	defer rows.Close()
 	return spec, nil
 }
 

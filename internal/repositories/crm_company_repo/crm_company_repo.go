@@ -42,6 +42,7 @@ func (r *PgCrmCompanyRepository) Get(ctx context.Context, params ports.CrmCompan
 
 		return Company{}, err
 	}
+	defer rows.Close()
 	return company, nil
 }
 
@@ -58,6 +59,7 @@ func (r *PgCrmCompanyRepository) AddHubspot(ctx context.Context, params ports.Cr
 	if err != nil {
 		return Company{}, err
 	}
+	defer rows.Close()
 	return company, nil
 }
 
