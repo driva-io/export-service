@@ -2,6 +2,7 @@ package middlewares
 
 import (
 	"export-service/internal/gateways"
+	"os"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
@@ -33,6 +34,23 @@ func AuthMiddleware(g gateways.AuthServiceGateway) fiber.Handler {
 		}
 
 		c.Locals("user", user)
+		return c.Next()
+	}
+}
+
+func TokenMiddleware() fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		token := c.Get("X-API-KEY")
+		if token == "" {
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+				"error": "Missing X-API-KEY header",
+			})
+		}
+		if token != os.Getenv("API_KEY") {
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+				"error": "Invalid X-API-KEY header",
+			})
+		}
 		return c.Next()
 	}
 }
