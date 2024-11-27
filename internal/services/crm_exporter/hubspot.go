@@ -179,18 +179,27 @@ func searchForExistingContact(client *hubspot.Client, fields ...map[string]any) 
 func sendCompany(client *hubspot.Client, mappedCompanyData map[string]any, ownerId string) (ObjectStatus, error) {
 	companyEntity, exists := mappedCompanyData["entity"]
 	if !exists {
-		return ObjectStatus{}, errors.New("company entity not found in mapped company data")
+		return ObjectStatus{
+            Status:  Failed,
+            Message: "company entity not found in mapped company data",
+		}, errors.New("company entity not found in mapped company data")
 	}
 	companyEntityMap, isMap := companyEntity.(map[string]any)
 	if !isMap {
-		return ObjectStatus{}, errors.New("company entity is not a map")
+		return ObjectStatus{
+			Status:  Failed,
+            Message: "company entity is not a map",
+		}, errors.New("company entity is not a map")
 	}
 
 	companyEntityMap["hubspot_owner_id"] = ownerId
 
 	existingCompany, err := searchForExistingCompany(client, map[string]any{"name": companyEntityMap["name"]})
 	if err != nil {
-		return ObjectStatus{}, err
+		return ObjectStatus{
+			Status:  Failed,
+            Message: err.Error(),
+		}, err
 	}
 
 	var company *hubspot.ResponseResource
@@ -199,7 +208,10 @@ func sendCompany(client *hubspot.Client, mappedCompanyData map[string]any, owner
 	if existingCompany != nil {
 		updatedCompany, err := client.CRM.Company.Update(existingCompany.(map[string]any)["id"].(string), companyEntityMap)
 		if err != nil {
-			return ObjectStatus{}, err
+			return ObjectStatus{
+				Status:  Failed,
+                Message: err.Error(),
+			}, err
 		}
 		status = Updated
 		company = updatedCompany
@@ -207,7 +219,10 @@ func sendCompany(client *hubspot.Client, mappedCompanyData map[string]any, owner
 	} else {
 		createdCompany, err := client.CRM.Company.Create(companyEntityMap)
 		if err != nil {
-			return ObjectStatus{}, err
+			return ObjectStatus{
+				Status:  Failed,
+                Message: err.Error(),
+			}, err
 		}
 		status = Created
 		company = createdCompany
@@ -223,11 +238,17 @@ func sendCompany(client *hubspot.Client, mappedCompanyData map[string]any, owner
 func sendDeal(client *hubspot.Client, mappedDealData map[string]any, ownerId string, pipelineId string, stageId string) (ObjectStatus, error) {
 	dealEntity, exists := mappedDealData["entity"]
 	if !exists {
-		return ObjectStatus{}, errors.New("deal entity not found in mapped deal data")
+		return ObjectStatus{
+			Status: Failed,
+			Message: "deal entity not found in mapped deal data",
+		}, errors.New("deal entity not found in mapped deal data")
 	}
 	dealEntityMap, isMap := dealEntity.(map[string]any)
 	if !isMap {
-		return ObjectStatus{}, errors.New("deal entity is not a map")
+		return ObjectStatus{
+			Status: Failed,
+			Message: "deal entity is not a map",
+		}, errors.New("deal entity is not a map")
 	}
 
 	dealEntityMap["pipeline"] = pipelineId
@@ -236,7 +257,10 @@ func sendDeal(client *hubspot.Client, mappedDealData map[string]any, ownerId str
 
 	existingDeal, err := searchForExistingDeal(client, map[string]any{"dealname": dealEntityMap["dealname"]})
 	if err != nil {
-		return ObjectStatus{}, err
+		return ObjectStatus{
+			Status:  Failed,
+			Message: err.Error(),
+		}, err
 	}
 
 	var deal *hubspot.ResponseResource
@@ -245,7 +269,10 @@ func sendDeal(client *hubspot.Client, mappedDealData map[string]any, ownerId str
 	if existingDeal != nil {
 		updatedDeal, err := client.CRM.Deal.Update(existingDeal.(map[string]any)["id"].(string), dealEntityMap)
 		if err != nil {
-			return ObjectStatus{}, err
+			return ObjectStatus{
+				Status:  Failed,
+				Message: err.Error(),
+			}, err
 		}
 		status = Updated
 		deal = updatedDeal
@@ -253,7 +280,10 @@ func sendDeal(client *hubspot.Client, mappedDealData map[string]any, ownerId str
 	} else {
 		createdDeal, err := client.CRM.Deal.Create(dealEntityMap)
 		if err != nil {
-			return ObjectStatus{}, err
+			return ObjectStatus{
+				Status:  Failed,
+				Message: err.Error(),
+			}, err
 		}
 		status = Created
 		deal = createdDeal
@@ -269,18 +299,27 @@ func sendDeal(client *hubspot.Client, mappedDealData map[string]any, ownerId str
 func sendContact(client *hubspot.Client, mappedContactData map[string]any, ownerId string) (ObjectStatus, error) {
 	contactEntity, exists := mappedContactData["entity"]
 	if !exists {
-		return ObjectStatus{}, errors.New("contact entity not found in mapped contact data")
+		return ObjectStatus{
+			Status: Failed,
+            Message: "contact entity not found in mapped contact data",
+		}, errors.New("contact entity not found in mapped contact data")
 	}
 	contactEntityMap, isMap := contactEntity.(map[string]any)
 	if !isMap {
-		return ObjectStatus{}, errors.New("contact entity is not a map")
+		return ObjectStatus{
+			Status: Failed,
+            Message: "contact entity is not a map",
+		}, errors.New("contact entity is not a map")
 	}
 
 	contactEntityMap["hubspot_owner_id"] = ownerId
 
 	existingContact, err := searchForExistingContact(client, map[string]any{"email": contactEntityMap["email"]})
 	if err != nil {
-		return ObjectStatus{}, err
+		return ObjectStatus{
+			Status:  Failed,
+            Message: err.Error(),
+		}, err
 	}
 
 	var contact *hubspot.ResponseResource
@@ -289,7 +328,10 @@ func sendContact(client *hubspot.Client, mappedContactData map[string]any, owner
 	if existingContact != nil {
 		updatedContact, err := client.CRM.Contact.Update(existingContact.(map[string]any)["id"].(string), contactEntityMap)
 		if err != nil {
-			return ObjectStatus{}, err
+			return ObjectStatus{
+				Status:  Failed,
+                Message: err.Error(),
+			}, err
 		}
 		status = Updated
 		contact = updatedContact
@@ -297,7 +339,10 @@ func sendContact(client *hubspot.Client, mappedContactData map[string]any, owner
 	} else {
 		createdContact, err := client.CRM.Contact.Create(contactEntityMap)
 		if err != nil {
-			return ObjectStatus{}, err
+			return ObjectStatus{
+				Status:  Failed,
+                Message: err.Error(),
+			}, err
 		}
 		status = Created
 		contact = createdContact
@@ -374,10 +419,10 @@ func (h HubspotService) SendLead(client any, mappedLead map[string]any, configs 
 			return lead, errors.New("invalid company data to send crm. must be a map")
 		}
 		sentCompany, err := sendCompany(husbpotClient, companyData, ownerId)
+		lead.Company = &sentCompany
 		if err != nil {
 			return lead, err
 		}
-		lead.Company = &sentCompany
 	}
 
 	deal, exists := mappedLead["deal"]
@@ -387,10 +432,10 @@ func (h HubspotService) SendLead(client any, mappedLead map[string]any, configs 
 			return lead, errors.New("invalid deal data to send to crm. must be a map")
 		}
 		sentDeal, err := sendDeal(husbpotClient, dealData, ownerId, pipelineId, stageId)
+		lead.Deal = &sentDeal
 		if err != nil {
 			return lead, err
 		}
-		lead.Deal = &sentDeal
 	}
 
 	contact, exists := mappedLead["contact"]
@@ -400,13 +445,13 @@ func (h HubspotService) SendLead(client any, mappedLead map[string]any, configs 
 			return lead, errors.New("invalid contact data to send to crm. must be a map")
 		}
 		sentContact, err := sendContact(husbpotClient, contactData, ownerId)
-		if err != nil {
-			return lead, err
-		}
 		if lead.Contacts == nil {
 			lead.Contacts = &[]ObjectStatus{}
 		}
 		*lead.Contacts = append(*lead.Contacts, sentContact)
+		if err != nil {
+			return lead, err
+		}
 	}
 
 	contacts, exists := mappedLead["contacts"]
@@ -582,11 +627,7 @@ func (h HubspotService) Authorize(ctx context.Context, companyName string) (any,
 func (h HubspotService) Validate(c *fiber.Ctx, client any) bool {
 
 	_, err := h.GetPipelines(client)
-	if err != nil {
-		return false
-	}
-
-	return true
+	return err == nil
 }
 
 func (h HubspotService) Install(installData any) (any, error) {
