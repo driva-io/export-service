@@ -3,9 +3,10 @@ package messaging
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"go.elastic.co/apm/module/apmhttp/v2"
 	"go.elastic.co/apm/v2"
-	"time"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 	"go.uber.org/zap"
@@ -30,13 +31,15 @@ func NewRabbitMQClient(conn *amqp.Connection, logger *zap.Logger) *RabbitClient 
 	}
 }
 
-func (c *RabbitClient) CreateQueue(name string, useDLX bool) error {
+func (c *RabbitClient) CreateQueue(name string, dlxName *string, routingKey *string) error {
 	if name == "" {
 		return fmt.Errorf("queue name cannot be empty")
 	}
 	args := amqp.Table{}
-	if useDLX {
-		args = amqp.Table{"x-dead-letter-exchange": "exports-dlx"}
+	if dlxName != nil && routingKey != nil {
+		args = amqp.Table{"x-dead-letter-exchange": *dlxName,
+			"x-dead-letter-routing-key": *routingKey,
+		}
 	}
 	_, err := c.ch.QueueDeclare(
 		name,

@@ -24,5 +24,5 @@ func handleFlat(source map[string]any, location any) (any, error) {
 		return flatMap(allResults), nil
 	}
 
-	return nil, nil
+	return []any{}, nil
 }

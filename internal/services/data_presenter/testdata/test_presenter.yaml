@@ -273,13 +273,15 @@
           - $for: 
               $prop: instagram
               $format:
-                url: url
-                cnpj: super$.cnpj
+                entity: 
+                  url: url
+                  cnpj: super$.cnpj
           - $for: 
               $prop: telefones
               $format:
-                tc: telefone_completo
-                cnpj: super$.cnpj
+                entity:
+                  tc: telefone_completo
+                  cnpj: super$.cnpj
               $filter:
                 fixo_movel: "FIXO"
                 whatsapp: true
@@ -287,12 +289,15 @@
   expected:
     Tab1:
       testeFlat: 
-        - url: "instagram.com/instagram1"
-          cnpj: 1111.0
-        - url: "instagram.com/instagram2"
-          cnpj: 1111.0
-        - tc: "99 944444444"
-          cnpj: 1111.0
+        - entity:
+            url: "instagram.com/instagram1"
+            cnpj: 1111.0
+        - entity:
+            url: "instagram.com/instagram2"
+            cnpj: 1111.0
+        - entity:
+            tc: "99 944444444"
+            cnpj: 1111.0
 
 
 - name: Test $flat obj

@@ -9,7 +9,6 @@ import (
 
 type Status string
 
-// Define constants representing the enum values
 const (
 	Updated Status = "updated"
 	Created Status = "created"
@@ -18,16 +17,17 @@ const (
 )
 
 type ObjectStatus struct {
-	Id      any    `json:"id"`
-	Status  Status `json:"status"`
-	Message string `json:"message,omitempty"`
+	CrmId          any     `json:"crm_id"`
+	Status         Status  `json:"status"`
+	Message        string  `json:"message,omitempty"`
+	DrivaContactId *string `json:"driva_contact_id,omitempty"`
 }
 
 type CreatedLead struct {
-	Company  *ObjectStatus   `json:"company"`
-	Deal     *ObjectStatus   `json:"deal"`
-	Contacts *[]ObjectStatus `json:"contacts"`
-	Other    *[]ObjectStatus `json:"other"`
+	Company  *ObjectStatus   `json:"company,omitempty"`
+	Deal     *ObjectStatus   `json:"deal,omitempty"`
+	Contacts *[]ObjectStatus `json:"contacts,omitempty"`
+	Other    *[]ObjectStatus `json:"other,omitempty"`
 }
 
 type Crm interface {
@@ -36,7 +36,7 @@ type Crm interface {
 	Install(installData any) (any, error)
 	OAuthCallback(c *fiber.Ctx, params ...any) (any, error)
 
-	SendLead(client any, mappedStorageData map[string]any, configs map[string]any) (CreatedLead, error)
+	SendLead(client any, mappedStorageData map[string]any, correspondingRawData map[string]any, configs map[string]any, existingLead map[string]map[string]any) (CreatedLead, error)
 	GetPipelines(client any) ([]Pipeline, error)
 	GetFields(client any) (CrmFields, error)
 	GetOwners(client any) ([]Owner, error)

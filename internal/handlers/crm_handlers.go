@@ -75,11 +75,11 @@ func GetPipelinesHandler(c *fiber.Ctx, crmService crm_exporter.Crm, client any) 
 func TestLeadHandler(c *fiber.Ctx, crmService crm_exporter.Crm, client any, p *presentation_spec_repo.PgPresentationSpecRepository) error {
 	getSpecParms := ports.PresentationSpecQueryParams{
 		UserEmail:   c.Query("user_email"),
-        UserCompany: c.Query("company"),
-        Service:     "crm_" + c.Params("crm"),
-        DataSource:  c.Query("base"),
+		UserCompany: c.Query("company"),
+		Service:     "crm_" + c.Params("crm"),
+		DataSource:  c.Query("base"),
 	}
-	
+
 	var configs map[string]any
 	if err := c.BodyParser(&configs); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(ports.NewInvalidBodyError())
@@ -95,12 +95,12 @@ func TestLeadHandler(c *fiber.Ctx, crmService crm_exporter.Crm, client any, p *p
 		return c.Status(fiber.StatusBadRequest).JSON(err)
 	}
 
-	result, err := crmService.SendLead(client, mappedLead, configs)
+	result, err := crmService.SendLead(client, mappedLead, map[string]any{}, configs, map[string]map[string]any{})
 
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": err.Error(),
-			"lead": result,
+			"lead":  result,
 		})
 	}
 

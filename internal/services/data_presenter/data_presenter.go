@@ -153,6 +153,7 @@ func PresentSingle(data map[string]any, spec domain.PresentationSpecSpec) (map[s
 		}
 
 		result[key] = tabResult
+
 	}
 	return result, nil
 }

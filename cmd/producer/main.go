@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"export-service/internal/messaging"
 	"export-service/internal/usecases"
@@ -26,7 +27,7 @@ func main() {
 		DataDownloadURL: "https://1.1.1.1",
 	}
 	reqBytes, _ := json.Marshal(req)
-	failOnError(client.Publish("exports.excel", reqBytes), "Failed to publish message")
+	failOnError(client.Publish(context.Background(), "exports.excel", reqBytes), "Failed to publish message")
 }
 func failOnError(err error, msg string) {
 	if err != nil {
