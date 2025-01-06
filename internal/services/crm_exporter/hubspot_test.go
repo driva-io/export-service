@@ -68,7 +68,7 @@ func TestSendLead(t *testing.T) {
 			"stage_id":    "appointmentscheduled",
 			"create_deal": true,
 		}
-		result, err := hubspotService.SendLead(client, lead, configs)
+		result, err := hubspotService.SendLead(client, lead, map[string]any{}, configs, map[string]map[string]any{})
 
 		println(result.Company)
 		require.NoError(t, err)

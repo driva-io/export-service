@@ -17,9 +17,10 @@ const (
 )
 
 type ObjectStatus struct {
-	Id      any    `json:"id"`
-	Status  Status `json:"status"`
-	Message string `json:"message,omitempty"`
+	CrmId          any     `json:"crm_id"`
+	Status         Status  `json:"status"`
+	Message        string  `json:"message,omitempty"`
+	DrivaContactId *string `json:"driva_contact_id,omitempty"`
 }
 
 type CreatedLead struct {
@@ -35,7 +36,7 @@ type Crm interface {
 	Install(installData any) (any, error)
 	OAuthCallback(c *fiber.Ctx, params ...any) (any, error)
 
-	SendLead(client any, mappedStorageData map[string]any, configs map[string]any) (CreatedLead, error)
+	SendLead(client any, mappedStorageData map[string]any, correspondingRawData map[string]any, configs map[string]any, existingLead map[string]map[string]any) (CreatedLead, error)
 	GetPipelines(client any) ([]Pipeline, error)
 	GetFields(client any) (CrmFields, error)
 	GetOwners(client any) ([]Owner, error)

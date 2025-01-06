@@ -6,15 +6,23 @@ import (
 	"errors"
 	"export-service/internal/core/domain"
 	"export-service/internal/core/ports"
+	"export-service/internal/repositories"
 	"export-service/internal/repositories/crm_company_repo"
 	"export-service/internal/repositories/crm_solicitation_repo"
+	"export-service/internal/server"
 	"export-service/internal/services/crm_exporter"
 	"export-service/internal/services/data_presenter"
+	"fmt"
+	"os"
+	"strconv"
+	"strings"
 
+	"github.com/belong-inc/go-hubspot"
 	"go.uber.org/zap"
 )
 
 type CrmExportUseCase struct {
+	httpClient           server.HttpClient
 	downloader           ports.Downloader
 	presentationSpecRepo ports.PresentationSpecRepository
 	companyRepo          *crm_company_repo.PgCrmCompanyRepository
@@ -23,8 +31,9 @@ type CrmExportUseCase struct {
 	logger               *zap.Logger
 }
 
-func NewCrmExportUseCase(downloader ports.Downloader, presentationSpecRepo ports.PresentationSpecRepository, companyRepo *crm_company_repo.PgCrmCompanyRepository, solicitationRepo *crm_solicitation_repo.PgCrmSolicitationRepository, mailer ports.Mailer, logger *zap.Logger) *CrmExportUseCase {
+func NewCrmExportUseCase(httpClient server.HttpClient, downloader ports.Downloader, presentationSpecRepo ports.PresentationSpecRepository, companyRepo *crm_company_repo.PgCrmCompanyRepository, solicitationRepo *crm_solicitation_repo.PgCrmSolicitationRepository, mailer ports.Mailer, logger *zap.Logger) *CrmExportUseCase {
 	return &CrmExportUseCase{
+		httpClient:           httpClient,
 		downloader:           downloader,
 		presentationSpecRepo: presentationSpecRepo,
 		companyRepo:          companyRepo,
@@ -34,6 +43,24 @@ func NewCrmExportUseCase(downloader ports.Downloader, presentationSpecRepo ports
 	}
 }
 
+func (c *CrmExportUseCase) IsRetriable(err error) bool {
+	var hubspotError *hubspot.APIError
+	var retriable bool
+
+	switch {
+	case errors.As(err, &hubspotError):
+		if strings.HasPrefix(strconv.Itoa(hubspotError.HTTPStatusCode), "4") {
+			retriable = false
+		} else {
+			retriable = true
+		}
+	default:
+		retriable = true
+	}
+
+	return retriable
+}
+
 func (c *CrmExportUseCase) Execute(request CrmExportRequest, requestConfigs map[string]any) error {
 
 	crm, ok := requestConfigs["crm"].(string)
@@ -41,44 +68,9 @@ func (c *CrmExportUseCase) Execute(request CrmExportRequest, requestConfigs map[
 		return errors.New("invalid or missing crm header")
 	}
 
-	solicitation, err := c.solicitationRepo.Create(context.Background(), crm_solicitation_repo.CreateSolicitation{
-		ListId:        request.ListID,
-		UserEmail:     request.UserEmail,
-		Current:       0,
-		Total:         int(requestConfigs["total"].(int64)),
-		OwnerId:       requestConfigs["owner_id"].(string),
-		PipelineId:    requestConfigs["pipeline_id"].(string),
-		StageId:       requestConfigs["stage_id"].(string),
-		OverwriteData: requestConfigs["overwrite_data"].(bool),
-		CreateDeal:    requestConfigs["create_deal"].(bool),
-	})
-	if err != nil {
-		c.logError("Error creating solicitation in db", err, request)
-		return err
-	}
-
-	data, err := c.downloadData(request)
-	if err != nil {
-		c.logError("Error when downloading data", err, request)
-		return err
-	}
-
-	spec, err := c.getPresentationSpec(request, crm)
-	if err != nil {
-		c.logError("Error when getting presentation spec", err, request)
-		return err
-	}
-
-	presentedData, err := c.applyPresentationSpecCrm(request, data, spec)
-	if err != nil {
-		c.logError("Error when applying presentation spec", err, request)
-		return err
-	}
-
 	crmService, exists := crm_exporter.GetCrm(crm, c.companyRepo)
 	if !exists {
-		c.logError("Crm is invalid", err, request)
-		return err
+		return errors.New("crm service for " + crm + " not found")
 	}
 
 	crmClient, err := crmService.Authorize(context.Background(), request.UserCompany)
@@ -87,13 +79,54 @@ func (c *CrmExportUseCase) Execute(request CrmExportRequest, requestConfigs map[
 		return err
 	}
 
-	presentedDataMappedToCnpjs, err := c.mapPresentedDataToCnpjs(data, presentedData)
+	var solicitationNotFoundError repositories.SolicitationNotFoundError
+	solicitation, err := c.solicitationRepo.GetById(context.Background(), request.ListID)
+	if errors.As(err, &solicitationNotFoundError) {
+		solicitation, err = c.solicitationRepo.Create(context.Background(), crm_solicitation_repo.CreateSolicitation{
+			ListId:        request.ListID,
+			UserEmail:     request.UserEmail,
+			Current:       0,
+			Total:         int(requestConfigs["total"].(int64)),
+			OwnerId:       requestConfigs["owner_id"].(string),
+			PipelineId:    requestConfigs["pipeline_id"].(string),
+			StageId:       requestConfigs["stage_id"].(string),
+			OverwriteData: requestConfigs["overwrite_data"].(bool),
+			CreateDeal:    requestConfigs["create_deal"].(bool),
+		})
+
+		if err != nil {
+			c.logError("Error creating solicitation in db", err, request)
+			return err
+		}
+	} else {
+		c.logInfo("Solicitation "+request.ListID+" already exists, skipping creation.", request)
+	}
+
+	spec, err := c.getPresentationSpec(request, crm)
+	if err != nil {
+		c.logError("Error when getting presentation spec", err, request)
+		return err
+	}
+
+	downloadedData, err := c.downloadData(request)
+	if err != nil {
+		c.logError("Error when downloading data", err, request)
+		return err
+	}
+
+	presentedData, err := c.applyPresentationSpecCrm(request, downloadedData, spec)
+	if err != nil {
+		c.logError("Error when applying presentation spec", err, request)
+		return err
+	}
+
+	presentedDataMappedToCnpjs, err := c.mapPresentedDataToCnpjs(downloadedData, presentedData)
 	if err != nil {
 		c.logError("Error mapping cnpj to presented data", err, request)
 		return err
 	}
 
-	err = c.sendAllLeads(crmService, crmClient, presentedDataMappedToCnpjs, requestConfigs, solicitation.ListId)
+	err = c.sendAllLeads(crmService, crmClient, presentedDataMappedToCnpjs, downloadedData, requestConfigs, solicitation)
 
 	return err
 
@@ -123,25 +156,89 @@ func (c *CrmExportUseCase) mapPresentedDataToCnpjs(data []map[string]any, presen
 	return presentedDataCnpjMap, nil
 }
 
-func (c *CrmExportUseCase) sendAllLeads(crmService crm_exporter.Crm, client any, leadsData map[any]map[string]any, configs map[string]any, solicitationId string) error {
-	for cnpj, leadData := range leadsData {
-		leadResult, err := crmService.SendLead(client, leadData, configs)
-		c.updateExportedCompaniesInDb(leadResult, cnpj, solicitationId)
+func (c *CrmExportUseCase) removeAlreadyExportedCnpjs(data []map[string]any, filterKeys map[string]any) []map[string]any {
+	var filtered []map[string]any
 
+	for _, item := range data {
+		if cnpj, exists := item["cnpj"]; exists {
+			stringCnpj := fmt.Sprintf("%v", cnpj)
+			if _, found := filterKeys[stringCnpj]; !found {
+				filtered = append(filtered, item)
+			}
+		} else {
+			filtered = append(filtered, item)
+		}
+	}
+
+	return filtered
+}
+
+func (c *CrmExportUseCase) sendAllLeads(crmService crm_exporter.Crm, client any, leadsData map[any]map[string]any, rawLeadsData []map[string]any, configs map[string]any, solicitation crm_solicitation_repo.Solicitation) error {
+	for cnpj, leadData := range leadsData {
+		var correspondingRawData map[string]any
+		for _, rawLead := range rawLeadsData {
+			if rawCnpj, ok := rawLead["cnpj"]; ok && rawCnpj == cnpj {
+				correspondingRawData = rawLead
+				break
+			}
+		}
+
+		stringCnpj := fmt.Sprintf("%v", int(cnpj.(float64)))
+		existingLead := solicitation.ExportedCompanies[stringCnpj]
+		leadResult, err := crmService.SendLead(client, leadData, correspondingRawData, configs, existingLead)
+		c.updateExportedCompaniesInSolicitation(leadResult, cnpj, solicitation.ListId)
+		
 		if err != nil {
 			return err
 		}
+		
+		c.updateExportedLeadClickhouse(leadResult)
 	}
 
 	return nil
 }
 
-func (c *CrmExportUseCase) updateExportedCompaniesInDb(leadResult crm_exporter.CreatedLead, cnpj any, solicitationId string) error {
+func (c *CrmExportUseCase) updateExportedCompaniesInSolicitation(leadResult crm_exporter.CreatedLead, cnpj any, solicitationId string) error {
 
 	c.solicitationRepo.Update(context.Background(), crm_solicitation_repo.UpdateExportedCompaniesParms{
 		Cnpj:               cnpj,
 		NewExportedCompany: leadResult,
 	}, solicitationId)
+
+	return nil
+}
+
+func (c *CrmExportUseCase) updateExportedLeadClickhouse(leadResult crm_exporter.CreatedLead) error {
+
+	url := os.Getenv("LISTS_SERVICE_URL") + "/update-crm-info"
+
+	if leadResult.Company != nil {
+		body := map[string]any{
+			"id":     leadResult.Company.DrivaContactId,
+			"crm_id": leadResult.Company.CrmId,
+			"crm":    "hubspot",
+			"type":   "company",
+		}
+		_, err := c.httpClient.Patch(url, body, nil)
+		if err != nil {
+			return err
+		}
+	}
+
+	if leadResult.Contacts != nil {
+		for _, contact := range *leadResult.Contacts {
+			body := map[string]any{
+				"id":     contact.DrivaContactId,
+				"crm_id": contact.CrmId,
+				"crm":    "hubspot",
+				"type":   "profile",
+			}
+			_, err := c.httpClient.Patch(url, body, nil)
+			if err != nil {
+				return err
+			}
+		}
+	}
 
 	return nil
 }

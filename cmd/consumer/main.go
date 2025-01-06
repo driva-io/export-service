@@ -19,6 +19,7 @@ import (
 	"export-service/internal/repositories/crm_company_repo"
 	"export-service/internal/repositories/crm_solicitation_repo"
 	"export-service/internal/repositories/presentation_spec_repo"
+	"export-service/internal/server"
 	"export-service/internal/usecases"
 	"export-service/internal/writers"
 	"log"
@@ -47,11 +48,13 @@ func main() {
 	defer client.Close()
 
 	// Create queues
+	dlx := "exports_dead_letter_exchange"
+	crmRKey := "exports.crm.dlq"
 	exports := "exports.excel"
-	failOnError(client.CreateQueue("exports.excel", false), "Failed to create exports queue")
-	failOnError(client.CreateQueue("exports.results.excel", false), "Failed to create exports result queue")
+	failOnError(client.CreateQueue("exports.excel", nil, nil), "Failed to create exports queue")
+	failOnError(client.CreateQueue("exports.results.excel", nil, nil), "Failed to create exports result queue")
 	crm := "exports.crm"
-	failOnError(client.CreateQueue(crm, false), "Failed to create exports.crm queue")
+	failOnError(client.CreateQueue(crm, &dlx, &crmRKey), "Failed to create exports.crm queue")
 
 	go func() {
 		for {
@@ -83,7 +86,7 @@ func main() {
 					failOnError(err, "Failed to connect to database")
 				}
 
-				handleCrmExportRequest(d, conn, client)
+				handleCrmExportRequest(d, conn)
 			}
 
 			mainLogger.Warn("Queue closed, retrying in 60 seconds")
@@ -96,8 +99,7 @@ func main() {
 	<-make(chan struct{})
 }
 
-func handleCrmExportRequest(d amqp.Delivery, conn *pgx.Conn, client *messaging.RabbitClient) {
-	d.Ack(true)
+func handleCrmExportRequest(d amqp.Delivery, conn *pgx.Conn) {
 	ctx := getMessageContext(d)
 	defer func(ctx context.Context) {
 		tx := apm.TransactionFromContext(ctx)
@@ -127,31 +129,25 @@ func handleCrmExportRequest(d amqp.Delivery, conn *pgx.Conn, client *messaging.R
 		//Add other crm configs
 	}
 
-	//CRM logic
 	CrmUc := getCrmUseCase(logger, conn)
 	err := CrmUc.Execute(req, configs)
-	print(err)
-
-	failOnError(d.Ack(false), "Failed to ack message")
+	if err != nil {
+		retriable := CrmUc.IsRetriable(err) //Does nothing for now if retriable
+		logger.Error("Retriable error: ", zap.Any("retriable", retriable))
+		failOnError(d.Nack(false, false), "Failed to nack message")
+	} else {
+		failOnError(d.Ack(false), "Failed to ack message")
+	}
 }
 
 func getCrmUseCase(logger *zap.Logger, conn *pgx.Conn) *usecases.CrmExportUseCase {
-	// bucket := os.Getenv("S3_BUCKET")
-	// endpoint := os.Getenv("S3_ENDPOINT")
-	// folder := "exports/sheet"
-	// key := os.Getenv("S3_KEY")
-	// region := os.Getenv("S3_REGION")
-	// secretKey := os.Getenv("S3_SECRET_KEY")
-
-	// uploader := adapters.NewS3Uploader(key, secretKey, endpoint, region, bucket, folder, logger)
 	mailer := adapters.NewDrivaMailer(logger)
 	specRepo := presentation_spec_repo.NewPgPresentationSpecRepository(conn, logger)
 	companyRepo := crm_company_repo.NewPgCrmCompanyRepository(conn, logger)
 	solicitationRepo := crm_solicitation_repo.NewPgCrmSolicitationRepository(conn, logger)
+	httpClient := &server.NetHttpClient{}
 
-	return usecases.NewCrmExportUseCase(&adapters.HTTPDownloader{}, specRepo, companyRepo, solicitationRepo, mailer, logger)
-
-	// return usecases.NewSheetExportUseCase(&writers.ExcelWriter{}, &adapters.HTTPDownloader{}, uploader, specRepo, mailer, logger)
+	return usecases.NewCrmExportUseCase(httpClient, &adapters.HTTPDownloader{}, specRepo, companyRepo, solicitationRepo, mailer, logger)
 }
 
 func handleExportRequest(d amqp.Delivery, conn *pgx.Conn, client *messaging.RabbitClient) {

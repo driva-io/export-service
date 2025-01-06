@@ -6,13 +6,12 @@ import (
 )
 
 type UpdateExportedCompaniesParms struct {
-	Cnpj               any                      `json:"cnpj"` //Any to support changes to cnpj type
+	Cnpj               any                      `json:"cnpj"`
 	NewExportedCompany crm_exporter.CreatedLead `json:"new_exported_company"`
 }
 
 type SolicitationStatus string
 
-// Define constants representing the enum values
 const (
 	Interrupted SolicitationStatus = "Interrupted"
 	InProgress  SolicitationStatus = "In Progress"
@@ -23,7 +22,7 @@ type Solicitation struct {
 	ListId            string
 	UserEmail         string
 	Status            SolicitationStatus
-	ExportedCompanies map[string]any
+	ExportedCompanies map[string]map[string]map[string]any
 
 	OwnerId       string
 	PipelineId    string
