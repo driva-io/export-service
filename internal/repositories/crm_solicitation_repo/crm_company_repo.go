@@ -8,15 +8,16 @@ import (
 	"fmt"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"go.uber.org/zap"
 )
 
 type PgCrmSolicitationRepository struct {
-	conn   *pgx.Conn
+	conn  *pgxpool.Pool
 	logger *zap.Logger
 }
 
-func NewPgCrmSolicitationRepository(conn *pgx.Conn, logger *zap.Logger) *PgCrmSolicitationRepository {
+func NewPgCrmSolicitationRepository(conn *pgxpool.Pool, logger *zap.Logger) *PgCrmSolicitationRepository {
 	return &PgCrmSolicitationRepository{
 		conn:   conn,
 		logger: logger.Named("PgCrmSolicitationRepository"),

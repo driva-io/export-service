@@ -9,11 +9,12 @@ import (
 	"export-service/internal/repositories/presentation_spec_repo"
 	srv "export-service/internal/server"
 	"fmt"
+	"log"
 	"net/url"
 	"os"
 	"strconv"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	_ "github.com/joho/godotenv/autoload"
 	"go.uber.org/zap"
 )
@@ -24,7 +25,16 @@ func main() {
 	ctx := context.Background()
 
 	logger := zap.NewExample()
-	conn, err := pgx.Connect(ctx, getPostgresConnStr())
+	config, err := pgxpool.ParseConfig(getPostgresConnStr())
+	if err != nil {
+		log.Fatalf("Unable to parse connection string: %v", err)
+	}
+
+	conn, err := pgxpool.NewWithConfig(ctx, config)
+	if err != nil {
+		log.Fatalf("Unable to create connection pool: %v", err)
+	}
+	defer conn.Close()
 
 	auth := &gateways.HTTPAuthService{HttpClient: &srv.NetHttpClient{}}
 

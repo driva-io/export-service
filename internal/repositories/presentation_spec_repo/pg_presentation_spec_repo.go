@@ -9,15 +9,16 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"go.uber.org/zap"
 )
 
 type PgPresentationSpecRepository struct {
-	conn   *pgx.Conn
+	conn   *pgxpool.Pool
 	logger *zap.Logger
 }
 
-func NewPgPresentationSpecRepository(conn *pgx.Conn, logger *zap.Logger) *PgPresentationSpecRepository {
+func NewPgPresentationSpecRepository(conn *pgxpool.Pool, logger *zap.Logger) *PgPresentationSpecRepository {
 	return &PgPresentationSpecRepository{
 		conn:   conn,
 		logger: logger.Named("PgPresentationSpecRepository"),
@@ -31,7 +32,12 @@ func (r *PgPresentationSpecRepository) Get(ctx context.Context, params ports.Pre
 		return domain.PresentationSpec{}, ports.NewInvalidQueryParamsError()
 	}
 
-	rows, _ := r.conn.Query(ctx, getQuery, params.UserEmail, params.UserCompany, params.Service, params.DataSource)
+	rows, err := r.conn.Query(ctx, getQuery, params.UserEmail, params.UserCompany, params.Service, params.DataSource)
+	if err!= nil {
+        r.logger.Error("Failed to execute query", zap.Error(err), zap.Any("params", params))
+        return domain.PresentationSpec{}, err
+    }
+	defer rows.Close()
 
 	spec, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[domain.PresentationSpec])
 	if err != nil {
@@ -44,14 +50,18 @@ func (r *PgPresentationSpecRepository) Get(ctx context.Context, params ports.Pre
 
 		return domain.PresentationSpec{}, err
 	}
-	defer rows.Close()
 	return spec, nil
 }
 
 func (r *PgPresentationSpecRepository) GetById(ctx context.Context, id string) (domain.PresentationSpec, error) {
 	defer r.logger.Sync()
 
-	rows, _ := r.conn.Query(ctx, getByIdQuery, id)
+	rows, err := r.conn.Query(ctx, getByIdQuery, id)
+	if err!= nil {
+        r.logger.Error("Failed to execute query", zap.Error(err), zap.Any("params", id))
+        return domain.PresentationSpec{}, err
+    }
+	defer rows.Close()
 
 	spec, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[domain.PresentationSpec])
 	if err != nil {
@@ -64,7 +74,6 @@ func (r *PgPresentationSpecRepository) GetById(ctx context.Context, id string) (
 
 		return domain.PresentationSpec{}, err
 	}
-	defer rows.Close()
 	return spec, nil
 }
 

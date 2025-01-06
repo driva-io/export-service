@@ -7,15 +7,16 @@ import (
 	"export-service/internal/repositories"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"go.uber.org/zap"
 )
 
 type PgCrmCompanyRepository struct {
-	conn   *pgx.Conn
+	conn   *pgxpool.Pool
 	logger *zap.Logger
 }
 
-func NewPgCrmCompanyRepository(conn *pgx.Conn, logger *zap.Logger) *PgCrmCompanyRepository {
+func NewPgCrmCompanyRepository(conn *pgxpool.Pool, logger *zap.Logger) *PgCrmCompanyRepository {
 	return &PgCrmCompanyRepository{
 		conn:   conn,
 		logger: logger.Named("PgCrmCompanyRepository"),
@@ -29,7 +30,12 @@ func (r *PgCrmCompanyRepository) Get(ctx context.Context, params ports.CrmCompan
 		return Company{}, ports.NewInvalidQueryParamsError()
 	}
 
-	rows, _ := r.conn.Query(ctx, getQuery, params.Crm, params.Company)
+	rows, err := r.conn.Query(ctx, getQuery, params.Crm, params.Company)
+	if err != nil {
+		r.logger.Error("Failed to execute query", zap.Error(err), zap.Any("params", params))
+		return Company{}, err
+	}
+	defer rows.Close()
 
 	company, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[Company])
 	if err != nil {
@@ -42,7 +48,6 @@ func (r *PgCrmCompanyRepository) Get(ctx context.Context, params ports.CrmCompan
 
 		return Company{}, err
 	}
-	defer rows.Close()
 	return company, nil
 }
 
@@ -53,13 +58,17 @@ func (r *PgCrmCompanyRepository) AddHubspot(ctx context.Context, params ports.Cr
 		return Company{}, ports.NewInvalidQueryParamsError()
 	}
 
-	rows, _ := r.conn.Query(ctx, addHubspotQuery, params.Company, params.UserId, params.WorkspaceId, params.RefreshToken, params.AccessToken)
+	rows, err := r.conn.Query(ctx, addHubspotQuery, params.Company, params.UserId, params.WorkspaceId, params.RefreshToken, params.AccessToken)
+	if err != nil {
+		r.logger.Error("Failed to execute query", zap.Error(err), zap.Any("params", params))
+		return Company{}, err
+	}
+	defer rows.Close()
 
 	company, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[Company])
 	if err != nil {
 		return Company{}, err
 	}
-	defer rows.Close()
 	return company, nil
 }
 

@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
@@ -46,12 +46,16 @@ func TestGet(t *testing.T) {
 		}
 	}()
 	url, _ := postgresContainer.ConnectionString(ctx)
-	conn, err := pgx.Connect(ctx, url)
+	config, err := pgxpool.ParseConfig(url)
 	if err != nil {
-		panic(err)
+		log.Fatalf("Unable to parse connection string: %v", err)
 	}
 
-	defer conn.Close(ctx)
+	conn, err := pgxpool.NewWithConfig(ctx, config)
+	if err != nil {
+		log.Fatalf("Unable to create connection pool: %v", err)
+	}
+	defer conn.Close()
 	logger, _ := zap.NewProduction()
 	repo := presentation_spec_repo.NewPgPresentationSpecRepository(conn, logger)
 	// Begin testing
@@ -154,12 +158,16 @@ func TestAdd(t *testing.T) {
 		}
 	}()
 	url, _ := postgresContainer.ConnectionString(ctx)
-	conn, err := pgx.Connect(ctx, url)
+	config, err := pgxpool.ParseConfig(url)
 	if err != nil {
-		panic(err)
+		log.Fatalf("Unable to parse connection string: %v", err)
 	}
 
-	defer conn.Close(ctx)
+	conn, err := pgxpool.NewWithConfig(ctx, config)
+	if err != nil {
+		log.Fatalf("Unable to create connection pool: %v", err)
+	}
+	defer conn.Close()
 	logger, _ := zap.NewProduction()
 	repo := presentation_spec_repo.NewPgPresentationSpecRepository(conn, logger)
 
@@ -236,12 +244,16 @@ func TestDelete(t *testing.T) {
 		}
 	}()
 	url, _ := postgresContainer.ConnectionString(ctx)
-	conn, err := pgx.Connect(ctx, url)
+	config, err := pgxpool.ParseConfig(url)
 	if err != nil {
-		panic(err)
+		log.Fatalf("Unable to parse connection string: %v", err)
 	}
 
-	defer conn.Close(ctx)
+	conn, err := pgxpool.NewWithConfig(ctx, config)
+	if err != nil {
+		log.Fatalf("Unable to create connection pool: %v", err)
+	}
+	defer conn.Close()
 	logger, _ := zap.NewProduction()
 	repo := presentation_spec_repo.NewPgPresentationSpecRepository(conn, logger)
 

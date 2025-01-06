@@ -25,7 +25,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 
 	"go.uber.org/zap"
 )
@@ -39,10 +39,16 @@ func main() {
 
 	ctx := context.Background()
 
-	conn, err := pgx.Connect(ctx, getPostgresConnStr())
-	failOnError(err, "Failed to connect to database")
+	config, err := pgxpool.ParseConfig(getPostgresConnStr())
+	if err != nil {
+		log.Fatalf("Unable to parse connection string: %v", err)
+	}
 
-	defer conn.Close(ctx)
+	conn, err := pgxpool.NewWithConfig(ctx, config)
+	if err != nil {
+		log.Fatalf("Unable to create connection pool: %v", err)
+	}
+	defer conn.Close()
 
 	client := messaging.NewRabbitMQClient(con, mainLogger)
 	defer client.Close()
@@ -62,10 +68,10 @@ func main() {
 			failOnError(err, "Failed to consume bus")
 
 			for d := range exportsBus {
-				if conn.IsClosed() {
-					conn, err = pgx.Connect(ctx, getPostgresConnStr())
-					failOnError(err, "Failed to connect to database")
-				}
+				// if conn.IsClosed() {
+				// 	conn, err = pgx.Connect(ctx, getPostgresConnStr())
+				// 	failOnError(err, "Failed to connect to database")
+				// }
 
 				handleExportRequest(d, conn, client)
 			}
@@ -99,7 +105,7 @@ func main() {
 	<-make(chan struct{})
 }
 
-func handleCrmExportRequest(d amqp.Delivery, conn *pgx.Conn) {
+func handleCrmExportRequest(d amqp.Delivery, conn *pgxpool.Pool) {
 	ctx := getMessageContext(d)
 	defer func(ctx context.Context) {
 		tx := apm.TransactionFromContext(ctx)
@@ -140,7 +146,7 @@ func handleCrmExportRequest(d amqp.Delivery, conn *pgx.Conn) {
 	}
 }
 
-func getCrmUseCase(logger *zap.Logger, conn *pgx.Conn) *usecases.CrmExportUseCase {
+func getCrmUseCase(logger *zap.Logger, conn *pgxpool.Pool) *usecases.CrmExportUseCase {
 	mailer := adapters.NewDrivaMailer(logger)
 	specRepo := presentation_spec_repo.NewPgPresentationSpecRepository(conn, logger)
 	companyRepo := crm_company_repo.NewPgCrmCompanyRepository(conn, logger)
@@ -150,7 +156,7 @@ func getCrmUseCase(logger *zap.Logger, conn *pgx.Conn) *usecases.CrmExportUseCas
 	return usecases.NewCrmExportUseCase(httpClient, &adapters.HTTPDownloader{}, specRepo, companyRepo, solicitationRepo, mailer, logger)
 }
 
-func handleExportRequest(d amqp.Delivery, conn *pgx.Conn, client *messaging.RabbitClient) {
+func handleExportRequest(d amqp.Delivery, conn *pgxpool.Pool, client *messaging.RabbitClient) {
 	ctx := getMessageContext(d)
 	defer func(ctx context.Context) {
 		tx := apm.TransactionFromContext(ctx)
@@ -212,7 +218,7 @@ func getPostgresConnStr() string {
 	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s", escapedUser, escapedPassword, host, port, dbname)
 }
 
-func getSheetUseCase(logger *zap.Logger, conn *pgx.Conn) *usecases.SheetExportUseCase {
+func getSheetUseCase(logger *zap.Logger, conn *pgxpool.Pool) *usecases.SheetExportUseCase {
 	bucket := os.Getenv("S3_BUCKET")
 	endpoint := os.Getenv("S3_ENDPOINT")
 	folder := "exports/sheet"
