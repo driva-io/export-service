@@ -75,24 +75,24 @@ func main() {
 		}
 	}()
 
-	go func() {
-		for {
-			crmBus, err := client.Consume(crm)
-			failOnError(err, "Failed to consume bus")
+	// go func() {
+	// 	for {
+	// 		crmBus, err := client.Consume(crm)
+	// 		failOnError(err, "Failed to consume bus")
 
-			for d := range crmBus {
-				if conn.IsClosed() {
-					conn, err = pgx.Connect(ctx, getPostgresConnStr())
-					failOnError(err, "Failed to connect to database")
-				}
+	// 		for d := range crmBus {
+	// 			if conn.IsClosed() {
+	// 				conn, err = pgx.Connect(ctx, getPostgresConnStr())
+	// 				failOnError(err, "Failed to connect to database")
+	// 			}
 
-				handleCrmExportRequest(d, conn)
-			}
+	// 			handleCrmExportRequest(d, conn)
+	// 		}
 
-			mainLogger.Warn("Queue closed, retrying in 60 seconds")
-			time.Sleep(60 * time.Second)
-		}
-	}()
+	// 		mainLogger.Warn("Queue closed, retrying in 60 seconds")
+	// 		time.Sleep(60 * time.Second)
+	// 	}
+	// }()
 
 	mainLogger.Info("Consuming messages, press CTRL+C to stop")
 	// Blocks forever
