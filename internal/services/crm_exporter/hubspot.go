@@ -95,12 +95,18 @@ func sendCompany(client *hubspot.Client, mappedCompanyData map[string]any, owner
 
 	companyEntityMap["hubspot_owner_id"] = ownerId
 
-	existingCompany, err := searchForExistingObject(client, "companies", map[string]any{"name": companyEntityMap["name"]})
+	searchFilters := map[string]any{"name": companyEntityMap["name"]}
+	existingCompany, err := searchForExistingObject(client, "companies", searchFilters)
 	if err != nil {
 		return ObjectStatus{
 			Status:  Failed,
 			Message: err.Error(),
 		}, err
+	}
+
+	var searchFields string
+	for key, value := range searchFilters {
+		searchFields += fmt.Sprintf("%s: %v, ", key, value)
 	}
 
 	var company *hubspot.ResponseResource
@@ -116,7 +122,7 @@ func sendCompany(client *hubspot.Client, mappedCompanyData map[string]any, owner
 		}
 		status = Updated
 		company = updatedCompany
-		message = "Searched fields: cnpj"
+		message = fmt.Sprintf("Searched fields: %s", searchFields)
 	} else {
 		createdCompany, err := client.CRM.Company.Create(companyEntityMap)
 		if err != nil {
@@ -156,12 +162,18 @@ func sendDeal(client *hubspot.Client, mappedDealData map[string]any, ownerId str
 	dealEntityMap["dealstage"] = stageId
 	dealEntityMap["hubspot_owner_id"] = ownerId
 
-	existingDeal, err := searchForExistingObject(client, "deals", map[string]any{"dealname": dealEntityMap["dealname"]})
+	searchFilters := map[string]any{"dealname": dealEntityMap["dealname"]}
+	existingDeal, err := searchForExistingObject(client, "deals", searchFilters)
 	if err != nil {
 		return ObjectStatus{
 			Status:  Failed,
 			Message: err.Error(),
 		}, err
+	}
+
+	var searchFields string
+	for key, value := range searchFilters {
+		searchFields += fmt.Sprintf("%s: %v, ", key, value)
 	}
 
 	var deal *hubspot.ResponseResource
@@ -177,7 +189,7 @@ func sendDeal(client *hubspot.Client, mappedDealData map[string]any, ownerId str
 		}
 		status = Updated
 		deal = updatedDeal
-		message = "Searched fields: dealname"
+		message = fmt.Sprintf("Searched fields: %s", searchFields)
 	} else {
 		createdDeal, err := client.CRM.Deal.Create(dealEntityMap)
 		if err != nil {
@@ -215,12 +227,18 @@ func sendContact(client *hubspot.Client, mappedContactData map[string]any, owner
 
 	contactEntityMap["hubspot_owner_id"] = ownerId
 
-	existingContact, err := searchForExistingObject(client, "contacts", map[string]any{"email": contactEntityMap["email"]})
+	searchFilters := map[string]any{"email": contactEntityMap["email"]}
+	existingContact, err := searchForExistingObject(client, "contacts", searchFilters)
 	if err != nil {
 		return ObjectStatus{
 			Status:  Failed,
 			Message: err.Error(),
 		}, err
+	}
+
+	var searchFields string
+	for key, value := range searchFilters {
+		searchFields += fmt.Sprintf("%s: %v, ", key, value)
 	}
 
 	var contact *hubspot.ResponseResource
@@ -236,7 +254,7 @@ func sendContact(client *hubspot.Client, mappedContactData map[string]any, owner
 		}
 		status = Updated
 		contact = updatedContact
-		message = contactEntityMap["email"].(string)
+		message = fmt.Sprintf("Searched fields: %s", searchFields)
 	} else {
 		createdContact, err := client.CRM.Contact.Create(contactEntityMap)
 		if err != nil {
@@ -247,11 +265,11 @@ func sendContact(client *hubspot.Client, mappedContactData map[string]any, owner
 		}
 		status = Created
 		contact = createdContact
-		email, exists := contactEntityMap["email"]
+		linkedinUrl, exists := contactEntityMap["hs_linkedin_url"]
 		if exists {
-			message = email.(string)
+			message = "Profile contact: " + linkedinUrl.(string)
 		} else {
-			message = contactEntityMap["phone"].(string)
+			message = "Phone contact: " + contactEntityMap["phone"].(string)
 		}
 	}
 
