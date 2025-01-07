@@ -22,7 +22,7 @@ type Solicitation struct {
 	ListId            string
 	UserEmail         string
 	Status            SolicitationStatus
-	ExportedCompanies map[string]map[string]map[string]any
+	ExportedCompanies map[string]map[string]any
 
 	OwnerId       string
 	PipelineId    string

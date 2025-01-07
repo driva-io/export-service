@@ -81,12 +81,13 @@ func (c *CrmExportUseCase) Execute(request CrmExportRequest, requestConfigs map[
 
 	var solicitationNotFoundError repositories.SolicitationNotFoundError
 	solicitation, err := c.solicitationRepo.GetById(context.Background(), request.ListID)
+
 	if errors.As(err, &solicitationNotFoundError) {
 		solicitation, err = c.solicitationRepo.Create(context.Background(), crm_solicitation_repo.CreateSolicitation{
 			ListId:        request.ListID,
 			UserEmail:     request.UserEmail,
 			Current:       0,
-			Total:         int(requestConfigs["total"].(int64)),
+			Total:         int(requestConfigs["total"].(float64)),
 			OwnerId:       requestConfigs["owner_id"].(string),
 			PipelineId:    requestConfigs["pipeline_id"].(string),
 			StageId:       requestConfigs["stage_id"].(string),
@@ -187,11 +188,11 @@ func (c *CrmExportUseCase) sendAllLeads(crmService crm_exporter.Crm, client any,
 		existingLead := solicitation.ExportedCompanies[stringCnpj]
 		leadResult, err := crmService.SendLead(client, leadData, correspondingRawData, configs, existingLead)
 		c.updateExportedCompaniesInSolicitation(leadResult, cnpj, solicitation.ListId)
-		
+
 		if err != nil {
 			return err
 		}
-		
+
 		c.updateExportedLeadClickhouse(leadResult)
 	}
 
@@ -262,7 +263,7 @@ func (c *CrmExportUseCase) getPresentationSpec(request CrmExportRequest, crm str
 		UserEmail:   request.UserEmail,
 		UserCompany: request.UserCompany,
 		Service:     "crm_" + crm,
-		DataSource:  request.DataSource,
+		DataSource:  "empresas",
 	})
 }
 

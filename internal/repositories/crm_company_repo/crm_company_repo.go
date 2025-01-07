@@ -26,11 +26,11 @@ func NewPgCrmCompanyRepository(conn *pgxpool.Pool, logger *zap.Logger) *PgCrmCom
 func (r *PgCrmCompanyRepository) Get(ctx context.Context, params ports.CrmCompanyQueryParams) (Company, error) {
 	defer r.logger.Sync()
 
-	if params.Company == "" || params.Crm == "" {
+	if params.WorkspaceId == "" || params.Crm == "" {
 		return Company{}, ports.NewInvalidQueryParamsError()
 	}
 
-	rows, err := r.conn.Query(ctx, getQuery, params.Crm, params.Company)
+	rows, err := r.conn.Query(ctx, getQuery, params.Crm, params.WorkspaceId)
 	if err != nil {
 		r.logger.Error("Failed to execute query", zap.Error(err), zap.Any("params", params))
 		return Company{}, err

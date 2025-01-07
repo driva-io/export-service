@@ -81,24 +81,24 @@ func main() {
 		}
 	}()
 
-	// go func() {
-	// 	for {
-	// 		crmBus, err := client.Consume(crm)
-	// 		failOnError(err, "Failed to consume bus")
+	go func() {
+		for {
+			crmBus, err := client.Consume(crm)
+			failOnError(err, "Failed to consume bus")
 
-	// 		for d := range crmBus {
-	// 			if conn.IsClosed() {
-	// 				conn, err = pgx.Connect(ctx, getPostgresConnStr())
-	// 				failOnError(err, "Failed to connect to database")
-	// 			}
+			for d := range crmBus {
+				// if conn.IsClosed() {
+				// 	conn, err = pgx.Connect(ctx, getPostgresConnStr())
+				// 	failOnError(err, "Failed to connect to database")
+				// }
 
-	// 			handleCrmExportRequest(d, conn)
-	// 		}
+				handleCrmExportRequest(d, conn)
+			}
 
-	// 		mainLogger.Warn("Queue closed, retrying in 60 seconds")
-	// 		time.Sleep(60 * time.Second)
-	// 	}
-	// }()
+			mainLogger.Warn("Queue closed, retrying in 60 seconds")
+			time.Sleep(60 * time.Second)
+		}
+	}()
 
 	mainLogger.Info("Consuming messages, press CTRL+C to stop")
 	// Blocks forever
@@ -138,8 +138,11 @@ func handleCrmExportRequest(d amqp.Delivery, conn *pgxpool.Pool) {
 	CrmUc := getCrmUseCase(logger, conn)
 	err := CrmUc.Execute(req, configs)
 	if err != nil {
-		retriable := CrmUc.IsRetriable(err) //Does nothing for now if retriable
-		logger.Error("Retriable error: ", zap.Any("retriable", retriable))
+		retriable := CrmUc.IsRetriable(err)
+		logger.Error("Error executing CRM request",
+			zap.Error(err),
+			zap.Bool("retriable", retriable),
+		)
 		failOnError(d.Nack(false, false), "Failed to nack message")
 	} else {
 		failOnError(d.Ack(false), "Failed to ack message")

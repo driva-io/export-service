@@ -36,7 +36,7 @@ type Crm interface {
 	Install(installData any) (any, error)
 	OAuthCallback(c *fiber.Ctx, params ...any) (any, error)
 
-	SendLead(client any, mappedStorageData map[string]any, correspondingRawData map[string]any, configs map[string]any, existingLead map[string]map[string]any) (CreatedLead, error)
+	SendLead(client any, mappedStorageData map[string]any, correspondingRawData map[string]any, configs map[string]any, existingLead map[string]any) (CreatedLead, error)
 	GetPipelines(client any) ([]Pipeline, error)
 	GetFields(client any) (CrmFields, error)
 	GetOwners(client any) ([]Owner, error)

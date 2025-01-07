@@ -13,7 +13,7 @@ import (
 )
 
 type PgCrmSolicitationRepository struct {
-	conn  *pgxpool.Pool
+	conn   *pgxpool.Pool
 	logger *zap.Logger
 }
 

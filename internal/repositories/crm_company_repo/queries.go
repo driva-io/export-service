@@ -1,7 +1,7 @@
 package crm_company_repo
 
 const getQuery = `
-	select * from crm.company where crm = $1 and name = $2
+	select * from crm.company where crm = $1 and workspace_id = $2
 	`
 
 const addHubspotQuery = `

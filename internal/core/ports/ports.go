@@ -6,8 +6,8 @@ import (
 )
 
 type CrmCompanyQueryParams struct {
-	Crm     string
-	Company string
+	Crm         string
+	WorkspaceId string
 }
 
 type CrmAddHubspotCompanyQueryParams struct {

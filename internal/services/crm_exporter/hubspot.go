@@ -26,21 +26,11 @@ func NewHubspotService(companyRepo *crm_company_repo.PgCrmCompanyRepository) *Hu
 	return &HubspotService{companyRepo: companyRepo}
 }
 
-func searchForExistingCompany(client *hubspot.Client, fields ...map[string]any) (any, error) {
+func searchForExistingObject(client *hubspot.Client, objectType string, filtersMap map[string]any) (any, error) {
 	var filters []map[string][]map[string]any
-	for _, field := range fields {
-		var isNil bool
-		var key string
-		var value any
-		for k, v := range field {
-			if v == nil {
-				isNil = true
-				break
-			}
-			key, value = k, v
-			break
-		}
-		if isNil {
+
+	for key, value := range filtersMap {
+		if value == nil {
 			continue
 		}
 		filters = append(filters, map[string][]map[string]any{
@@ -54,11 +44,11 @@ func searchForExistingCompany(client *hubspot.Client, fields ...map[string]any) 
 		})
 	}
 
-	if filters == nil {
+	if len(filters) == 0 {
 		return nil, nil
 	}
 
-	url := "https://api.hubapi.com/crm/v3/objects/companies/search"
+	url := "https://api.hubapi.com/crm/v3/objects/" + objectType + "/search"
 	body := map[string]any{
 		"filterGroups": filters,
 	}
@@ -69,111 +59,22 @@ func searchForExistingCompany(client *hubspot.Client, fields ...map[string]any) 
 		return nil, err
 	}
 
-	if res.(map[string]any)["total"].(float64) == 0 {
+	resMap, ok := res.(map[string]any)
+	if !ok {
+		return nil, errors.New("unexpected response format")
+	}
+
+	total, ok := resMap["total"].(float64)
+	if !ok || total == 0 {
 		return nil, nil
 	}
 
-	return res.(map[string]any)["results"].([]any)[0], nil
-}
-
-func searchForExistingDeal(client *hubspot.Client, fields ...map[string]any) (any, error) {
-	var filters []map[string][]map[string]any
-	for _, field := range fields {
-		var isNil bool
-		var key string
-		var value any
-		for k, v := range field {
-			if v == nil {
-				isNil = true
-				break
-			}
-			key, value = k, v
-			break
-		}
-		if isNil {
-			continue
-		}
-		filters = append(filters, map[string][]map[string]any{
-			"filters": {
-				{
-					"propertyName": key,
-					"operator":     "EQ",
-					"value":        value,
-				},
-			},
-		})
-	}
-
-	if filters == nil {
+	results, ok := resMap["results"].([]any)
+	if !ok || len(results) == 0 {
 		return nil, nil
 	}
 
-	url := "https://api.hubapi.com/crm/v3/objects/deals/search"
-	body := map[string]any{
-		"filterGroups": filters,
-	}
-
-	var res any
-	err := client.Post(url, body, &res)
-	if err != nil {
-		return nil, err
-	}
-
-	if res.(map[string]any)["total"].(float64) == 0 {
-		return nil, nil
-	}
-
-	return res.(map[string]any)["results"].([]any)[0], nil
-}
-
-func searchForExistingContact(client *hubspot.Client, fields ...map[string]any) (any, error) {
-	var filters []map[string][]map[string]any
-	for _, field := range fields {
-		var isNil bool
-		var key string
-		var value any
-		for k, v := range field {
-			if v == nil {
-				isNil = true
-				break
-			}
-			key, value = k, v
-			break
-		}
-		if isNil {
-			continue
-		}
-		filters = append(filters, map[string][]map[string]any{
-			"filters": {
-				{
-					"propertyName": key,
-					"operator":     "EQ",
-					"value":        value,
-				},
-			},
-		})
-	}
-
-	if filters == nil {
-		return nil, nil
-	}
-
-	url := "https://api.hubapi.com/crm/v3/objects/contacts/search"
-	body := map[string]any{
-		"filterGroups": filters,
-	}
-
-	var res any
-	err := client.Post(url, body, &res)
-	if err != nil {
-		return nil, err
-	}
-
-	if res.(map[string]any)["total"].(float64) == 0 {
-		return nil, nil
-	}
-
-	return res.(map[string]any)["results"].([]any)[0], nil
+	return results[0], nil
 }
 
 func sendCompany(client *hubspot.Client, mappedCompanyData map[string]any, ownerId string) (ObjectStatus, error) {
@@ -194,7 +95,7 @@ func sendCompany(client *hubspot.Client, mappedCompanyData map[string]any, owner
 
 	companyEntityMap["hubspot_owner_id"] = ownerId
 
-	existingCompany, err := searchForExistingCompany(client, map[string]any{"name": companyEntityMap["name"]})
+	existingCompany, err := searchForExistingObject(client, "companies", map[string]any{"name": companyEntityMap["name"]})
 	if err != nil {
 		return ObjectStatus{
 			Status:  Failed,
@@ -255,7 +156,7 @@ func sendDeal(client *hubspot.Client, mappedDealData map[string]any, ownerId str
 	dealEntityMap["dealstage"] = stageId
 	dealEntityMap["hubspot_owner_id"] = ownerId
 
-	existingDeal, err := searchForExistingDeal(client, map[string]any{"dealname": dealEntityMap["dealname"]})
+	existingDeal, err := searchForExistingObject(client, "deals", map[string]any{"dealname": dealEntityMap["dealname"]})
 	if err != nil {
 		return ObjectStatus{
 			Status:  Failed,
@@ -314,7 +215,7 @@ func sendContact(client *hubspot.Client, mappedContactData map[string]any, owner
 
 	contactEntityMap["hubspot_owner_id"] = ownerId
 
-	existingContact, err := searchForExistingContact(client, map[string]any{"email": contactEntityMap["email"]})
+	existingContact, err := searchForExistingObject(client, "contacts", map[string]any{"email": contactEntityMap["email"]})
 	if err != nil {
 		return ObjectStatus{
 			Status:  Failed,
@@ -391,156 +292,208 @@ func createLeadAssociations(client *hubspot.Client, lead CreatedLead) error {
 	return nil
 }
 
-func (h HubspotService) SendLead(client any, mappedLead map[string]any, correspondingRawData map[string]any, configs map[string]any, existingLead map[string]map[string]any) (CreatedLead, error) {
-
-	ownerId, exists := configs["owner_id"].(string)
-	if !exists {
-		return CreatedLead{}, errors.New("owner_id config is required to send a hubspot lead")
+func (h HubspotService) SendLead(
+	client any,
+	mappedLead map[string]any,
+	correspondingRawData map[string]any,
+	configs map[string]any,
+	existingLead map[string]any,
+) (CreatedLead, error) {
+	husbpotClient, ok := client.(*hubspot.Client)
+	if !ok {
+		return CreatedLead{}, errors.New("invalid HubSpot client")
 	}
 
-	stageId, exists := configs["stage_id"].(string)
-	if !exists {
-		return CreatedLead{}, errors.New("stage_id config is required to send a hubspot lead")
+	ownerId, err := getConfigValue[string](configs, "owner_id")
+	if err != nil {
+		return CreatedLead{}, err
 	}
 
-	pipelineId, exists := configs["pipeline_id"].(string)
-	if !exists {
-		return CreatedLead{}, errors.New("pipeline_id config is required to send a hubspot lead")
+	stageId, err := getConfigValue[string](configs, "stage_id")
+	if err != nil {
+		return CreatedLead{}, err
+	}
+
+	pipelineId, err := getConfigValue[string](configs, "pipeline_id")
+	if err != nil {
+		return CreatedLead{}, err
 	}
 
 	createDeal := configs["create_deal"].(bool)
+	lead := CreatedLead{}
 
-	husbpotClient := client.(*hubspot.Client)
-	lead := CreatedLead{
-		Company:  nil,
-		Contacts: nil,
-		Deal:     nil,
-		Other:    nil,
+	if company, exists := mappedLead["company"]; exists {
+		companyStatus, err := processCompany(husbpotClient, company, existingLead, correspondingRawData, ownerId)
+		if err != nil {
+			return lead, err
+		}
+		lead.Company = companyStatus
 	}
 
-	company, exists := mappedLead["company"]
-	if exists {
-		exportedCompany, exists := existingLead["company"]
-		if !exists || exportedCompany["id"] == nil {
-			companyData, isMap := company.(map[string]any)
-			if !isMap {
-				return lead, errors.New("invalid company data to send crm. must be a map")
-			}
-			sentCompany, err := sendCompany(husbpotClient, companyData, ownerId)
-			driva_id, exists := correspondingRawData["contact_id"].(string)
-			if exists {
-				sentCompany.DrivaContactId = &driva_id
-			}
-			lead.Company = &sentCompany
-			if err != nil {
-				return lead, err
-			}
-		} else {
-			driva_id := exportedCompany["driva_contact_id"].(string)
-			lead.Company = &ObjectStatus{
-				CrmId:   exportedCompany["id"].(string),
-				Status:  Status(exportedCompany["status"].(string)),
-				Message: exportedCompany["message"].(string),
-				DrivaContactId: &driva_id,
-			}
+	if deal, exists := mappedLead["deal"]; exists && createDeal {
+		dealStatus, err := processDeal(husbpotClient, deal, existingLead, correspondingRawData, ownerId, pipelineId, stageId)
+		if err != nil {
+			return lead, err
 		}
+		lead.Deal = dealStatus
 	}
 
-	deal, exists := mappedLead["deal"]
-	if exists && createDeal {
-		exportedDeal, exists := existingLead["deal"]
-		if !exists || exportedDeal["id"] == nil {
-			dealData, isMap := deal.(map[string]any)
-			if !isMap {
-				return lead, errors.New("invalid deal data to send to crm. must be a map")
-			}
-			sentDeal, err := sendDeal(husbpotClient, dealData, ownerId, pipelineId, stageId)
-			driva_id, exists := correspondingRawData["contact_id"].(string)
-			if exists {
-				sentDeal.DrivaContactId = &driva_id
-			}
-			lead.Deal = &sentDeal
-			if err != nil {
-				return lead, err
-			}
-		} else {
-			driva_id := exportedDeal["driva_contact_id"].(string)
-			lead.Company = &ObjectStatus{
-				CrmId:   exportedDeal["id"].(string),
-				Status:  Status(exportedDeal["status"].(string)),
-				Message: exportedDeal["message"].(string),
-				DrivaContactId: &driva_id,
-			}
+	if contact, exists := mappedLead["contact"]; exists {
+		contactStatus, err := processContact(husbpotClient, contact, existingLead, correspondingRawData, ownerId)
+		if err != nil {
+			return lead, err
 		}
+		lead.Contacts = contactStatus
 	}
 
-	contact, exists := mappedLead["contact"]
-	if exists {
-		exportedContact, exists := existingLead["contact"]
-		if !exists || exportedContact["id"] == nil {
-			contactData, isMap := contact.(map[string]any)
-			if !isMap {
-				return lead, errors.New("invalid contact data to send to crm. must be a map")
-			}
-			sentContact, err := sendContact(husbpotClient, contactData, ownerId)
-			if lead.Contacts == nil {
-				lead.Contacts = &[]ObjectStatus{}
-			}
-			driva_id, exists := correspondingRawData["contact_id"].(string)
-			if exists {
-				sentContact.DrivaContactId = &driva_id
-			}
-			*lead.Contacts = append(*lead.Contacts, sentContact)
-			if err != nil {
-				return lead, err
-			}
-		} else {
-			driva_id := exportedContact["driva_contact_id"].(string)
-			lead.Contacts = &[]ObjectStatus{
-				{
-					CrmId:   exportedContact["id"].(string),
-					Status:  Status(exportedContact["status"].(string)),
-					Message: exportedContact["message"].(string),
-					DrivaContactId: &driva_id,
-				},
-			}
+	if contacts, exists := mappedLead["contacts"]; exists {
+		contactsStatus, err := processContacts(husbpotClient, contacts, existingLead, correspondingRawData, ownerId)
+		if err != nil {
+			return lead, err
 		}
+		lead.Contacts = contactsStatus
 	}
 
-	contacts, exists := mappedLead["contacts"]
-	if exists {
-		contactsData, isArray := contacts.([]any)
-		if !isArray {
-			return lead, errors.New("invalid contacts data to send to crm. must be an array")
-		}
-		if len(contactsData) != 0 {
-			for _, contact := range contactsData {
-				mapContact, isMap := contact.(map[string]any)
-				if !isMap {
-					return lead, errors.New("every contact in contacts must be a map")
-				}
-				sentContact, err := sendContact(husbpotClient, mapContact, ownerId)
-				if err != nil {
-					return lead, err
-				}
-				if lead.Contacts == nil {
-					lead.Contacts = &[]ObjectStatus{}
-				}
-				driva_id, exists := correspondingRawData["profile_id"].(string)
-				if exists {
-					sentContact.DrivaContactId = &driva_id
-				}
-				*lead.Contacts = append(*lead.Contacts, sentContact)
-			}
-		}
-	}
-
-	err := createLeadAssociations(husbpotClient, lead)
-	if err != nil {
+	if err := createLeadAssociations(husbpotClient, lead); err != nil {
 		return lead, err
 	}
 
 	return lead, nil
+}
+
+func getConfigValue[T any](configs map[string]any, key string) (T, error) {
+	value, exists := configs[key]
+	if !exists {
+		return *new(T), fmt.Errorf("%s config is required", key)
+	}
+	castValue, ok := value.(T)
+	if !ok {
+		return *new(T), fmt.Errorf("invalid type for %s config", key)
+	}
+	return castValue, nil
+}
+
+func processCompany(client *hubspot.Client, company any, existingLead, rawData map[string]any, ownerId string) (*ObjectStatus, error) {
+	exportedCompany, exists := existingLead["company"].(map[string]any)
+	if exists && exportedCompany["crm_id"] != nil {
+		return createExistingStatus(exportedCompany), nil
+	}
+
+	companyData, ok := company.(map[string]any)
+	if !ok {
+		return nil, errors.New("invalid company data")
+	}
+
+	sentCompany, err := sendCompany(client, companyData, ownerId)
+	if err != nil {
+		return nil, err
+	}
+
+	if drivaID, exists := rawData["company_contact_id"].(string); exists {
+		sentCompany.DrivaContactId = &drivaID
+	}
+
+	return &sentCompany, nil
+}
+
+func processDeal(client *hubspot.Client, deal any, existingLead, rawData map[string]any, ownerId, pipelineId, stageId string) (*ObjectStatus, error) {
+	exportedDeal, exists := existingLead["deal"].(map[string]any)
+	if exists && exportedDeal["crm_id"] != nil {
+		return createExistingStatus(exportedDeal), nil
+	}
+
+	dealData, ok := deal.(map[string]any)
+	if !ok {
+		return nil, errors.New("invalid deal data")
+	}
+
+	sentDeal, err := sendDeal(client, dealData, ownerId, pipelineId, stageId)
+	if err != nil {
+		return nil, err
+	}
+
+	if drivaID, exists := rawData["company_contact_id"].(string); exists {
+		sentDeal.DrivaContactId = &drivaID
+	}
+
+	return &sentDeal, nil
+}
+
+func processContact(client *hubspot.Client, contact any, existingLead, rawData map[string]any, ownerId string) (*[]ObjectStatus, error) {
+	exportedContact, exists := existingLead["contact"].(map[string]any)
+	if exists && exportedContact["crm_id"] != nil {
+		return &[]ObjectStatus{*createExistingStatus(exportedContact)}, nil
+	}
+
+	contactData, ok := contact.(map[string]any)
+	if !ok {
+		return nil, errors.New("invalid contact data")
+	}
+
+	sentContact, err := sendContact(client, contactData, ownerId)
+	if err != nil {
+		return nil, err
+	}
+
+	if drivaID, exists := rawData["profile_contact_id"].(string); exists {
+		sentContact.DrivaContactId = &drivaID
+	}
+
+	return &[]ObjectStatus{sentContact}, nil
+}
+
+func processContacts(client *hubspot.Client, contacts any, existingLead, rawData map[string]any, ownerId string) (*[]ObjectStatus, error) {
+	contactsData, ok := contacts.([]any)
+	if !ok {
+		return nil, errors.New("invalid contacts data")
+	}
+
+	var statuses []ObjectStatus
+	for _, contact := range contactsData {
+		contactMap, ok := contact.(map[string]any)
+		if !ok {
+			continue
+		}
+
+		exportedContacts, exists := existingLead["contacts"].([]map[string]any)
+		if exists {
+			for _, exportedContact := range exportedContacts {
+				if exportedContact["driva_contact_id"] == contactMap["profile_company_id"] {
+					statuses = append(statuses, *createExistingStatus(exportedContact))
+					continue
+				}
+			}
+		}
+
+		sentContact, err := sendContact(client, contactMap, ownerId)
+		if err != nil {
+			return nil, err
+		}
+
+		if drivaID, exists := rawData["profile_contact_id"].(string); exists {
+			sentContact.DrivaContactId = &drivaID
+		}
+		statuses = append(statuses, sentContact)
+	}
+
+	return &statuses, nil
+}
+
+func createExistingStatus(data map[string]any) *ObjectStatus {
+	drivaID := data["driva_contact_id"].(string)
+	return &ObjectStatus{
+		CrmId:          data["crm_id"].(string),
+		Status:         Status(data["status"].(string)),
+		Message:        safeString(data, "message"),
+		DrivaContactId: &drivaID,
+	}
+}
+
+func safeString(data map[string]any, key string) string {
+	if value, ok := data[key].(string); ok {
+		return value
+	}
+	return ""
 }
 
 func (h HubspotService) GetPipelines(client any) ([]Pipeline, error) {
@@ -663,11 +616,15 @@ func (h HubspotService) GetOwners(client any) ([]Owner, error) {
 	return owners, nil
 }
 
-func (h HubspotService) Authorize(ctx context.Context, companyName string) (any, error) {
+func (h HubspotService) Authorize(ctx context.Context, workspaceId string) (any, error) {
 
-	company, err := h.companyRepo.Get(ctx, ports.CrmCompanyQueryParams{Crm: "hubspot", Company: companyName})
+	company, err := h.companyRepo.Get(ctx, ports.CrmCompanyQueryParams{Crm: "hubspot", WorkspaceId: workspaceId})
 	if err != nil {
 		return nil, err
+	}
+
+	if company.RefreshToken.String == "" {
+		return nil, errors.New("refresh token not found for " + workspaceId)
 	}
 
 	client, _ := hubspot.NewClient(hubspot.SetOAuth(&hubspot.OAuthConfig{
@@ -692,7 +649,10 @@ func (h HubspotService) Install(installData any) (any, error) {
 	clientID := url.QueryEscape(os.Getenv("HUBSPOT_CLIENT_ID"))
 	scope := url.QueryEscape(os.Getenv("HUBSPOT_SCOPE"))
 	redirectURI := os.Getenv("HUBSPOT_REDIRECT_URI")
-	installDataMap := installData.(map[string]any)
+	installDataMap, isMap := installData.(map[string]any)
+	if !isMap {
+		return nil, errors.New("expected install data to be a map")
+	}
 	state := fmt.Sprintf("%s|%s|%s", installDataMap["workspace_id"], installDataMap["user_id"], installDataMap["company"])
 
 	authURL := fmt.Sprintf("%s?client_id=%s&scope=%s&redirect_uri=%s&state=%s", baseURL, clientID, scope, url.QueryEscape(redirectURI), url.QueryEscape(state))
@@ -737,24 +697,3 @@ func (h HubspotService) OAuthCallback(c *fiber.Ctx, params ...any) (any, error) 
 
 	return nil, nil
 }
-
-// func refreshToken(ctx context.Context, company any) (string, error) {
-
-// 	client, _ := hubspot.NewClient(hubspot.SetOAuth(&hubspot.OAuthConfig{
-// 		GrantType:    hubspot.GrantTypeRefreshToken,
-// 		ClientID:     os.Getenv("HUBSPOT_CLIENT_ID"),
-// 		ClientSecret: os.Getenv("HUBSPOT_CLIENT_SECRET"),
-// 		RefreshToken: company["refresh_token"],
-// 	}))
-
-// 	company.RefreshToken = refreshToken
-// 	company.AccessToken = accessToken
-// 	company.ExpiresIn = fmt.Sprintf("%d", expiresIn)
-// 	company.RefreshedAt = time.Now().UTC().Format(time.RFC3339)
-
-// 	if err := companyRepo.Update("hubspot", company.Name, *company); err != nil {
-// 		return "", fmt.Errorf("failed to update company: %w", err)
-// 	}
-
-// 	return accessToken, nil
-// }

@@ -33,10 +33,10 @@ func (r *PgPresentationSpecRepository) Get(ctx context.Context, params ports.Pre
 	}
 
 	rows, err := r.conn.Query(ctx, getQuery, params.UserEmail, params.UserCompany, params.Service, params.DataSource)
-	if err!= nil {
-        r.logger.Error("Failed to execute query", zap.Error(err), zap.Any("params", params))
-        return domain.PresentationSpec{}, err
-    }
+	if err != nil {
+		r.logger.Error("Failed to execute query", zap.Error(err), zap.Any("params", params))
+		return domain.PresentationSpec{}, err
+	}
 	defer rows.Close()
 
 	spec, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[domain.PresentationSpec])
@@ -57,10 +57,10 @@ func (r *PgPresentationSpecRepository) GetById(ctx context.Context, id string) (
 	defer r.logger.Sync()
 
 	rows, err := r.conn.Query(ctx, getByIdQuery, id)
-	if err!= nil {
-        r.logger.Error("Failed to execute query", zap.Error(err), zap.Any("params", id))
-        return domain.PresentationSpec{}, err
-    }
+	if err != nil {
+		r.logger.Error("Failed to execute query", zap.Error(err), zap.Any("params", id))
+		return domain.PresentationSpec{}, err
+	}
 	defer rows.Close()
 
 	spec, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[domain.PresentationSpec])
