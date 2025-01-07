@@ -31,9 +31,10 @@ func (r *PgCrmSolicitationRepository) GetById(ctx context.Context, id string) (S
 
 	solicitation, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[Solicitation])
 	if err != nil {
-		r.logger.Error("Got error when collecting one row", zap.Error(err), zap.Any("params", id))
 		if errors.Is(err, pgx.ErrNoRows) {
 			return Solicitation{}, repositories.NewSolicitationNotFoundError()
+		} else {
+			r.logger.Error("Got error when collecting one row", zap.Error(err), zap.Any("params", id))
 		}
 
 		return Solicitation{}, err

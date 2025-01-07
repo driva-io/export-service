@@ -127,7 +127,7 @@ func (c *CrmExportUseCase) Execute(request CrmExportRequest, requestConfigs map[
 		return err
 	}
 
-	err = c.sendAllLeads(crmService, crmClient, presentedDataMappedToCnpjs, downloadedData, requestConfigs, solicitation)
+	err = c.sendAllLeads(request, crmService, crmClient, presentedDataMappedToCnpjs, downloadedData, requestConfigs, solicitation)
 
 	return err
 
@@ -174,7 +174,7 @@ func (c *CrmExportUseCase) removeAlreadyExportedCnpjs(data []map[string]any, fil
 	return filtered
 }
 
-func (c *CrmExportUseCase) sendAllLeads(crmService crm_exporter.Crm, client any, leadsData map[any]map[string]any, rawLeadsData []map[string]any, configs map[string]any, solicitation crm_solicitation_repo.Solicitation) error {
+func (c *CrmExportUseCase) sendAllLeads(request CrmExportRequest, crmService crm_exporter.Crm, client any, leadsData map[any]map[string]any, rawLeadsData []map[string]any, configs map[string]any, solicitation crm_solicitation_repo.Solicitation) error {
 	for cnpj, leadData := range leadsData {
 		var correspondingRawData map[string]any
 		for _, rawLead := range rawLeadsData {
@@ -186,13 +186,16 @@ func (c *CrmExportUseCase) sendAllLeads(crmService crm_exporter.Crm, client any,
 
 		stringCnpj := fmt.Sprintf("%v", int(cnpj.(float64)))
 		existingLead := solicitation.ExportedCompanies[stringCnpj]
+		c.logInfoLead("Sending Lead", request, leadData)
 		leadResult, err := crmService.SendLead(client, leadData, correspondingRawData, configs, existingLead)
+		c.logInfoLead("Updating exported companies in solicitation", request, leadData)
 		c.updateExportedCompaniesInSolicitation(leadResult, cnpj, solicitation.ListId)
 
 		if err != nil {
 			return err
 		}
 
+		c.logInfoLead("Updating contact list crm ids", request, leadData)
 		c.updateExportedLeadClickhouse(leadResult)
 	}
 
@@ -289,6 +292,10 @@ func (c *CrmExportUseCase) sendEmail(request CrmExportRequest, url string) error
 
 func (c *CrmExportUseCase) logInfo(message string, request CrmExportRequest) {
 	c.logger.Info(message, zap.Any("request", request))
+}
+
+func (c *CrmExportUseCase) logInfoLead(message string, request CrmExportRequest, lead map[string]any) {
+	c.logger.Info(message, zap.Any("request", request), zap.Any("lead", lead))
 }
 
 func (c *CrmExportUseCase) logError(message string, err error, request CrmExportRequest) {
