@@ -51,6 +51,34 @@ func (r *PgCrmCompanyRepository) Get(ctx context.Context, params ports.CrmCompan
 	return company, nil
 }
 
+func (r *PgCrmCompanyRepository) GetByCompanyName(ctx context.Context, params ports.CrmGetByCompanyNameQueryParams) (Company, error) {
+	defer r.logger.Sync()
+
+	if params.CompanyName == "" || params.Crm == "" {
+		return Company{}, ports.NewInvalidQueryParamsError()
+	}
+
+	rows, err := r.conn.Query(ctx, getByCompanyNameQuery, params.Crm, params.CompanyName)
+	if err != nil {
+		r.logger.Error("Failed to execute query", zap.Error(err), zap.Any("params", params))
+		return Company{}, err
+	}
+	defer rows.Close()
+
+	company, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[Company])
+	if err != nil {
+		r.logger.Error("Got error when collecting one row", zap.Error(err), zap.Any("params", params))
+		if errors.Is(err, pgx.ErrNoRows) {
+			return Company{}, repositories.NewCompanyNotFoundError()
+		} else if errors.Is(err, pgx.ErrTooManyRows) {
+			return Company{}, repositories.NewCompanyNotUniqueError()
+		}
+
+		return Company{}, err
+	}
+	return company, nil
+}
+
 func (r *PgCrmCompanyRepository) AddHubspot(ctx context.Context, params ports.CrmAddHubspotCompanyQueryParams) (Company, error) {
 	defer r.logger.Sync()
 

@@ -10,6 +10,11 @@ type CrmCompanyQueryParams struct {
 	WorkspaceId string
 }
 
+type CrmGetByCompanyNameQueryParams struct {
+	Crm         string
+	CompanyName string
+}
+
 type CrmAddHubspotCompanyQueryParams struct {
 	Company      string
 	WorkspaceId  string

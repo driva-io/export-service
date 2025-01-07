@@ -2,6 +2,7 @@ package middlewares
 
 import (
 	"errors"
+	"export-service/internal/core/ports"
 	"export-service/internal/repositories/crm_company_repo"
 	"export-service/internal/services/crm_exporter"
 	"log"
@@ -24,7 +25,7 @@ func ValidateCrmMiddleware(co *crm_company_repo.PgCrmCompanyRepository) fiber.Ha
 	}
 }
 
-func AuthenticateCrmMiddleware() fiber.Handler {
+func AuthenticateCrmMiddleware(co *crm_company_repo.PgCrmCompanyRepository) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		ctx := c.Context()
 
@@ -33,7 +34,11 @@ func AuthenticateCrmMiddleware() fiber.Handler {
 
 		log.Printf("Authenticating CRM for company: %v", companyName)
 
-		crmClient, err := crm.Authorize(ctx, companyName)
+		company, err := co.GetByCompanyName(ctx, ports.CrmGetByCompanyNameQueryParams{Crm: "hubspot", CompanyName: companyName})
+		if err != nil {
+			return err
+		}
+		crmClient, err := crm.Authorize(ctx, company.WorkspaceId.String)
 		if err != nil {
 			return err
 		}

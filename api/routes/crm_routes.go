@@ -29,7 +29,7 @@ func RegisterCrmRoutes(s *server.FiberServer, a gateways.AuthServiceGateway, co 
 	crmRoutes := s.App.Group("/crm/v1")
 	crmRoutes.Use(middlewares.AuthMiddleware(a))
 	crmRoutes.Use("/:crm/*", middlewares.ValidateCrmMiddleware(co))
-	crmRoutes.Use("/:crm/*", middlewares.AuthenticateCrmMiddleware())
+	crmRoutes.Use("/:crm/*", middlewares.AuthenticateCrmMiddleware(co))
 	crmRoutes.Get("/:crm/pipelines", func(c *fiber.Ctx) error {
 		return handlers.GetPipelinesHandler(c, c.Locals("crm").(crm_exporter.Crm), c.Locals("crmClient"))
 	})
