@@ -4,9 +4,10 @@ import (
 	"export-service/internal/core/domain"
 	"export-service/internal/core/ports"
 	"fmt"
-	"github.com/tealeg/xlsx/v3"
 	"log"
 	"os"
+
+	"github.com/tealeg/xlsx/v3"
 )
 
 type ExcelWriter struct {
@@ -38,6 +39,18 @@ func (e *ExcelWriter) Write(data []map[string]any, spec domain.PresentationSpec)
 }
 
 func addSheet(data []map[string]any, wb *xlsx.File, sheetOption domain.PresentationSpecSheetOptions) {
+	hasAtLeastOneValue := false
+	for _, d := range data {
+		_, ok := d[sheetOption.Key] // verifica se o campo com os valores da aba atual existe
+		if ok {
+			hasAtLeastOneValue = true
+			break
+		}
+	}
+
+	if !hasAtLeastOneValue {
+		return
+	}
 	sh, err := wb.AddSheet(sheetOption.Key)
 	if err != nil {
 		log.Println("Error adding sheet", sheetOption.Key, err)

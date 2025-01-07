@@ -3,10 +3,11 @@ package writers
 import (
 	"export-service/internal/core/domain"
 	"fmt"
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tealeg/xlsx/v3"
-	"testing"
 )
 
 func TestExcelWriter_Write(t *testing.T) {
@@ -200,22 +201,11 @@ func TestExcelWriter_Write(t *testing.T) {
 		wb, err := xlsx.OpenFile(path)
 		require.NoError(t, err)
 
-		expectedSheets := []string{"RFB", "Telefones"}
+		expectedSheets := []string{"RFB"}
 		assert.Lenf(t, wb.Sheets, len(expectedSheets), "Expected %d sheets, got %d", len(expectedSheets), len(wb.Sheets))
 		for i, sh := range wb.Sheets {
 			assert.Equalf(t, expectedSheets[i], sh.Name, "Sheet %d should be %s", i, expectedSheets[i])
 		}
-
-		err = wb.Sheet["Telefones"].ForEachRow(func(r *xlsx.Row) error {
-			if r.GetCoordinate() == 0 {
-				assert.Equalf(t, "CNPJ", r.GetCell(0).Value, "Expected 'CNPJ' as first column header, got %s", r.GetCell(0).Value)
-				assert.Equalf(t, "Telefone", r.GetCell(1).Value, "Expected 'Telefone' as second column header, got %s", r.GetCell(1).Value)
-			}
-
-			assert.Equalf(t, 0, r.GetCoordinate(), "Should have only headers when there's no data in sheet")
-			return nil
-		})
-		require.NoError(t, err)
 	})
 
 	t.Run("Should handle missing fields in data", func(t *testing.T) {

@@ -1,53 +1,53 @@
 - name: Test $for
   spec:
     Tab1:
-      testeForSimples: 
-        $for: 
+      testeForSimples:
+        $for:
           $prop: instagram
           $format: url
-      testeForObjeto: 
-        $for: 
+      testeForObjeto:
+        $for:
           $prop: instagram
-          $format: 
+          $format:
             url: url
             cnpj: super$.cnpj
       testeForIndex:
-        $for: 
+        $for:
           $prop: instagram
           $format: url
           $index: 1
       testeForLimit:
-        $for: 
+        $for:
           $prop: instagram
           $format: url
           $limit: 1
       testeForFilter:
-        $for: 
+        $for:
           $prop: telefones
           $format: telefone_completo
           $filter:
             fixo_movel: "MOVEL"
             whatsapp: true
       testeForVazio:
-        $for: 
+        $for:
           $prop: campo_inexistente
           $format: telefone_completo
           $filter:
             fixo_movel: "MOVEL"
-            whatsapp: true 
-      
+            whatsapp: true
+
   expected:
     Tab1:
-      testeForSimples: 
+      testeForSimples:
         - instagram.com/instagram1
         - instagram.com/instagram2
-      testeForObjeto: 
+      testeForObjeto:
         - url: instagram.com/instagram1
           cnpj: 1111.0
         - url: instagram.com/instagram2
           cnpj: 1111.0
       testeForIndex: instagram.com/instagram2
-      testeForLimit:        
+      testeForLimit:
         - instagram.com/instagram1
       testeForFilter:
         - "99 922222222"
@@ -96,7 +96,7 @@
         $joinby:
           $prop: instagram.url
           $separator: "---"
-  
+
   expected:
     Tab1:
       testeJoinbySimples: "instagram.com/instagram1, instagram.com/instagram2"
@@ -107,12 +107,12 @@
     Tab1:
       testeSwitch:
         $switch:
-          $cases: 
+          $cases:
             - $use: razao_social
-              $case: 
+              $case:
                 endereco: ENDERECO
             - $use: endereco
-              $case: 
+              $case:
                 razao_social: RAZAO SOCIAL
 
   expected:
@@ -231,7 +231,7 @@
   expected:
     Tab1:
       testeNumber: 222
- 
+
 - name: Test $string
   spec:
     Tab1:
@@ -256,12 +256,12 @@
   spec:
     Tab1:
       testeCompositeString:
-        $compositestring: 
+        $compositestring:
           VALOR1: razao_social
           VALOR2: nome_fantasia
           VALOR3: capital_social
-  
-  expected: 
+
+  expected:
     Tab1:
       testeCompositeString: "VALOR1: RAZAO SOCIAL\nVALOR2: NOME FANTASIA\nVALOR3: 110000\n"
 
@@ -270,13 +270,13 @@
     Tab1:
       testeFlat:
         $flat:
-          - $for: 
+          - $for:
               $prop: instagram
               $format:
-                entity: 
+                entity:
                   url: url
                   cnpj: super$.cnpj
-          - $for: 
+          - $for:
               $prop: telefones
               $format:
                 entity:
@@ -288,7 +288,7 @@
 
   expected:
     Tab1:
-      testeFlat: 
+      testeFlat:
         - entity:
             url: "instagram.com/instagram1"
             cnpj: 1111.0
@@ -299,7 +299,6 @@
             tc: "99 944444444"
             cnpj: 1111.0
 
-
 - name: Test $flat obj
   spec:
     Tab1:
@@ -307,11 +306,34 @@
         $flat:
           - instagram
           - facebook
-
   expected:
     Tab1:
-      testeFlatObj: 
+      testeFlatObj:
         - url: "instagram.com/instagram1"
         - url: "instagram.com/instagram2"
         - url: "facebook.com/facebook1"
         - url: "facebook.com/facebook2"
+
+- name: Test CNES
+  spec:
+    CNES:
+      CNPJ:
+        $ncnpj: cnpj
+      Atividade: cnes.atividade
+      Razão Social: razao_social
+  expected:
+    CNES:
+      CNPJ: "00000000001111"
+      Atividade: "INTERNACAO"
+      Razão Social: "RAZAO SOCIAL"
+- name: Test Inexistente
+  spec:
+    Inexistente:
+      CNPJ:
+        $ncnpj: cnpj
+      A: campo_inexistente.atividade
+      Razão Social: razao_social
+  expected:
+    Inexistente:
+      CNPJ: "00000000001111"
+      Razão Social: "RAZAO SOCIAL"
