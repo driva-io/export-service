@@ -67,6 +67,42 @@ func (r *PgCrmSolicitationRepository) Update(ctx context.Context, params UpdateE
 	return solicitation, nil
 }
 
+func (r *PgCrmSolicitationRepository) UpdateStatus(ctx context.Context, newStatus SolicitationStatus, solicitationId string) (Solicitation, error) {
+	defer r.logger.Sync()
+
+	rows, _ := r.conn.Query(ctx, updateStatusQuery, newStatus, solicitationId)
+
+	solicitation, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[Solicitation])
+	if err != nil {
+		r.logger.Error("Got error when collecting one row", zap.Error(err), zap.Any("params", newStatus))
+		if errors.Is(err, pgx.ErrNoRows) {
+			return Solicitation{}, repositories.NewSolicitationNotFoundError()
+		}
+
+		return Solicitation{}, err
+	}
+
+	return solicitation, nil
+}
+
+func (r *PgCrmSolicitationRepository) IncrementCurrent(ctx context.Context, solicitationId string) (Solicitation, error) {
+	defer r.logger.Sync()
+
+	rows, _ := r.conn.Query(ctx, incrementCurrentQuery, solicitationId)
+
+	solicitation, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[Solicitation])
+	if err != nil {
+		r.logger.Error("Got error when collecting one row", zap.Error(err), zap.Any("params", solicitationId))
+		if errors.Is(err, pgx.ErrNoRows) {
+			return Solicitation{}, repositories.NewSolicitationNotFoundError()
+		}
+
+		return Solicitation{}, err
+	}
+
+	return solicitation, nil
+}
+
 func (r *PgCrmSolicitationRepository) Create(ctx context.Context, solicitation CreateSolicitation) (Solicitation, error) {
 	defer r.logger.Sync()
 

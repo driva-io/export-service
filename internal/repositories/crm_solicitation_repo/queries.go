@@ -4,6 +4,14 @@ const getQuery = `
 	select * from crm.solicitation_v2 where list_id = $1
 	`
 
+const updateStatusQuery = `
+	update crm.solicitation_v2 set status = $1 where list_id = $2
+`
+
+const incrementCurrentQuery = `
+	update crm.solicitation_v2 set current = current + 1 where list_id = $2
+`
+
 const updateExportedCompanies = `
 	UPDATE crm.solicitation_v2
 	SET exported_companies = jsonb_set(

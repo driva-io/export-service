@@ -100,34 +100,45 @@ func (c *CrmExportUseCase) Execute(request CrmExportRequest, requestConfigs map[
 			return err
 		}
 	} else {
-		c.logInfo("Solicitation "+request.ListID+" already exists, skipping creation.", request)
+		c.logInfo("Solicitation "+request.ListID+" already exists, updating status to In Progress.", request)
+		c.solicitationRepo.UpdateStatus(context.Background(), crm_solicitation_repo.InProgress, request.ListID)
 	}
 
 	spec, err := c.getPresentationSpec(request, crm)
 	if err != nil {
 		c.logError("Error when getting presentation spec", err, request)
+		c.solicitationRepo.UpdateStatus(context.Background(), crm_solicitation_repo.Interrupted, request.ListID)
 		return err
 	}
 
 	downloadedData, err := c.downloadData(request)
 	if err != nil {
 		c.logError("Error when downloading data", err, request)
+		c.solicitationRepo.UpdateStatus(context.Background(), crm_solicitation_repo.Interrupted, request.ListID)
 		return err
 	}
 
 	presentedData, err := c.applyPresentationSpecCrm(request, downloadedData, spec)
 	if err != nil {
 		c.logError("Error when applying presentation spec", err, request)
+		c.solicitationRepo.UpdateStatus(context.Background(), crm_solicitation_repo.Interrupted, request.ListID)
 		return err
 	}
 
 	presentedDataMappedToCnpjs, err := c.mapPresentedDataToCnpjs(downloadedData, presentedData)
 	if err != nil {
 		c.logError("Error mapping cnpj to presented data", err, request)
+		c.solicitationRepo.UpdateStatus(context.Background(), crm_solicitation_repo.Interrupted, request.ListID)
 		return err
 	}
 
 	err = c.sendAllLeads(request, crmService, crmClient, presentedDataMappedToCnpjs, downloadedData, requestConfigs, solicitation)
+
+	if err != nil {
+		c.solicitationRepo.UpdateStatus(context.Background(), crm_solicitation_repo.Interrupted, request.ListID)
+	} else {
+		c.solicitationRepo.UpdateStatus(context.Background(), crm_solicitation_repo.Completed, request.ListID)
+	}
 
 	return err
 
@@ -157,23 +168,6 @@ func (c *CrmExportUseCase) mapPresentedDataToCnpjs(data []map[string]any, presen
 	return presentedDataCnpjMap, nil
 }
 
-func (c *CrmExportUseCase) removeAlreadyExportedCnpjs(data []map[string]any, filterKeys map[string]any) []map[string]any {
-	var filtered []map[string]any
-
-	for _, item := range data {
-		if cnpj, exists := item["cnpj"]; exists {
-			stringCnpj := fmt.Sprintf("%v", cnpj)
-			if _, found := filterKeys[stringCnpj]; !found {
-				filtered = append(filtered, item)
-			}
-		} else {
-			filtered = append(filtered, item)
-		}
-	}
-
-	return filtered
-}
-
 func (c *CrmExportUseCase) sendAllLeads(request CrmExportRequest, crmService crm_exporter.Crm, client any, leadsData map[any]map[string]any, rawLeadsData []map[string]any, configs map[string]any, solicitation crm_solicitation_repo.Solicitation) error {
 	for cnpj, leadData := range leadsData {
 		var correspondingRawData map[string]any
@@ -197,6 +191,7 @@ func (c *CrmExportUseCase) sendAllLeads(request CrmExportRequest, crmService crm
 
 		c.logInfoLead("Updating contact list crm ids", request, leadData)
 		c.updateExportedLeadClickhouse(leadResult)
+		c.solicitationRepo.IncrementCurrent(context.Background(), request.ListID)
 	}
 
 	return nil
