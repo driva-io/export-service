@@ -9,7 +9,7 @@ const updateStatusQuery = `
 `
 
 const incrementCurrentQuery = `
-	update crm.solicitation_v2 set current = current + 1 where list_id = $2
+	update crm.solicitation_v2 set current = current + 1 where list_id = $1
 `
 
 const updateExportedCompanies = `
