@@ -36,7 +36,7 @@ func AuthenticateCrmMiddleware(co *crm_company_repo.PgCrmCompanyRepository) fibe
 		var company crm_company_repo.Company
 		var err error
 		if workspaceId != "" {
-			log.Printf("Authenticating CRM for company: %v", companyName)
+			log.Printf("Authenticating CRM for workspace: %v", workspaceId)
 			company, err = co.GetCompanyByWorkspaceId(ctx, ports.CrmCompanyQueryParams{Crm: "hubspot", WorkspaceId: workspaceId})
 			if err != nil {
 				return err

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"export-service/internal/core/ports"
+	"export-service/internal/repositories"
 	"export-service/internal/repositories/crm_company_repo"
 	"fmt"
 	"io"
@@ -701,6 +702,12 @@ func (h HubspotService) OAuthCallback(c *fiber.Ctx, params ...any) (any, error) 
 	workspaceId := params[0].(string)
 	userId := params[1].(string)
 	company := params[2].(string)
+
+	_, err := h.companyRepo.GetCompanyByWorkspaceId(c.Context(), ports.CrmCompanyQueryParams{Crm: "hubspot", WorkspaceId: workspaceId})
+	var companyNotFoundError *repositories.CompanyNotFoundError
+	if !errors.As(err, &companyNotFoundError) {
+		return nil, errors.New("workspace already has an installation for hubspot")
+	}
 
 	formData := url.Values{}
 	formData.Set("grant_type", "authorization_code")
