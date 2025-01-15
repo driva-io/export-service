@@ -704,7 +704,7 @@ func (h HubspotService) OAuthCallback(c *fiber.Ctx, params ...any) (any, error) 
 	company := params[2].(string)
 
 	_, err := h.companyRepo.GetCompanyByWorkspaceId(c.Context(), ports.CrmCompanyQueryParams{Crm: "hubspot", WorkspaceId: workspaceId})
-	var companyNotFoundError *repositories.CompanyNotFoundError
+	var companyNotFoundError repositories.CompanyNotFoundError
 	if !errors.As(err, &companyNotFoundError) {
 		return nil, errors.New("workspace already has an installation for hubspot")
 	}
