@@ -190,8 +190,14 @@ func (c *CrmExportUseCase) sendAllLeads(request CrmExportRequest, crmService crm
 		}
 
 		c.logInfoLead("Updating contact list crm ids", request, leadData)
-		c.updateExportedLeadClickhouse(leadResult)
-		c.solicitationRepo.IncrementCurrent(context.Background(), request.ListID)
+		err = c.updateExportedLeadClickhouse(leadResult)
+		if err!= nil {
+            return err
+        }
+		_, err = c.solicitationRepo.IncrementCurrent(context.Background(), request.ListID)
+		if err!= nil {
+            return err
+        }
 	}
 
 	return nil

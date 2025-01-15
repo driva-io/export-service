@@ -104,10 +104,14 @@ func sendCompany(client *hubspot.Client, mappedCompanyData map[string]any, owner
 		}, err
 	}
 
-	var searchFields string
+	var builder strings.Builder
 	for key, value := range searchFilters {
-		searchFields += fmt.Sprintf("%s: %v, ", key, value)
+		if builder.Len() > 0 {
+			builder.WriteString(", ") // Add a comma only after the first pair
+		}
+		builder.WriteString(fmt.Sprintf("%s: %v", key, value))
 	}
+	searchFields := builder.String()
 
 	var company *hubspot.ResponseResource
 	var status Status
@@ -171,10 +175,14 @@ func sendDeal(client *hubspot.Client, mappedDealData map[string]any, ownerId str
 		}, err
 	}
 
-	var searchFields string
+	var builder strings.Builder
 	for key, value := range searchFilters {
-		searchFields += fmt.Sprintf("%s: %v, ", key, value)
+		if builder.Len() > 0 {
+			builder.WriteString(", ") // Add a comma only after the first pair
+		}
+		builder.WriteString(fmt.Sprintf("%s: %v", key, value))
 	}
+	searchFields := builder.String()
 
 	var deal *hubspot.ResponseResource
 	var status Status
@@ -236,10 +244,14 @@ func sendContact(client *hubspot.Client, mappedContactData map[string]any, owner
 		}, err
 	}
 
-	var searchFields string
+	var builder strings.Builder
 	for key, value := range searchFilters {
-		searchFields += fmt.Sprintf("%s: %v, ", key, value)
+		if builder.Len() > 0 {
+			builder.WriteString(", ") // Add a comma only after the first pair
+		}
+		builder.WriteString(fmt.Sprintf("%s: %v", key, value))
 	}
+	searchFields := builder.String()
 
 	var contact *hubspot.ResponseResource
 	var status Status
@@ -467,17 +479,19 @@ func processContacts(client *hubspot.Client, contacts any, existingLead, rawData
 	}
 
 	var statuses []ObjectStatus
-	for _, contact := range contactsData {
+	for key, contact := range contactsData {
+		contactRawData := rawData["profiles"].([]any)[key].(map[string]any)
+
 		contactMap, ok := contact.(map[string]any)
 		if !ok {
 			continue
 		}
 
-		exportedContacts, exists := existingLead["contacts"].([]map[string]any)
+		exportedContacts, exists := existingLead["contacts"].([]any)
 		if exists {
 			for _, exportedContact := range exportedContacts {
-				if exportedContact["driva_contact_id"] == contactMap["profile_company_id"] {
-					statuses = append(statuses, *createExistingStatus(exportedContact))
+				if exportedContact.(map[string]any)["driva_contact_id"] == contactMap["profile_company_id"] {
+					statuses = append(statuses, *createExistingStatus(exportedContact.(map[string]any)))
 					continue
 				}
 			}
@@ -488,7 +502,7 @@ func processContacts(client *hubspot.Client, contacts any, existingLead, rawData
 			return nil, err
 		}
 
-		if drivaID, exists := rawData["profile_contact_id"].(string); exists {
+		if drivaID, exists := contactRawData["profile_contact_id"].(string); exists {
 			sentContact.DrivaContactId = &drivaID
 		}
 		statuses = append(statuses, sentContact)
@@ -636,7 +650,7 @@ func (h HubspotService) GetOwners(client any) ([]Owner, error) {
 
 func (h HubspotService) Authorize(ctx context.Context, workspaceId string) (any, error) {
 
-	company, err := h.companyRepo.Get(ctx, ports.CrmCompanyQueryParams{Crm: "hubspot", WorkspaceId: workspaceId})
+	company, err := h.companyRepo.GetCompanyByWorkspaceId(ctx, ports.CrmCompanyQueryParams{Crm: "hubspot", WorkspaceId: workspaceId})
 	if err != nil {
 		return nil, err
 	}

@@ -30,14 +30,27 @@ func AuthenticateCrmMiddleware(co *crm_company_repo.PgCrmCompanyRepository) fibe
 		ctx := c.Context()
 
 		companyName := c.Query("company")
+		workspaceId := c.Query("workspace_id")
 		crm := c.Locals("crm").(crm_exporter.Crm)
 
-		log.Printf("Authenticating CRM for company: %v", companyName)
-
-		company, err := co.GetByCompanyName(ctx, ports.CrmGetByCompanyNameQueryParams{Crm: "hubspot", CompanyName: companyName})
-		if err != nil {
-			return err
+		var company crm_company_repo.Company
+		var err error
+		if workspaceId != "" {
+			log.Printf("Authenticating CRM for company: %v", companyName)
+			company, err = co.GetCompanyByWorkspaceId(ctx, ports.CrmCompanyQueryParams{Crm: "hubspot", WorkspaceId: workspaceId})
+			if err != nil {
+				return err
+			}
+		} else if companyName != "" {
+			log.Printf("Authenticating CRM for company: %v", companyName)
+			company, err = co.GetByCompanyName(ctx, ports.CrmGetByCompanyNameQueryParams{Crm: "hubspot", CompanyName: companyName})
+			if err != nil {
+				return err
+			}
+		} else {
+			return errors.New("either workspace_id or company query parameter is required")
 		}
+		
 		crmClient, err := crm.Authorize(ctx, company.WorkspaceId.String)
 		if err != nil {
 			return err

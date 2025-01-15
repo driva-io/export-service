@@ -5,11 +5,11 @@ const getQuery = `
 	`
 
 const updateStatusQuery = `
-	update crm.solicitation_v2 set status = $1 where list_id = $2
+	update crm.solicitation_v2 set status = $1 where list_id = $2 returning *
 `
 
 const incrementCurrentQuery = `
-	update crm.solicitation_v2 set current = current + 1 where list_id = $1
+	update crm.solicitation_v2 set current = current + 1 where list_id = $1 returning *
 `
 
 const updateExportedCompanies = `

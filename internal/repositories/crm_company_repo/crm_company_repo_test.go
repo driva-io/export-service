@@ -85,7 +85,7 @@ func TestGet(t *testing.T) {
 			WorkspaceId:        sql.NullString{String: "workspace_1", Valid: true},
 		}
 
-		result, err := repo.Get(ctx, ports.CrmCompanyQueryParams{Crm: "hubspot", WorkspaceId: "workspace_1"})
+		result, err := repo.GetCompanyByWorkspaceId(ctx, ports.CrmCompanyQueryParams{Crm: "hubspot", WorkspaceId: "workspace_1"})
 
 		require.NoError(t, err)
 		require.Equal(t, company, result)
