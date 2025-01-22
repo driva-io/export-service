@@ -16,16 +16,23 @@ const (
 	Failed  Status = "failed"
 )
 
+type Association struct {
+	ObjectType string `json:"object_type,omitempty"`
+	CrmId      any    `json:"crm_id,omitempty"`
+}
+
 type ObjectStatus struct {
-	CrmId          any     `json:"crm_id"`
-	Status         Status  `json:"status"`
-	Message        string  `json:"message,omitempty"`
-	DrivaContactId *string `json:"driva_contact_id,omitempty"`
+	CrmId          any           `json:"crm_id,omitempty"`
+	Status         Status        `json:"status,omitempty"`
+	Message        string        `json:"message,omitempty"`
+	DrivaContactId string        `json:"driva_contact_id,omitempty"`
+	Associations   []Association `json:"associations,omitempty"`
 }
 
 type CreatedLead struct {
 	Company  *ObjectStatus   `json:"company,omitempty"`
 	Deal     *ObjectStatus   `json:"deal,omitempty"`
+	Lead     *ObjectStatus   `json:"lead,omitempty"`
 	Contacts *[]ObjectStatus `json:"contacts,omitempty"`
 	Other    *[]ObjectStatus `json:"other,omitempty"`
 }
@@ -45,6 +52,7 @@ type Crm interface {
 func GetCrm(crm string, co *crm_company_repo.PgCrmCompanyRepository) (Crm, bool) {
 	crms := map[string]Crm{
 		"hubspot": NewHubspotService(co),
+		"bitrix":  NewBitrixService(co),
 	}
 
 	crmService, exists := crms[crm]

@@ -81,24 +81,24 @@ func main() {
 		}
 	}()
 
-	// go func() {
-	// 	for {
-	// 		crmBus, err := client.Consume(crm)
-	// 		failOnError(err, "Failed to consume bus")
+	go func() {
+		for {
+			crmBus, err := client.Consume(crm)
+			failOnError(err, "Failed to consume bus")
 
-	// 		for d := range crmBus {
-	// 			// if conn.IsClosed() {
-	// 			// 	conn, err = pgx.Connect(ctx, getPostgresConnStr())
-	// 			// 	failOnError(err, "Failed to connect to database")
-	// 			// }
+			for d := range crmBus {
+				// if conn.IsClosed() {
+				// 	conn, err = pgx.Connect(ctx, getPostgresConnStr())
+				// 	failOnError(err, "Failed to connect to database")
+				// }
 
-	// 			handleCrmExportRequest(d, conn)
-	// 		}
+				handleCrmExportRequest(d, conn)
+			}
 
-	// 		mainLogger.Warn("Queue closed, retrying in 60 seconds")
-	// 		time.Sleep(60 * time.Second)
-	// 	}
-	// }()
+			mainLogger.Warn("Queue closed, retrying in 60 seconds")
+			time.Sleep(60 * time.Second)
+		}
+	}()
 
 	mainLogger.Info("Consuming messages, press CTRL+C to stop")
 	// Blocks forever
@@ -124,6 +124,26 @@ func handleCrmExportRequest(d amqp.Delivery, conn *pgxpool.Pool) {
 	}
 
 	headers := d.Headers
+	total := int64(0)
+	if rawTotal, ok := headers["total"]; ok {
+		switch v := rawTotal.(type) {
+		case int:
+			total = int64(v)
+		case int64:
+			total = v
+		case float64:
+			total = int64(v)
+		default:
+			logger.Warn("Unexpected type for total", zap.Any("value", rawTotal))
+			failOnError(d.Nack(false, false), "Failed to nack message")
+			return
+		}
+	} else {
+		logger.Warn("Total is missing in headers")
+		failOnError(d.Nack(false, false), "Failed to nack message")
+		return
+	}
+
 	configs := map[string]any{
 		"crm":            headers["crm"],
 		"pipeline_id":    headers["pipeline_id"],
@@ -131,7 +151,7 @@ func handleCrmExportRequest(d amqp.Delivery, conn *pgxpool.Pool) {
 		"owner_id":       headers["owner_id"],
 		"create_deal":    headers["create_deal"],
 		"overwrite_data": headers["overwrite_data"],
-		"total":          headers["total"],
+		"total":          total,
 		//Add other crm configs
 	}
 

@@ -79,6 +79,10 @@ func (c *CrmExportUseCase) Execute(request CrmExportRequest, requestConfigs map[
 		return err
 	}
 
+	if crm == "bitrix" {
+		requestConfigs["workspace_id"] = request.UserCompany
+	}
+
 	var solicitationNotFoundError repositories.SolicitationNotFoundError
 	solicitation, err := c.solicitationRepo.GetById(context.Background(), request.ListID)
 
@@ -87,7 +91,7 @@ func (c *CrmExportUseCase) Execute(request CrmExportRequest, requestConfigs map[
 			ListId:        request.ListID,
 			UserEmail:     request.UserEmail,
 			Current:       0,
-			Total:         int(requestConfigs["total"].(float64)),
+			Total:         int(requestConfigs["total"].(int64)),
 			OwnerId:       requestConfigs["owner_id"].(string),
 			PipelineId:    requestConfigs["pipeline_id"].(string),
 			StageId:       requestConfigs["stage_id"].(string),
@@ -191,13 +195,13 @@ func (c *CrmExportUseCase) sendAllLeads(request CrmExportRequest, crmService crm
 
 		c.logInfoLead("Updating contact list crm ids", request, leadData)
 		err = c.updateExportedLeadClickhouse(leadResult)
-		if err!= nil {
-            return err
-        }
+		if err != nil {
+			return err
+		}
 		_, err = c.solicitationRepo.IncrementCurrent(context.Background(), request.ListID)
-		if err!= nil {
-            return err
-        }
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
