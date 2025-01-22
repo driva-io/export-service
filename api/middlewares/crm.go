@@ -28,37 +28,40 @@ func ValidateCrmMiddleware(co *crm_company_repo.PgCrmCompanyRepository) fiber.Ha
 func AuthenticateCrmMiddleware(co *crm_company_repo.PgCrmCompanyRepository) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		ctx := c.Context()
-
+	
 		companyName := c.Query("company")
 		workspaceId := c.Query("workspace_id")
 		crmService := c.Locals("crm_service").(crm_exporter.Crm)
 		crm := c.Params("crm")
-
-		var company crm_company_repo.Company
-		var err error
-		if workspaceId != "" {
-			log.Printf("Authenticating CRM for workspace: %v", workspaceId)
-			company, err = co.GetCompanyByWorkspaceId(ctx, ports.CrmCompanyQueryParams{Crm: crm, WorkspaceId: workspaceId})
-			if err != nil {
-				return err
-			}
-		} else if companyName != "" {
-			log.Printf("Authenticating CRM for company: %v", companyName)
-			company, err = co.GetByCompanyName(ctx, ports.CrmGetByCompanyNameQueryParams{Crm: crm, CompanyName: companyName})
-			if err != nil {
-				return err
-			}
-		} else {
+	
+		if workspaceId == "" && companyName == "" {
 			return errors.New("either workspace_id or company query parameter is required")
 		}
-
-		crmClient, err := crmService.Authorize(ctx, company.WorkspaceId.String)
+	
+		if workspaceId == "" {
+			company, err := co.GetByCompanyName(ctx, ports.CrmGetByCompanyNameQueryParams{
+				Crm:        crm,
+				CompanyName: companyName,
+			})
+			if err != nil {
+				return err
+			}
+	
+			if company.WorkspaceId.String == "" {
+				return errors.New("workspace_id not found for the given company")
+			}
+	
+			workspaceId = company.WorkspaceId.String
+		}
+	
+		log.Printf("Authenticating CRM for workspace: %v", workspaceId)
+		crmClient, err := crmService.Authorize(ctx, workspaceId)
 		if err != nil {
 			return err
 		}
-
+	
 		c.Locals("crmClient", crmClient)
-
+	
 		return c.Next()
 	}
 }
