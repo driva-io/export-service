@@ -84,7 +84,7 @@ func (c *CrmExportUseCase) Execute(request CrmExportRequest, requestConfigs map[
 	}
 
 	var solicitationNotFoundError repositories.SolicitationNotFoundError
-	solicitation, err := c.solicitationRepo.GetById(context.Background(), request.ListID)
+	solicitation, err := c.solicitationRepo.GetByIdAndCrm(context.Background(), request.ListID, crm)
 
 	if errors.As(err, &solicitationNotFoundError) {
 		solicitation, err = c.solicitationRepo.Create(context.Background(), crm_solicitation_repo.CreateSolicitation{
@@ -97,6 +97,7 @@ func (c *CrmExportUseCase) Execute(request CrmExportRequest, requestConfigs map[
 			StageId:       requestConfigs["stage_id"].(string),
 			OverwriteData: requestConfigs["overwrite_data"].(bool),
 			CreateDeal:    requestConfigs["create_deal"].(bool),
+			Crm: crm,
 		})
 
 		if err != nil {
@@ -105,43 +106,43 @@ func (c *CrmExportUseCase) Execute(request CrmExportRequest, requestConfigs map[
 		}
 	} else {
 		c.logInfo("Solicitation "+request.ListID+" already exists, updating status to In Progress.", request)
-		c.solicitationRepo.UpdateStatus(context.Background(), crm_solicitation_repo.InProgress, request.ListID)
+		c.solicitationRepo.UpdateStatus(context.Background(), crm_solicitation_repo.InProgress, request.ListID, crm)
 	}
 
 	spec, err := c.getPresentationSpec(request, crm)
 	if err != nil {
 		c.logError("Error when getting presentation spec", err, request)
-		c.solicitationRepo.UpdateStatus(context.Background(), crm_solicitation_repo.Interrupted, request.ListID)
+		c.solicitationRepo.UpdateStatus(context.Background(), crm_solicitation_repo.Interrupted, request.ListID, crm)
 		return err
 	}
 
 	downloadedData, err := c.downloadData(request)
 	if err != nil {
 		c.logError("Error when downloading data", err, request)
-		c.solicitationRepo.UpdateStatus(context.Background(), crm_solicitation_repo.Interrupted, request.ListID)
+		c.solicitationRepo.UpdateStatus(context.Background(), crm_solicitation_repo.Interrupted, request.ListID, crm)
 		return err
 	}
 
 	presentedData, err := c.applyPresentationSpecCrm(request, downloadedData, spec)
 	if err != nil {
 		c.logError("Error when applying presentation spec", err, request)
-		c.solicitationRepo.UpdateStatus(context.Background(), crm_solicitation_repo.Interrupted, request.ListID)
+		c.solicitationRepo.UpdateStatus(context.Background(), crm_solicitation_repo.Interrupted, request.ListID, crm)
 		return err
 	}
 
 	presentedDataMappedToCnpjs, err := c.mapPresentedDataToCnpjs(downloadedData, presentedData)
 	if err != nil {
 		c.logError("Error mapping cnpj to presented data", err, request)
-		c.solicitationRepo.UpdateStatus(context.Background(), crm_solicitation_repo.Interrupted, request.ListID)
+		c.solicitationRepo.UpdateStatus(context.Background(), crm_solicitation_repo.Interrupted, request.ListID, crm)
 		return err
 	}
 
 	err = c.sendAllLeads(request, crmService, crmClient, presentedDataMappedToCnpjs, downloadedData, requestConfigs, solicitation)
 
 	if err != nil {
-		c.solicitationRepo.UpdateStatus(context.Background(), crm_solicitation_repo.Interrupted, request.ListID)
+		c.solicitationRepo.UpdateStatus(context.Background(), crm_solicitation_repo.Interrupted, request.ListID, crm)
 	} else {
-		c.solicitationRepo.UpdateStatus(context.Background(), crm_solicitation_repo.Completed, request.ListID)
+		c.solicitationRepo.UpdateStatus(context.Background(), crm_solicitation_repo.Completed, request.ListID, crm)
 	}
 
 	return err
@@ -187,7 +188,7 @@ func (c *CrmExportUseCase) sendAllLeads(request CrmExportRequest, crmService crm
 		c.logInfoLead("Sending Lead", request, leadData)
 		leadResult, err := crmService.SendLead(client, leadData, correspondingRawData, configs, existingLead)
 		c.logInfoLead("Updating exported companies in solicitation", request, leadData)
-		c.updateExportedCompaniesInSolicitation(leadResult, cnpj, solicitation.ListId)
+		c.updateExportedCompaniesInSolicitation(leadResult, cnpj, solicitation.ListId, solicitation.Crm)
 
 		if err != nil {
 			return err
@@ -198,7 +199,7 @@ func (c *CrmExportUseCase) sendAllLeads(request CrmExportRequest, crmService crm
 		if err != nil {
 			return err
 		}
-		_, err = c.solicitationRepo.IncrementCurrent(context.Background(), request.ListID)
+		_, err = c.solicitationRepo.IncrementCurrent(context.Background(), request.ListID, solicitation.Crm)
 		if err != nil {
 			return err
 		}
@@ -207,12 +208,12 @@ func (c *CrmExportUseCase) sendAllLeads(request CrmExportRequest, crmService crm
 	return nil
 }
 
-func (c *CrmExportUseCase) updateExportedCompaniesInSolicitation(leadResult crm_exporter.CreatedLead, cnpj any, solicitationId string) error {
+func (c *CrmExportUseCase) updateExportedCompaniesInSolicitation(leadResult crm_exporter.CreatedLead, cnpj any, listId, crm string) error {
 
 	c.solicitationRepo.Update(context.Background(), crm_solicitation_repo.UpdateExportedCompaniesParms{
 		Cnpj:               cnpj,
 		NewExportedCompany: leadResult,
-	}, solicitationId)
+	}, listId, crm)
 
 	return nil
 }

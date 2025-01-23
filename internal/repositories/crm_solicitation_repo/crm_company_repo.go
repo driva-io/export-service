@@ -24,10 +24,10 @@ func NewPgCrmSolicitationRepository(conn *pgxpool.Pool, logger *zap.Logger) *PgC
 	}
 }
 
-func (r *PgCrmSolicitationRepository) GetById(ctx context.Context, id string) (Solicitation, error) {
+func (r *PgCrmSolicitationRepository) GetByIdAndCrm(ctx context.Context, id, crm string) (Solicitation, error) {
 	defer r.logger.Sync()
 
-	rows, _ := r.conn.Query(ctx, getQuery, id)
+	rows, _ := r.conn.Query(ctx, getQuery, id, crm)
 
 	solicitation, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[Solicitation])
 	if err != nil {
@@ -42,7 +42,7 @@ func (r *PgCrmSolicitationRepository) GetById(ctx context.Context, id string) (S
 	return solicitation, nil
 }
 
-func (r *PgCrmSolicitationRepository) Update(ctx context.Context, params UpdateExportedCompaniesParms, solicitationId string) (Solicitation, error) {
+func (r *PgCrmSolicitationRepository) Update(ctx context.Context, params UpdateExportedCompaniesParms, listId, crm string) (Solicitation, error) {
 	defer r.logger.Sync()
 
 	exportedCompanyBytes, err := json.Marshal(params.NewExportedCompany)
@@ -52,7 +52,7 @@ func (r *PgCrmSolicitationRepository) Update(ctx context.Context, params UpdateE
 
 	stringCnpj := fmt.Sprintf("%v", int(params.Cnpj.(float64)))
 
-	rows, _ := r.conn.Query(ctx, updateExportedCompanies, stringCnpj, string(exportedCompanyBytes), solicitationId)
+	rows, _ := r.conn.Query(ctx, updateExportedCompanies, stringCnpj, string(exportedCompanyBytes), listId, crm)
 
 	solicitation, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[Solicitation])
 	if err != nil {
@@ -67,10 +67,10 @@ func (r *PgCrmSolicitationRepository) Update(ctx context.Context, params UpdateE
 	return solicitation, nil
 }
 
-func (r *PgCrmSolicitationRepository) UpdateStatus(ctx context.Context, newStatus SolicitationStatus, solicitationId string) (Solicitation, error) {
+func (r *PgCrmSolicitationRepository) UpdateStatus(ctx context.Context, newStatus SolicitationStatus, listId, crm string) (Solicitation, error) {
 	defer r.logger.Sync()
 
-	rows, _ := r.conn.Query(ctx, updateStatusQuery, newStatus, solicitationId)
+	rows, _ := r.conn.Query(ctx, updateStatusQuery, newStatus, listId, crm)
 
 	solicitation, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[Solicitation])
 	if err != nil {
@@ -85,14 +85,14 @@ func (r *PgCrmSolicitationRepository) UpdateStatus(ctx context.Context, newStatu
 	return solicitation, nil
 }
 
-func (r *PgCrmSolicitationRepository) IncrementCurrent(ctx context.Context, solicitationId string) (Solicitation, error) {
+func (r *PgCrmSolicitationRepository) IncrementCurrent(ctx context.Context, listId, crm string) (Solicitation, error) {
 	defer r.logger.Sync()
 
-	rows, _ := r.conn.Query(ctx, incrementCurrentQuery, solicitationId)
+	rows, _ := r.conn.Query(ctx, incrementCurrentQuery, listId, crm)
 
 	solicitation, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[Solicitation])
 	if err != nil {
-		r.logger.Error("Got error when collecting one row", zap.Error(err), zap.Any("params", solicitationId))
+		r.logger.Error("Got error when collecting one row", zap.Error(err), zap.Any("params", map[string]any{"listId":listId, "crm":crm}))
 		if errors.Is(err, pgx.ErrNoRows) {
 			return Solicitation{}, repositories.NewSolicitationNotFoundError()
 		}
@@ -106,7 +106,7 @@ func (r *PgCrmSolicitationRepository) IncrementCurrent(ctx context.Context, soli
 func (r *PgCrmSolicitationRepository) Create(ctx context.Context, solicitation CreateSolicitation) (Solicitation, error) {
 	defer r.logger.Sync()
 
-	rows, err := r.conn.Query(ctx, createSolicitation, solicitation.ListId, solicitation.UserEmail, solicitation.OwnerId, solicitation.StageId, solicitation.PipelineId, solicitation.OverwriteData, solicitation.CreateDeal, solicitation.Current, solicitation.Total)
+	rows, err := r.conn.Query(ctx, createSolicitationQuery, solicitation.ListId, solicitation.UserEmail, solicitation.OwnerId, solicitation.StageId, solicitation.PipelineId, solicitation.OverwriteData, solicitation.CreateDeal, solicitation.Current, solicitation.Total, solicitation.Crm)
 	if err != nil {
 		return Solicitation{}, err
 	}

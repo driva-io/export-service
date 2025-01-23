@@ -670,14 +670,29 @@ func sendBitrixContact(client *BitrixClient, mappedContactData map[string]any, o
 
 	contactEntityMap["ASSIGNED_BY_ID"] = ownerId
 
-	searchFilters := map[string]any{"@EMAIL": contactEntityMap["EMAIL"]}
-	existingContact, err := searchForExistingBitrixObject(client, "contact", searchFilters)
-	if err != nil {
-		return ObjectStatus{
-			Status:  Failed,
-			Message: err.Error(),
-		}, err
+	var existingContact any
+	var err error
+	searchFilters := map[string]any{}
+	var searchedEmails []string
+	if emailValues, ok := contactEntityMap["EMAIL"].([]any); ok {
+		for _, email := range emailValues {
+			if value, ok := email.(map[string]any)["VALUE"]; ok && value != "" {
+				searchFilters["EMAIL"] = value.(string)
+				existingContact, err = searchForExistingBitrixObject(client, "contact", searchFilters)
+				if err != nil {
+					return ObjectStatus{
+                        Status:  Failed,
+                        Message: err.Error(),
+                    }, err
+                }
+				searchedEmails = append(searchedEmails, value.(string))
+				if existingContact != nil {
+					break
+				}
+			}
+		}
 	}
+	searchFilters["EMAIL"] = searchedEmails
 
 	searchFields := buildSearchFields(searchFilters)
 
