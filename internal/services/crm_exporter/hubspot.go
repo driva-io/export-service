@@ -792,7 +792,34 @@ func (h HubspotService) OAuthCallback(c *fiber.Ctx, params ...any) (any, error) 
 		log.Fatalf("Error unmarshaling JSON: %v", err)
 	}
 
-	h.companyRepo.AddHubspot(context.Background(), ports.CrmAddHubspotCompanyQueryParams{WorkspaceId: workspaceId, UserId: userId, RefreshToken: responseData["refresh_token"].(string), AccessToken: responseData["access_token"].(string), ExpiresIn: strconv.Itoa(responseData["expires_in"].(int))})
+	// Safely handle `expires_in`
+	var expiresIn string
+	if expires, ok := responseData["expires_in"]; ok {
+		switch v := expires.(type) {
+		case float64: // JSON numbers are unmarshaled as float64
+			expiresIn = strconv.Itoa(int(v))
+		case int:
+			expiresIn = strconv.Itoa(v)
+		case string:
+			expiresIn = v // If already a string, use it directly
+		default:
+			log.Fatalf("Unexpected type for expires_in: %T", v)
+		}
+	} else {
+		log.Fatalf("expires_in not found in the response")
+	}
+
+	// Use the parsed values
+	h.companyRepo.AddHubspot(
+		context.Background(),
+		ports.CrmAddHubspotCompanyQueryParams{
+			WorkspaceId:  workspaceId,
+			UserId:       userId,
+			RefreshToken: responseData["refresh_token"].(string),
+			AccessToken:  responseData["access_token"].(string),
+			ExpiresIn:    expiresIn,
+		},
+	)
 
 	return nil, nil
 }

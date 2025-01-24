@@ -770,7 +770,6 @@ func processBitrixContacts(client *BitrixClient, contacts any, existingLead, raw
 				contactRawData = rawData["profiles"].([]any)[key].(map[string]any)
 			}
 		}
-		
 
 		contactMap, ok := contact.(map[string]any)
 		if !ok {
