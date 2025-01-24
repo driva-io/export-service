@@ -741,7 +741,7 @@ func (h HubspotService) Install(installData any) (any, error) {
 	if !isMap {
 		return nil, errors.New("expected install data to be a map")
 	}
-	state := fmt.Sprintf("%s|%s|%s", installDataMap["workspace_id"], installDataMap["user_id"])
+	state := fmt.Sprintf("%s|%s", installDataMap["workspace_id"], installDataMap["user_id"])
 
 	authURL := fmt.Sprintf("%s?client_id=%s&scope=%s&redirect_uri=%s&state=%s", baseURL, clientID, scope, url.QueryEscape(redirectURI), url.QueryEscape(state))
 
