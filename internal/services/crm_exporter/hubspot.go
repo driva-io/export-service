@@ -513,7 +513,12 @@ func processHubspotContacts(client *hubspot.Client, contacts any, existingLead, 
 
 	var statuses []ObjectStatus
 	for key, contact := range contactsData {
-		contactRawData := rawData["profiles"].([]any)[key].(map[string]any)
+		var contactRawData map[string]any
+		if profilesRaw, ok := rawData["profiles"]; ok {
+			if key < len(profilesRaw.([]any)) {
+				contactRawData = rawData["profiles"].([]any)[key].(map[string]any)
+			}
+		}
 
 		contactMap, ok := contact.(map[string]any)
 		if !ok {
