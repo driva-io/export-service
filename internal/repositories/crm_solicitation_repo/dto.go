@@ -21,7 +21,7 @@ const (
 type Solicitation struct {
 	ListId            string
 	UserEmail         string
-	Crm string
+	Crm               string
 	Status            SolicitationStatus
 	ExportedCompanies map[string]map[string]any
 
@@ -40,7 +40,7 @@ type Solicitation struct {
 type CreateSolicitation struct {
 	ListId    string
 	UserEmail string
-	Crm string
+	Crm       string
 	Current   int
 	Total     int
 

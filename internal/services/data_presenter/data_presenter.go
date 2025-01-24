@@ -126,7 +126,7 @@ func buildStructure(keys []string, source, spec map[string]any, target map[strin
 			if err != nil {
 				return nil, err
 			}
-			if result != nil {
+			if result != nil && result != "" {
 				target[k] = result
 			}
 		}

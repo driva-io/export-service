@@ -92,7 +92,7 @@ func (r *PgCrmSolicitationRepository) IncrementCurrent(ctx context.Context, list
 
 	solicitation, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[Solicitation])
 	if err != nil {
-		r.logger.Error("Got error when collecting one row", zap.Error(err), zap.Any("params", map[string]any{"listId":listId, "crm":crm}))
+		r.logger.Error("Got error when collecting one row", zap.Error(err), zap.Any("params", map[string]any{"listId": listId, "crm": crm}))
 		if errors.Is(err, pgx.ErrNoRows) {
 			return Solicitation{}, repositories.NewSolicitationNotFoundError()
 		}

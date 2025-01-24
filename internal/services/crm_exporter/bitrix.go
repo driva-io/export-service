@@ -142,10 +142,11 @@ func (b *BitrixService) SendLead(client any, mappedStorageData map[string]any, c
 		leadFormat = true
 	}
 	createDeal := configs["create_deal"].(bool)
+	overwriteData := configs["overwrite_data"].(bool)
 	createdLead := CreatedLead{}
 
 	if company, exists := mappedStorageData["company"]; exists {
-		companyStatus, err := processBitrixCompany(bitrixClient, company, existingLead, correspondingRawData, ownerId)
+		companyStatus, err := processBitrixCompany(bitrixClient, company, existingLead, correspondingRawData, ownerId, overwriteData)
 		if err != nil {
 			return createdLead, err
 		}
@@ -153,7 +154,7 @@ func (b *BitrixService) SendLead(client any, mappedStorageData map[string]any, c
 	}
 
 	if deal, exists := mappedStorageData["deal"]; exists && createDeal && !leadFormat {
-		dealStatus, err := processBitrixDeal(bitrixClient, deal, existingLead, correspondingRawData, ownerId, pipelineId, stageId)
+		dealStatus, err := processBitrixDeal(bitrixClient, deal, existingLead, correspondingRawData, ownerId, pipelineId, stageId, overwriteData)
 		if err != nil {
 			return createdLead, err
 		}
@@ -161,7 +162,7 @@ func (b *BitrixService) SendLead(client any, mappedStorageData map[string]any, c
 	}
 
 	if contact, exists := mappedStorageData["contact"]; exists {
-		contactStatus, err := processBitrixContact(bitrixClient, contact, existingLead, correspondingRawData, ownerId)
+		contactStatus, err := processBitrixContact(bitrixClient, contact, existingLead, correspondingRawData, ownerId, overwriteData)
 		if err != nil {
 			return createdLead, err
 		}
@@ -169,7 +170,7 @@ func (b *BitrixService) SendLead(client any, mappedStorageData map[string]any, c
 	}
 
 	if contacts, exists := mappedStorageData["contacts"]; exists {
-		contactsStatus, err := processBitrixContacts(bitrixClient, contacts, existingLead, correspondingRawData, ownerId)
+		contactsStatus, err := processBitrixContacts(bitrixClient, contacts, existingLead, correspondingRawData, ownerId, overwriteData)
 		if err != nil {
 			return createdLead, err
 		}
@@ -177,7 +178,7 @@ func (b *BitrixService) SendLead(client any, mappedStorageData map[string]any, c
 	}
 
 	if lead, exists := mappedStorageData["lead"]; exists && leadFormat {
-		leadStatus, err := processBitrixLead(bitrixClient, lead, existingLead, correspondingRawData, ownerId)
+		leadStatus, err := processBitrixLead(bitrixClient, lead, existingLead, correspondingRawData, ownerId, overwriteData)
 		if err != nil {
 			return createdLead, err
 		}
@@ -346,7 +347,7 @@ func (b *BitrixService) GetOwners(client any) ([]Owner, error) {
 	return nil, nil
 }
 
-func processBitrixCompany(client *BitrixClient, company any, existingLead, rawData map[string]any, ownerId string) (*ObjectStatus, error) {
+func processBitrixCompany(client *BitrixClient, company any, existingLead, rawData map[string]any, ownerId string, overwriteData bool) (*ObjectStatus, error) {
 	exportedCompany, exists := existingLead["company"].(map[string]any)
 	if exists && exportedCompany["crm_id"] != nil {
 		return createExistingStatus(exportedCompany), nil
@@ -357,7 +358,7 @@ func processBitrixCompany(client *BitrixClient, company any, existingLead, rawDa
 		return nil, errors.New("invalid company data")
 	}
 
-	sentCompany, err := sendBitrixCompany(client, companyData, ownerId)
+	sentCompany, err := sendBitrixCompany(client, companyData, ownerId, overwriteData)
 	if err != nil {
 		return nil, err
 	}
@@ -369,7 +370,7 @@ func processBitrixCompany(client *BitrixClient, company any, existingLead, rawDa
 	return &sentCompany, nil
 }
 
-func sendBitrixCompany(client *BitrixClient, mappedCompanyData map[string]any, ownerId string) (ObjectStatus, error) {
+func sendBitrixCompany(client *BitrixClient, mappedCompanyData map[string]any, ownerId string, overwriteData bool) (ObjectStatus, error) {
 	companyEntity, exists := mappedCompanyData["entity"]
 	if !exists {
 		return ObjectStatus{
@@ -402,16 +403,23 @@ func sendBitrixCompany(client *BitrixClient, mappedCompanyData map[string]any, o
 	var status Status
 	var message string
 	if existingCompany != nil {
-		updatedCompany, err := client.MakeRequest("POST", "crm.company.update", map[string]any{"id": existingCompany.(map[string]any)["ID"], "fields": companyEntityMap})
-		if err != nil {
-			return ObjectStatus{
-				Status:  Failed,
-				Message: err.Error(),
-			}, err
+		if overwriteData {
+			updatedCompany, err := client.MakeRequest("POST", "crm.company.update", map[string]any{"id": existingCompany.(map[string]any)["ID"], "fields": companyEntityMap})
+			if err != nil {
+				return ObjectStatus{
+					Status:  Failed,
+					Message: err.Error(),
+				}, err
+			}
+			updatedCompany["result"] = existingCompany.(map[string]any)["ID"]
+			status = Updated
+			company = updatedCompany
+		} else {
+			status = Skipped
+			existingCompany.(map[string]any)["result"] = existingCompany.(map[string]any)["ID"]
+			company = existingCompany.(map[string]any)
 		}
-		updatedCompany["result"] = existingCompany.(map[string]any)["ID"]
-		status = Updated
-		company = updatedCompany
+
 		message = fmt.Sprintf("Searched fields: %s", searchFields)
 	} else {
 		createdCompany, err := client.MakeRequest("POST", "crm.company.add", map[string]any{"fields": companyEntityMap})
@@ -446,7 +454,7 @@ func searchForExistingBitrixObject(client *BitrixClient, objectType string, sear
 	return nil, nil
 }
 
-func processBitrixDeal(client *BitrixClient, deal any, existingLead, rawData map[string]any, ownerId, pipelineId, stageId string) (*ObjectStatus, error) {
+func processBitrixDeal(client *BitrixClient, deal any, existingLead, rawData map[string]any, ownerId, pipelineId, stageId string, overwriteData bool) (*ObjectStatus, error) {
 	exportedDeal, exists := existingLead["deal"].(map[string]any)
 	if exists && exportedDeal["crm_id"] != nil {
 		return createExistingStatus(exportedDeal), nil
@@ -457,7 +465,7 @@ func processBitrixDeal(client *BitrixClient, deal any, existingLead, rawData map
 		return nil, errors.New("invalid deal data")
 	}
 
-	sentDeal, err := sendBitrixDeal(client, dealData, ownerId, pipelineId, stageId)
+	sentDeal, err := sendBitrixDeal(client, dealData, ownerId, pipelineId, stageId, overwriteData)
 	if err != nil {
 		return nil, err
 	}
@@ -469,7 +477,7 @@ func processBitrixDeal(client *BitrixClient, deal any, existingLead, rawData map
 	return &sentDeal, nil
 }
 
-func sendBitrixDeal(client *BitrixClient, mappedDealData map[string]any, ownerId, pipelineId, stageId string) (ObjectStatus, error) {
+func sendBitrixDeal(client *BitrixClient, mappedDealData map[string]any, ownerId, pipelineId, stageId string, overwriteData bool) (ObjectStatus, error) {
 	dealEntity, exists := mappedDealData["entity"]
 	if !exists {
 		return ObjectStatus{
@@ -504,16 +512,22 @@ func sendBitrixDeal(client *BitrixClient, mappedDealData map[string]any, ownerId
 	var status Status
 	var message string
 	if existingDeal != nil {
-		updatedDeal, err := client.MakeRequest("POST", "crm.deal.update", map[string]any{"id": existingDeal.(map[string]any)["ID"], "fields": dealEntityMap})
-		if err != nil {
-			return ObjectStatus{
-				Status:  Failed,
-				Message: err.Error(),
-			}, err
+		if overwriteData {
+			updatedDeal, err := client.MakeRequest("POST", "crm.deal.update", map[string]any{"id": existingDeal.(map[string]any)["ID"], "fields": dealEntityMap})
+			if err != nil {
+				return ObjectStatus{
+					Status:  Failed,
+					Message: err.Error(),
+				}, err
+			}
+			updatedDeal["result"] = existingDeal.(map[string]any)["ID"]
+			status = Updated
+			deal = updatedDeal
+		} else {
+			status = Skipped
+			existingDeal.(map[string]any)["result"] = existingDeal.(map[string]any)["ID"]
+			deal = existingDeal.(map[string]any)
 		}
-		updatedDeal["result"] = existingDeal.(map[string]any)["ID"]
-		status = Updated
-		deal = updatedDeal
 		message = fmt.Sprintf("Searched fields: %s", searchFields)
 	} else {
 		createdDeal, err := client.MakeRequest("POST", "crm.deal.add", map[string]any{"fields": dealEntityMap})
@@ -543,7 +557,7 @@ func buildSearchFields(searchFilters map[string]any) string {
 	return string(stringFields)
 }
 
-func processBitrixLead(client *BitrixClient, lead any, existingLead, rawData map[string]any, ownerId string) (*ObjectStatus, error) {
+func processBitrixLead(client *BitrixClient, lead any, existingLead, rawData map[string]any, ownerId string, overwriteData bool) (*ObjectStatus, error) {
 	exportedLead, exists := existingLead["lead"].(map[string]any)
 	if exists && exportedLead["crm_id"] != nil {
 		return createExistingStatus(exportedLead), nil
@@ -554,7 +568,7 @@ func processBitrixLead(client *BitrixClient, lead any, existingLead, rawData map
 		return nil, errors.New("invalid company data")
 	}
 
-	sentLead, err := sendBitrixLead(client, leadData, ownerId)
+	sentLead, err := sendBitrixLead(client, leadData, ownerId, overwriteData)
 	if err != nil {
 		return nil, err
 	}
@@ -566,7 +580,7 @@ func processBitrixLead(client *BitrixClient, lead any, existingLead, rawData map
 	return &sentLead, nil
 }
 
-func sendBitrixLead(client *BitrixClient, mappedLeadData map[string]any, ownerId string) (ObjectStatus, error) {
+func sendBitrixLead(client *BitrixClient, mappedLeadData map[string]any, ownerId string, overwriteData bool) (ObjectStatus, error) {
 	leadEntity, exists := mappedLeadData["entity"]
 	if !exists {
 		return ObjectStatus{
@@ -599,16 +613,22 @@ func sendBitrixLead(client *BitrixClient, mappedLeadData map[string]any, ownerId
 	var status Status
 	var message string
 	if existingLead != nil {
-		updatedLead, err := client.MakeRequest("POST", "crm.lead.update", map[string]any{"id": existingLead.(map[string]any)["ID"], "fields": leadEntityMap})
-		if err != nil {
-			return ObjectStatus{
-				Status:  Failed,
-				Message: err.Error(),
-			}, err
+		if overwriteData {
+			updatedLead, err := client.MakeRequest("POST", "crm.lead.update", map[string]any{"id": existingLead.(map[string]any)["ID"], "fields": leadEntityMap})
+			if err != nil {
+				return ObjectStatus{
+					Status:  Failed,
+					Message: err.Error(),
+				}, err
+			}
+			updatedLead["result"] = existingLead.(map[string]any)["ID"]
+			status = Updated
+			lead = updatedLead
+		} else {
+			status = Skipped
+			existingLead.(map[string]any)["result"] = existingLead.(map[string]any)["ID"]
+			lead = existingLead.(map[string]any)
 		}
-		updatedLead["result"] = existingLead.(map[string]any)["ID"]
-		status = Updated
-		lead = updatedLead
 		message = fmt.Sprintf("Searched fields: %s", searchFields)
 	} else {
 		createdLead, err := client.MakeRequest("POST", "crm.lead.add", map[string]any{"fields": leadEntityMap})
@@ -629,7 +649,7 @@ func sendBitrixLead(client *BitrixClient, mappedLeadData map[string]any, ownerId
 	}, nil
 }
 
-func processBitrixContact(client *BitrixClient, contact any, existingLead, rawData map[string]any, ownerId string) (*[]ObjectStatus, error) {
+func processBitrixContact(client *BitrixClient, contact any, existingLead, rawData map[string]any, ownerId string, overwriteData bool) (*[]ObjectStatus, error) {
 	exportedContact, exists := existingLead["contact"].(map[string]any)
 	if exists && exportedContact["crm_id"] != nil {
 		return &[]ObjectStatus{*createExistingStatus(exportedContact)}, nil
@@ -640,7 +660,7 @@ func processBitrixContact(client *BitrixClient, contact any, existingLead, rawDa
 		return nil, errors.New("invalid contact data")
 	}
 
-	sentContact, err := sendBitrixContact(client, contactData, ownerId)
+	sentContact, err := sendBitrixContact(client, contactData, ownerId, overwriteData)
 	if err != nil {
 		return nil, err
 	}
@@ -652,7 +672,7 @@ func processBitrixContact(client *BitrixClient, contact any, existingLead, rawDa
 	return &[]ObjectStatus{sentContact}, nil
 }
 
-func sendBitrixContact(client *BitrixClient, mappedContactData map[string]any, ownerId string) (ObjectStatus, error) {
+func sendBitrixContact(client *BitrixClient, mappedContactData map[string]any, ownerId string, overwriteData bool) (ObjectStatus, error) {
 	contactEntity, exists := mappedContactData["entity"]
 	if !exists {
 		return ObjectStatus{
@@ -681,10 +701,10 @@ func sendBitrixContact(client *BitrixClient, mappedContactData map[string]any, o
 				existingContact, err = searchForExistingBitrixObject(client, "contact", searchFilters)
 				if err != nil {
 					return ObjectStatus{
-                        Status:  Failed,
-                        Message: err.Error(),
-                    }, err
-                }
+						Status:  Failed,
+						Message: err.Error(),
+					}, err
+				}
 				searchedEmails = append(searchedEmails, value.(string))
 				if existingContact != nil {
 					break
@@ -700,16 +720,22 @@ func sendBitrixContact(client *BitrixClient, mappedContactData map[string]any, o
 	var status Status
 	var message string
 	if existingContact != nil {
-		updatedContact, err := client.MakeRequest("POST", "crm.contact.update", map[string]any{"id": existingContact.(map[string]any)["ID"], "fields": contactEntityMap})
-		if err != nil {
-			return ObjectStatus{
-				Status:  Failed,
-				Message: err.Error(),
-			}, err
+		if overwriteData {
+			updatedContact, err := client.MakeRequest("POST", "crm.contact.update", map[string]any{"id": existingContact.(map[string]any)["ID"], "fields": contactEntityMap})
+			if err != nil {
+				return ObjectStatus{
+					Status:  Failed,
+					Message: err.Error(),
+				}, err
+			}
+			updatedContact["result"] = existingContact.(map[string]any)["ID"]
+			status = Updated
+			contact = updatedContact
+		} else {
+			status = Skipped
+			existingContact.(map[string]any)["result"] = existingContact.(map[string]any)["ID"]
+			contact = existingContact.(map[string]any)
 		}
-		updatedContact["result"] = existingContact.(map[string]any)["ID"]
-		status = Updated
-		contact = updatedContact
 		message = fmt.Sprintf("Searched fields: %s", searchFields)
 	} else {
 		createdContact, err := client.MakeRequest("POST", "crm.contact.add", map[string]any{"fields": contactEntityMap})
@@ -730,7 +756,7 @@ func sendBitrixContact(client *BitrixClient, mappedContactData map[string]any, o
 	}, nil
 }
 
-func processBitrixContacts(client *BitrixClient, contacts any, existingLead, rawData map[string]any, ownerId string) (*[]ObjectStatus, error) {
+func processBitrixContacts(client *BitrixClient, contacts any, existingLead, rawData map[string]any, ownerId string, overwriteData bool) (*[]ObjectStatus, error) {
 	contactsData, ok := contacts.([]any)
 	if !ok {
 		return nil, errors.New("invalid contacts data")
@@ -763,7 +789,7 @@ func processBitrixContacts(client *BitrixClient, contacts any, existingLead, raw
 			}
 		}
 
-		sentContact, err := sendBitrixContact(client, contactMap, ownerId)
+		sentContact, err := sendBitrixContact(client, contactMap, ownerId, overwriteData)
 		if err != nil {
 			return nil, err
 		}

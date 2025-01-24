@@ -97,7 +97,7 @@ func (c *CrmExportUseCase) Execute(request CrmExportRequest, requestConfigs map[
 			StageId:       requestConfigs["stage_id"].(string),
 			OverwriteData: requestConfigs["overwrite_data"].(bool),
 			CreateDeal:    requestConfigs["create_deal"].(bool),
-			Crm: crm,
+			Crm:           crm,
 		})
 
 		if err != nil {
@@ -174,7 +174,16 @@ func (c *CrmExportUseCase) mapPresentedDataToCnpjs(data []map[string]any, presen
 }
 
 func (c *CrmExportUseCase) sendAllLeads(request CrmExportRequest, crmService crm_exporter.Crm, client any, leadsData map[any]map[string]any, rawLeadsData []map[string]any, configs map[string]any, solicitation crm_solicitation_repo.Solicitation) error {
+	current := solicitation.Current
+	sentCount := 0
+	leadIndex := 0
+
 	for cnpj, leadData := range leadsData {
+		if leadIndex < current {
+			leadIndex++
+			continue
+		}
+
 		var correspondingRawData map[string]any
 		for _, rawLead := range rawLeadsData {
 			if rawCnpj, ok := rawLead["cnpj"]; ok && rawCnpj == cnpj {
@@ -187,22 +196,26 @@ func (c *CrmExportUseCase) sendAllLeads(request CrmExportRequest, crmService crm
 		existingLead := solicitation.ExportedCompanies[stringCnpj]
 		c.logInfoLead("Sending Lead", request, leadData)
 		leadResult, err := crmService.SendLead(client, leadData, correspondingRawData, configs, existingLead)
-		c.logInfoLead("Updating exported companies in solicitation", request, leadData)
-		c.updateExportedCompaniesInSolicitation(leadResult, cnpj, solicitation.ListId, solicitation.Crm)
-
 		if err != nil {
 			return err
 		}
+
+		c.logInfoLead("Updating exported companies in solicitation", request, leadData)
+		c.updateExportedCompaniesInSolicitation(leadResult, cnpj, solicitation.ListId, solicitation.Crm)
 
 		c.logInfoLead("Updating contact list crm ids", request, leadData)
 		err = c.updateExportedLeadClickhouse(leadResult)
 		if err != nil {
 			return err
 		}
+
 		_, err = c.solicitationRepo.IncrementCurrent(context.Background(), request.ListID, solicitation.Crm)
 		if err != nil {
 			return err
 		}
+
+		sentCount++
+		leadIndex++
 	}
 
 	return nil

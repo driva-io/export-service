@@ -16,7 +16,7 @@ func handleFallback(source map[string]any, location any) (any, error) {
 			return nil, err
 		}
 
-		if result != nil {
+		if result != nil && result != "" {
 			return result, nil
 		}
 	}
