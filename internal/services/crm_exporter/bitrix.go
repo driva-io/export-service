@@ -765,9 +765,12 @@ func processBitrixContacts(client *BitrixClient, contacts any, existingLead, raw
 	var statuses []ObjectStatus
 	for key, contact := range contactsData {
 		var contactRawData map[string]any
-		if key < len(rawData["profiles"].([]any)) {
-			contactRawData = rawData["profiles"].([]any)[key].(map[string]any)
+		if profilesRaw, ok := rawData["profiles"]; ok {
+			if key < len(profilesRaw.([]any)) {
+				contactRawData = rawData["profiles"].([]any)[key].(map[string]any)
+			}
 		}
+		
 
 		contactMap, ok := contact.(map[string]any)
 		if !ok {
