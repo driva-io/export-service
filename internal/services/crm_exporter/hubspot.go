@@ -741,7 +741,7 @@ func (h HubspotService) Install(installData any) (any, error) {
 	if !isMap {
 		return nil, errors.New("expected install data to be a map")
 	}
-	state := fmt.Sprintf("%s|%s|%s", installDataMap["workspace_id"], installDataMap["user_id"], installDataMap["company"])
+	state := fmt.Sprintf("%s|%s|%s", installDataMap["workspace_id"], installDataMap["user_id"])
 
 	authURL := fmt.Sprintf("%s?client_id=%s&scope=%s&redirect_uri=%s&state=%s", baseURL, clientID, scope, url.QueryEscape(redirectURI), url.QueryEscape(state))
 
@@ -749,14 +749,13 @@ func (h HubspotService) Install(installData any) (any, error) {
 }
 
 func (h HubspotService) OAuthCallback(c *fiber.Ctx, params ...any) (any, error) {
-	if len(params) != 3 {
-		return nil, errors.New("expected 4 parms in oauth callback")
+	if len(params) != 2 {
+		return nil, errors.New("expected 3 parms in oauth callback")
 	}
 
 	hubspotCode := c.Query("code")
 	workspaceId := params[0].(string)
 	userId := params[1].(string)
-	company := params[2].(string)
 
 	_, err := h.companyRepo.GetCompanyByWorkspaceId(c.Context(), ports.CrmCompanyQueryParams{Crm: "hubspot", WorkspaceId: workspaceId})
 	var companyNotFoundError repositories.CompanyNotFoundError
@@ -787,7 +786,7 @@ func (h HubspotService) OAuthCallback(c *fiber.Ctx, params ...any) (any, error) 
 		log.Fatalf("Error unmarshaling JSON: %v", err)
 	}
 
-	h.companyRepo.AddHubspot(context.Background(), ports.CrmAddHubspotCompanyQueryParams{Company: company, WorkspaceId: workspaceId, UserId: userId, RefreshToken: responseData["refresh_token"].(string), AccessToken: responseData["access_token"].(string)})
+	h.companyRepo.AddHubspot(context.Background(), ports.CrmAddHubspotCompanyQueryParams{WorkspaceId: workspaceId, UserId: userId, RefreshToken: responseData["refresh_token"].(string), AccessToken: responseData["access_token"].(string)})
 
 	return nil, nil
 }

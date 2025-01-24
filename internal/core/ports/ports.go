@@ -16,7 +16,6 @@ type CrmGetByCompanyNameQueryParams struct {
 }
 
 type CrmAddHubspotCompanyQueryParams struct {
-	Company      string
 	WorkspaceId  string
 	UserId       string
 	RefreshToken string

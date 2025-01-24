@@ -18,7 +18,6 @@ func InstallHandler(c *fiber.Ctx, crmService crm_exporter.Crm) error {
 	installData := map[string]any{
 		"workspace_id": c.Query("workspace_id"),
 		"user_id":      c.Query("user_id"),
-		"company":      c.Query("company"),
 	}
 	response, err := crmService.Install(installData)
 
@@ -38,17 +37,17 @@ func OAuthCallBackHandler(c *fiber.Ctx, crmService crm_exporter.Crm) error {
 		return err
 	}
 	parts := strings.Split(unescapedState, "|")
-	if len(parts) != 3 {
+	if len(parts) != 2 {
 		return errors.New("invalid state parameters")
 	}
 
-	workspaceID, userID, company := parts[0], parts[1], parts[2]
+	workspaceID, userID := parts[0], parts[1]
 
-	if workspaceID == "" || userID == "" || company == "" {
+	if workspaceID == "" || userID == "" {
 		return errors.New("invalid state parameters")
 	}
 
-	_, err = crmService.OAuthCallback(c, workspaceID, userID, company)
+	_, err = crmService.OAuthCallback(c, workspaceID, userID)
 
 	status := fiber.StatusNoContent
 	if err != nil {
