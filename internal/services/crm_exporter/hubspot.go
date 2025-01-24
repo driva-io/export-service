@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/belong-inc/go-hubspot"
@@ -791,7 +792,7 @@ func (h HubspotService) OAuthCallback(c *fiber.Ctx, params ...any) (any, error) 
 		log.Fatalf("Error unmarshaling JSON: %v", err)
 	}
 
-	h.companyRepo.AddHubspot(context.Background(), ports.CrmAddHubspotCompanyQueryParams{WorkspaceId: workspaceId, UserId: userId, RefreshToken: responseData["refresh_token"].(string), AccessToken: responseData["access_token"].(string)})
+	h.companyRepo.AddHubspot(context.Background(), ports.CrmAddHubspotCompanyQueryParams{WorkspaceId: workspaceId, UserId: userId, RefreshToken: responseData["refresh_token"].(string), AccessToken: responseData["access_token"].(string), ExpiresIn: strconv.Itoa(responseData["expires_in"].(int))})
 
 	return nil, nil
 }
