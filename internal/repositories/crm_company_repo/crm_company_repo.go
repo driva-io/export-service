@@ -82,11 +82,11 @@ func (r *PgCrmCompanyRepository) GetByCompanyName(ctx context.Context, params po
 func (r *PgCrmCompanyRepository) AddHubspot(ctx context.Context, params ports.CrmAddHubspotCompanyQueryParams) (Company, error) {
 	defer r.logger.Sync()
 
-	if  params.RefreshToken == "" || params.AccessToken == "" || params.UserId == "" || params.WorkspaceId == "" {
+	if  params.RefreshToken == "" || params.AccessToken == "" || params.UserId == "" || params.WorkspaceId == ""|| params.ExpiresIn == "" {
 		return Company{}, ports.NewInvalidQueryParamsError()
 	}
 
-	rows, err := r.conn.Query(ctx, addHubspotQuery, params.UserId, params.WorkspaceId, params.RefreshToken, params.AccessToken)
+	rows, err := r.conn.Query(ctx, addHubspotQuery, params.UserId, params.WorkspaceId, params.RefreshToken, params.AccessToken, params.ExpiresIn)
 	if err != nil {
 		r.logger.Error("Failed to execute query", zap.Error(err), zap.Any("params", params))
 		return Company{}, err

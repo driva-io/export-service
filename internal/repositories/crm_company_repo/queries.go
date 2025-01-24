@@ -9,5 +9,5 @@ const getByCompanyNameQuery = `
 	`
 
 const addHubspotQuery = `
-	insert into crm.company (crm, user_who_installed_id, workspace_id, refresh_token, access_token, created_at, updated_at) values ('hubspot', $1, $2, $3, $4, now(), now()) returning *;
+	insert into crm.company (crm, user_who_installed_id, workspace_id, refresh_token, access_token, created_at, updated_at, expires_in) values ('hubspot', $1, $2, $3, $4, now(), now(), $5) returning *;
 `

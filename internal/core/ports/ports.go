@@ -20,6 +20,7 @@ type CrmAddHubspotCompanyQueryParams struct {
 	UserId       string
 	RefreshToken string
 	AccessToken  string
+	ExpiresIn string
 }
 
 type PresentationSpecQueryParams struct {
