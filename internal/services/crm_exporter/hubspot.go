@@ -95,7 +95,9 @@ func sendHubspotCompany(client *hubspot.Client, mappedCompanyData map[string]any
 		}, errors.New("company entity is not a map")
 	}
 
-	companyEntityMap["hubspot_owner_id"] = ownerId
+	if (ownerId != "nenhum") {
+		companyEntityMap["hubspot_owner_id"] = ownerId
+	}
 
 	searchFilters := map[string]any{"name": companyEntityMap["name"]}
 	existingCompany, err := searchForExistingHubspotObject(client, "companies", searchFilters)
@@ -166,7 +168,9 @@ func sendHubspotDeal(client *hubspot.Client, mappedDealData map[string]any, owne
 
 	dealEntityMap["pipeline"] = pipelineId
 	dealEntityMap["dealstage"] = stageId
-	dealEntityMap["hubspot_owner_id"] = ownerId
+	if (ownerId != "nenhum") {
+		dealEntityMap["hubspot_owner_id"] = ownerId
+	}
 
 	searchFilters := map[string]any{"dealname": dealEntityMap["dealname"]}
 	existingDeal, err := searchForExistingHubspotObject(client, "deals", searchFilters)
@@ -235,7 +239,9 @@ func sendHubspotContact(client *hubspot.Client, mappedContactData map[string]any
 		}, errors.New("contact entity is not a map")
 	}
 
-	contactEntityMap["hubspot_owner_id"] = ownerId
+	if (ownerId != "nenhum") {
+		contactEntityMap["hubspot_owner_id"] = ownerId
+	}
 
 	searchFilters := map[string]any{"email": contactEntityMap["email"]}
 	existingContact, err := searchForExistingHubspotObject(client, "contacts", searchFilters)
