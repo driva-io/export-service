@@ -6,6 +6,7 @@ import (
 	"export-service/internal/repositories/crm_company_repo"
 	"export-service/internal/services/crm_exporter"
 	"log"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -43,12 +44,17 @@ func AuthenticateCrmMiddleware(co *crm_company_repo.PgCrmCompanyRepository) fibe
 				Crm:         crm,
 				CompanyName: companyName,
 			})
-			if err != nil {
-				return err
-			}
 
 			if company.WorkspaceId.String == "" {
+				if strings.HasSuffix(c.Path(), "/validate") {
+					c.Locals("crmClient", nil)
+					return c.JSON(fiber.Map{"valid": false})
+				}
 				return errors.New("workspace_id not found for the given company")
+			}
+
+			if err != nil {
+				return err
 			}
 
 			workspaceId = company.WorkspaceId.String
@@ -57,6 +63,10 @@ func AuthenticateCrmMiddleware(co *crm_company_repo.PgCrmCompanyRepository) fibe
 		log.Printf("Authenticating CRM for workspace: %v", workspaceId)
 		crmClient, err := crmService.Authorize(ctx, workspaceId)
 		if err != nil {
+			if strings.HasSuffix(c.Path(), "/validate") {
+				c.Locals("crmClient", nil)
+				return c.JSON(fiber.Map{"valid": false})
+			}
 			return err
 		}
 
