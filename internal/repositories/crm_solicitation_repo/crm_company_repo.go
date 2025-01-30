@@ -50,9 +50,20 @@ func (r *PgCrmSolicitationRepository) Update(ctx context.Context, params UpdateE
 		return Solicitation{}, err
 	}
 
-	stringCnpj := fmt.Sprintf("%v", int(params.Cnpj.(float64)))
+	var stringIdentifier string
 
-	rows, _ := r.conn.Query(ctx, updateExportedCompanies, stringCnpj, string(exportedCompanyBytes), listId, crm)
+	switch v := params.Identifier.(type) {
+	case float64:
+		stringIdentifier = fmt.Sprintf("%v", int(v))
+	case int:
+		stringIdentifier = fmt.Sprintf("%v", v)
+	case string:
+		stringIdentifier = v
+	default:
+		return Solicitation{}, errors.New("invalid type for Identifier")
+	}
+
+	rows, _ := r.conn.Query(ctx, updateExportedCompanies, stringIdentifier, string(exportedCompanyBytes), listId, crm)
 
 	solicitation, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[Solicitation])
 	if err != nil {

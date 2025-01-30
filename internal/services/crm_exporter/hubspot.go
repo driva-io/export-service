@@ -95,7 +95,7 @@ func sendHubspotCompany(client *hubspot.Client, mappedCompanyData map[string]any
 		}, errors.New("company entity is not a map")
 	}
 
-	if (ownerId != "nenhum") {
+	if ownerId != "nenhum" {
 		companyEntityMap["hubspot_owner_id"] = ownerId
 	}
 
@@ -168,7 +168,7 @@ func sendHubspotDeal(client *hubspot.Client, mappedDealData map[string]any, owne
 
 	dealEntityMap["pipeline"] = pipelineId
 	dealEntityMap["dealstage"] = stageId
-	if (ownerId != "nenhum") {
+	if ownerId != "nenhum" {
 		dealEntityMap["hubspot_owner_id"] = ownerId
 	}
 
@@ -239,7 +239,7 @@ func sendHubspotContact(client *hubspot.Client, mappedContactData map[string]any
 		}, errors.New("contact entity is not a map")
 	}
 
-	if (ownerId != "nenhum") {
+	if ownerId != "nenhum" {
 		contactEntityMap["hubspot_owner_id"] = ownerId
 	}
 

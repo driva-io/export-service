@@ -163,8 +163,11 @@ func (c *CrmExportUseCase) mapPresentedDataToCnpjs(data []map[string]any, presen
 			return map[any]map[string]any{}, errors.New("data and presented data length mismatch")
 		}
 		cnpj, exists := data[key]["cnpj"]
-		if !exists {
-			return map[any]map[string]any{}, errors.New("data and presented data length mismatch")
+		if !exists || isZero(cnpj) {
+			cnpj, exists = data[key]["public_id"]
+			if !exists {
+				return map[any]map[string]any{}, errors.New("cnpj or public_id missing")
+			}
 		}
 
 		presentedDataCnpjMap[cnpj] = item
@@ -173,27 +176,50 @@ func (c *CrmExportUseCase) mapPresentedDataToCnpjs(data []map[string]any, presen
 	return presentedDataCnpjMap, nil
 }
 
+func isZero(value any) bool {
+	switch v := value.(type) {
+	case int:
+		return v == 0
+	case float64:
+		return v == 0
+	default:
+		return false
+	}
+}
+
 func (c *CrmExportUseCase) sendAllLeads(request CrmExportRequest, crmService crm_exporter.Crm, client any, leadsData map[any]map[string]any, rawLeadsData []map[string]any, configs map[string]any, solicitation crm_solicitation_repo.Solicitation) error {
 	current := solicitation.Current
 	sentCount := 0
 	leadIndex := 0
 
-	for cnpj, leadData := range leadsData {
+	for identifier, leadData := range leadsData {
 		if leadIndex < current {
 			leadIndex++
 			continue
 		}
 
 		var correspondingRawData map[string]any
+		var stringIdentifier string
+		is_cnpj := false
 		for _, rawLead := range rawLeadsData {
-			if rawCnpj, ok := rawLead["cnpj"]; ok && rawCnpj == cnpj {
+			if rawCnpj, ok := rawLead["cnpj"]; ok && rawCnpj == identifier {
 				correspondingRawData = rawLead
+				is_cnpj = true
+				stringIdentifier = fmt.Sprintf("%v", int(identifier.(float64)))
 				break
 			}
 		}
+		if !is_cnpj {
+			for _, rawLead := range rawLeadsData {
+				if rawPublicId, ok := rawLead["public_id"]; ok && rawPublicId == identifier {
+					correspondingRawData = rawLead
+					stringIdentifier = identifier.(string)
+					break
+				}
+			}
+		}
 
-		stringCnpj := fmt.Sprintf("%v", int(cnpj.(float64)))
-		existingLead := solicitation.ExportedCompanies[stringCnpj]
+		existingLead := solicitation.ExportedCompanies[stringIdentifier]
 		c.logInfoLead("Sending Lead", request, leadData)
 		leadResult, err := crmService.SendLead(client, leadData, correspondingRawData, configs, existingLead)
 		if err != nil {
@@ -201,13 +227,14 @@ func (c *CrmExportUseCase) sendAllLeads(request CrmExportRequest, crmService crm
 		}
 
 		c.logInfoLead("Updating exported companies in solicitation", request, leadData)
-		c.updateExportedCompaniesInSolicitation(leadResult, cnpj, solicitation.ListId, solicitation.Crm)
+		c.updateExportedCompaniesInSolicitation(leadResult, stringIdentifier, solicitation.ListId, solicitation.Crm)
 
-		c.logInfoLead("Updating contact list crm ids", request, leadData)
-		err = c.updateExportedLeadClickhouse(leadResult)
-		if err != nil {
-			return err
-		}
+		//TODO: vincular com contatos das nossas listas (tava dando alguns BOs, as vezes funcionava)
+		// c.logInfoLead("Updating contact list crm ids", request, leadData)
+		// err = c.updateExportedLeadClickhouse(leadResult)
+		// if err != nil {
+		// 	return err
+		// }
 
 		_, err = c.solicitationRepo.IncrementCurrent(context.Background(), request.ListID, solicitation.Crm)
 		if err != nil {
@@ -224,7 +251,7 @@ func (c *CrmExportUseCase) sendAllLeads(request CrmExportRequest, crmService crm
 func (c *CrmExportUseCase) updateExportedCompaniesInSolicitation(leadResult crm_exporter.CreatedLead, cnpj any, listId, crm string) error {
 
 	c.solicitationRepo.Update(context.Background(), crm_solicitation_repo.UpdateExportedCompaniesParms{
-		Cnpj:               cnpj,
+		Identifier:         cnpj,
 		NewExportedCompany: leadResult,
 	}, listId, crm)
 

@@ -6,7 +6,7 @@ import (
 )
 
 type UpdateExportedCompaniesParms struct {
-	Cnpj               any                      `json:"cnpj"`
+	Identifier         any                      `json:"identifier"`
 	NewExportedCompany crm_exporter.CreatedLead `json:"new_exported_company"`
 }
 
