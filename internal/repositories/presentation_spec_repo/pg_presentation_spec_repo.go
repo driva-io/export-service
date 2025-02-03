@@ -77,6 +77,33 @@ func (r *PgPresentationSpecRepository) GetById(ctx context.Context, id string) (
 	return spec, nil
 }
 
+func (r *PgPresentationSpecRepository) GetKeyValue(ctx context.Context, id string, key string) (map[string]any, error) {
+	defer r.logger.Sync()
+
+	rows, err := r.conn.Query(ctx, GetKeyValueQuery, key, id)
+	if err != nil {
+		r.logger.Error("Failed to execute query", zap.Error(err), zap.String("key", key), zap.String("id", id))
+		return nil, err
+	}
+	defer rows.Close()
+
+	spec, err := pgx.CollectExactlyOneRow(rows, pgx.RowToMap)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, nil
+		} else if errors.Is(err, pgx.ErrTooManyRows) {
+			return nil, repositories.NewPresentationSpecNotUniqueError()
+		}
+
+		r.logger.Error("Got error when collecting one row", zap.Error(err), zap.String("key", key), zap.String("id", id))
+		return nil, err
+	}
+
+	return spec["value"].(map[string]any), nil
+}
+
+
+
 func (r *PgPresentationSpecRepository) Add(ctx context.Context, params ports.PresentationSpecQueryParams, body ports.PresentationSpecAddBody) (domain.PresentationSpec, error) {
 	defer r.logger.Sync()
 
@@ -237,6 +264,93 @@ func (r *PgPresentationSpecRepository) Patch(ctx context.Context, id string, bod
 
 	return patchedSpec, nil
 }
+
+func (r *PgPresentationSpecRepository) PatchSource(ctx context.Context, id string, body ports.PresentationSpecPatchSource) (domain.PresentationSpec, error) {
+	defer r.logger.Sync()
+
+	if id == "" {
+		return domain.PresentationSpec{}, ports.NewInvalidQueryParamsError()
+	}
+
+	keys := map[string]any{
+		"company": body.CompanySource,
+		"deal":    body.DealSource,
+		"lead":    body.LeadSource,
+		"contact": body.ContactSource,
+		"contacts": body.ContactsSource,
+	}
+
+	for key, sourceID := range keys {
+		if sourceID == nil || sourceID == "" {
+			continue
+		}
+		existingValue, err := r.GetKeyValue(ctx, id, key)
+		if err != nil {
+			r.logger.Error("Failed to get key value", zap.String("key", key), zap.Error(err))
+			return domain.PresentationSpec{}, err
+		}
+	
+		if existingValue == nil {
+			continue
+		}
+	
+		if key == "contacts" {
+			flatSlice, ok := existingValue["$flat"].([]any)
+			if !ok {
+				flatSlice = []any{}
+			}
+	
+			for i, item := range flatSlice {
+				itemMap, ok := item.(map[string]any)
+				if !ok {
+					continue
+				}
+	
+				forMap, ok := itemMap["$for"].(map[string]any)
+				if !ok {
+					continue
+				}
+	
+				entityMap, ok := forMap["$format"].(map[string]any)["entity"].(map[string]any)
+				if !ok {
+					continue
+				}
+	
+				entityMap["SOURCE_ID"] = map[string]any{
+					"$literal": sourceID,
+				}
+				flatSlice[i] = itemMap
+			}
+	
+			existingValue["$flat"] = flatSlice
+		} else {
+			entityMap, ok := existingValue["entity"].(map[string]any)
+			if !ok {
+				entityMap = make(map[string]any)
+				existingValue["entity"] = entityMap
+			}
+	
+			entityMap["SOURCE_ID"] = map[string]any{
+				"$literal": sourceID,
+			}
+		}
+	
+		_, err = r.conn.Query(ctx, patchKeyValueQuery, existingValue, key, id)
+		if err != nil {
+			r.logger.Error("Failed to update key value", zap.String("key", key), zap.Error(err))
+			return domain.PresentationSpec{}, err
+		}
+	}
+
+	updatedSpec, err := r.GetById(ctx, id)
+	if err != nil {
+		r.logger.Error("Failed to retrieve updated spec", zap.Error(err))
+		return domain.PresentationSpec{}, err
+	}
+
+	return updatedSpec, nil
+}
+
 
 func (r *PgPresentationSpecRepository) PatchKey(ctx context.Context, id string, key string, body ports.PresentationSpecPatchKey) (domain.PresentationSpec, error) {
 	defer r.logger.Sync()

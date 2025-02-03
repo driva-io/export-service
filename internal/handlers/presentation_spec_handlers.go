@@ -126,6 +126,63 @@ func PatchPresentationSpecHandler(c *fiber.Ctx, p *presentation_spec_repo.PgPres
 	return c.Status(status).JSON(returnBody)
 }
 
+func PatchSourceHandler(c *fiber.Ctx, p *presentation_spec_repo.PgPresentationSpecRepository) error {
+	var body ports.PresentationSpecPatchSource
+	if err := c.BodyParser(&body); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(ports.NewInvalidBodyError())
+	}
+
+	validate := validator.New()
+	if invalidStruct := validate.Struct(body); invalidStruct != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(ports.NewInvalidBodyError())
+	}
+
+	companyName := c.Query("user_company")
+	userEmail := c.Query("user_email")
+	service := c.Query("service")
+	base := c.Query("base")
+
+	if companyName == "" || service == "" || base == "" || userEmail == ""{
+		return c.Status(fiber.StatusBadRequest).JSON(ports.NewInvalidQueryParamsError())
+	}
+
+	var specId string
+	existingSpec, err := p.Get(c.Context(), ports.PresentationSpecQueryParams{UserEmail: userEmail, UserCompany: companyName, Service: service, DataSource: base})
+	if err != nil {
+        return c.Status(fiber.StatusInternalServerError).JSON(err)
+    }
+
+	if (existingSpec.IsDefault) {
+		newSpec, err := p.Add(c.Context(), ports.PresentationSpecQueryParams{UserEmail: userEmail, UserCompany: companyName, Service: service, DataSource: base}, ports.PresentationSpecAddBody{PresentationSpec: existingSpec.Spec, SpecOptions: existingSpec.SheetOptions})
+		if err!= nil {
+            return c.Status(fiber.StatusInternalServerError).JSON(err)
+        }
+		specId = newSpec.ID
+	} else {
+		specId = existingSpec.ID
+	}
+
+	updatedSpec, err := p.PatchSource(c.Context(), specId, body)
+	status := fiber.StatusOK
+	var returnBody any
+	returnBody = updatedSpec
+	if err != nil {
+		returnBody = err
+		var invalidQueryParams ports.InvalidQueryParamsError
+		var invalidBody ports.InvalidBodyError
+		switch {
+		case errors.As(err, &invalidBody):
+			status = fiber.StatusBadRequest
+		case errors.As(err, &invalidQueryParams):
+			status = fiber.StatusBadRequest
+		default:
+			status = fiber.StatusInternalServerError
+		}
+	}
+
+	return c.Status(status).JSON(returnBody)
+}
+
 func PatchPresentationSpecKeyHandler(c *fiber.Ctx, p *presentation_spec_repo.PgPresentationSpecRepository) error {
 	id := c.Params("id")
 	key := c.Params("key")

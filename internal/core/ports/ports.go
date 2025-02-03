@@ -40,6 +40,14 @@ type PresentationSpecPatchKey struct {
 	SpecOptions      domain.PresentationSpecPatchSheetOptions `json:"sheet_options" validate:"required"`
 }
 
+type PresentationSpecPatchSource struct {
+	DealSource     string `json:"deal_source,omitempty"`
+	CompanySource  string `json:"company_source,omitempty"`
+	LeadSource     string `json:"lead_source,omitempty"`
+	ContactSource  string `json:"contact_source,omitempty"`
+	ContactsSource string `json:"contacts_source,omitempty"`
+}
+
 type PresentationSpecRepository interface {
 	Get(ctx context.Context, params PresentationSpecQueryParams) (domain.PresentationSpec, error)
 	Add(ctx context.Context, params PresentationSpecQueryParams, body PresentationSpecAddBody) (domain.PresentationSpec, error)

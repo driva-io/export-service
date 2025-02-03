@@ -21,6 +21,9 @@ func RegisterPresentationSpecRoutes(s *server.FiberServer, p *presentation_spec_
 	presentationSpecRoutes.Post("/", func(c *fiber.Ctx) error {
 		return handlers.AddPresentationSpecHandler(c, p)
 	})
+	presentationSpecRoutes.Patch("/source", func(c *fiber.Ctx) error {
+		return handlers.PatchSourceHandler(c, p)
+	})
 	presentationSpecRoutes.Patch("/:id", func(c *fiber.Ctx) error {
 		return handlers.PatchPresentationSpecHandler(c, p)
 	})

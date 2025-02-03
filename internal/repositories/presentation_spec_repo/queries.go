@@ -64,6 +64,14 @@ const patchKeyOptions = `
 	update presentation_spec.sheet_options set key = $1, active_columns = $2, position = $3, should_explode = $4 where presentation_spec_id = $5 and key = $6;
 `
 
+const patchKeyValueQuery = `
+	update presentation_spec.specs set value = $1 where key = $2 and presentation_spec_id = $3;
+`
+
+const GetKeyValueQuery = `
+	select value from presentation_spec.specs where key = $1 and presentation_spec_id = $2;
+`
+
 const patchKeySpec = `
 	update presentation_spec.specs set value = $1, key = $2 where presentation_spec_id = $3 and key = $4
 `
