@@ -7,8 +7,8 @@ import (
 	"export-service/internal/core/ports"
 	"export-service/internal/services/data_presenter"
 	"fmt"
-
 	"github.com/google/uuid"
+
 	"go.uber.org/zap"
 )
 
@@ -117,7 +117,7 @@ func (s *SheetExportUseCase) writeSheet(request ExportRequest, data []map[string
 
 func (s *SheetExportUseCase) uploadSheet(request ExportRequest, path string) (string, error) {
 	s.logInfo("Uploading sheet", request)
-	return s.uploader.Upload(fmt.Sprintf("%s_%s.xlsx", request.ListID, uuid.NewString()[:8]), path)
+	return s.uploader.Upload(fmt.Sprintf("(DRIVA %s) %s.xlsx", uuid.NewString()[:8], request.ListName), path)
 }
 
 func (s *SheetExportUseCase) sendEmail(request ExportRequest, url string) error {

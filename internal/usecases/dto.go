@@ -7,6 +7,7 @@ type ExportRequest struct {
 	DataSource      string `json:"source"`
 	DataDownloadURL string `json:"download_url"`
 	ListID          string `json:"list_id"`
+	ListName        string `json:"list_name"`
 }
 
 type CrmExportRequest struct {
