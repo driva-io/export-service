@@ -32,4 +32,4 @@ COPY start.sh /bin/
 EXPOSE 23545
 
 # Run start.sh
-CMD /bin/start.sh
+CMD sh /bin/start.sh
