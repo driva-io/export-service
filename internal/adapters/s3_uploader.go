@@ -62,7 +62,9 @@ func (s *S3Uploader) Upload(fileName, path string) (string, error) {
 		return "", err
 	}
 
-	s.logger.Info("Successfully uploaded file", zap.String("path", path))
+	url := fmt.Sprintf("https://%s.s3.bhs.io.cloud.ovh.net/%s", s.bucket, key)
 
-	return fmt.Sprintf("https://%s.s3.bhs.io.cloud.ovh.net/%s", s.bucket, key), nil
+	s.logger.Info("Successfully uploaded file", zap.String("url", url), zap.String("path", path))
+
+	return url, nil
 }
