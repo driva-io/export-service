@@ -3,6 +3,7 @@ package data_presenter
 import (
 	"errors"
 	"export-service/internal/core/domain"
+	"log"
 	"strings"
 )
 
@@ -50,7 +51,16 @@ func getNestedValue(source any, location any) (any, error) {
 	}
 
 	if len(locs) > 0 && source != nil {
-		nested := source.(map[string]any)[locs[0]]
+		value, ok := source.(map[string]any)
+		if !ok {
+			log.Println(strings.Join(locs, "."), "FORMATO INESPERADO")
+			return nil, nil
+		}
+		nested, ok := value[locs[0]]
+		if !ok {
+			log.Println(strings.Join(locs, "."), "NÃO ENCONTRADO")
+			return nil, nil
+		}
 		if nestedArray, isArray := nested.([]any); isArray {
 			var result []any
 			for _, value := range nestedArray {
