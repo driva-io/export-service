@@ -1,4 +1,4 @@
-ARG GO_VERSION=1.23.0
+ARG GO_VERSION=1.24.1
 FROM golang:${GO_VERSION} AS build
 
 WORKDIR /src
@@ -32,4 +32,4 @@ COPY start.sh /bin/
 EXPOSE 23545
 
 # Run start.sh
-CMD sh /bin/start.sh
+CMD /bin/start.sh
