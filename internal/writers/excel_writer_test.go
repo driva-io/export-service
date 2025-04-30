@@ -95,6 +95,17 @@ func TestExcelWriter_Write(t *testing.T) {
 	})
 
 	t.Run("Should order sheets positions", func(t *testing.T) {
+		data := []map[string]any{{
+			"RFB": map[string]any{
+				"CNPJ":   "111111",
+				"Titulo": "RAZAO SOCIAL",
+			},
+			"Telefones": []map[string]any{
+				{"CNPJ": "111111", "Telefone": "123456", "WhatsApp": "SIM"},
+				{"CNPJ": "111111", "Telefone": "564565", "WhatsApp": "SIM"},
+			},
+		}}
+
 		spec := domain.PresentationSpec{
 			SheetOptions: []domain.PresentationSpecSheetOptions{
 				{
@@ -111,7 +122,7 @@ func TestExcelWriter_Write(t *testing.T) {
 		}
 
 		ew := ExcelWriter{}
-		path, err := ew.Write([]map[string]any{}, spec)
+		path, err := ew.Write(data, spec)
 		require.NoError(t, err)
 		assert.NotEmpty(t, path)
 
@@ -126,6 +137,34 @@ func TestExcelWriter_Write(t *testing.T) {
 	})
 
 	t.Run("Should handle duplicated positions", func(t *testing.T) {
+		data := []map[string]any{{
+			"RFB": map[string]any{
+				"CNPJ":   "111111",
+				"Titulo": "RAZAO SOCIAL",
+			},
+			"Telefones": []map[string]any{
+				{"CNPJ": "111111", "Telefone": "123456", "WhatsApp": "SIM"},
+				{"CNPJ": "111111", "Telefone": "564565", "WhatsApp": "SIM"},
+			},
+			"Emails": []map[string]any{
+				{"CNPJ": "111111", "Email": "a@test1.com", "WhatsApp": "SIM"},
+				{"CNPJ": "111111", "Email": "b@test1.com", "WhatsApp": "NÃO"},
+				{"CNPJ": "111111", "Email": "c@test1.com", "WhatsApp": "NÃO"},
+			},
+		}, {
+			"RFB": map[string]any{
+				"CNPJ":   "222222",
+				"Titulo": "RAZAO SOCIAL 222",
+			},
+			"Telefones": []map[string]any{
+				{"CNPJ": "222222", "Telefone": "9999999", "WhatsApp": "SIM"},
+			},
+			"Emails": []map[string]any{
+				{"CNPJ": "222222", "Email": "a@test2.com", "WhatsApp": "SIM"},
+				{"CNPJ": "222222", "Email": "b@test2.com", "WhatsApp": "SIM"},
+				{"CNPJ": "222222", "Email": "c@test2.com", "WhatsApp": "NÃO"},
+			},
+		}}
 		spec := domain.PresentationSpec{
 			SheetOptions: []domain.PresentationSpecSheetOptions{
 				{
@@ -149,7 +188,7 @@ func TestExcelWriter_Write(t *testing.T) {
 		}
 
 		ew := ExcelWriter{}
-		path, err := ew.Write([]map[string]any{}, spec)
+		path, err := ew.Write(data, spec)
 		require.NoError(t, err)
 		assert.NotEmpty(t, path)
 
@@ -251,6 +290,25 @@ func TestExcelWriter_Write(t *testing.T) {
 	})
 
 	t.Run("Should handle invalid sheet names", func(t *testing.T) {
+		data := []map[string]any{{
+			"Valid": map[string]any{
+				"CNPJ":   "111111",
+				"Titulo": "RAZAO SOCIAL",
+			},
+			"Telefones": []map[string]any{
+				{"CNPJ": "111111", "Telefone": "123456", "WhatsApp": "SIM"},
+				{"CNPJ": "111111", "Telefone": "564565", "WhatsApp": "SIM"},
+			},
+		}, {
+			"Valid": map[string]any{
+				"CNPJ":   "222222",
+				"Titulo": "RAZAO SOCIAL 222",
+			},
+			"Telefones": []map[string]any{
+				{"CNPJ": "222222", "Telefone": "9999999", "WhatsApp": "SIM"},
+			},
+		}}
+
 		spec := domain.PresentationSpec{
 			SheetOptions: []domain.PresentationSpecSheetOptions{
 				{
@@ -273,7 +331,7 @@ func TestExcelWriter_Write(t *testing.T) {
 		}
 
 		ew := ExcelWriter{}
-		path, err := ew.Write([]map[string]any{}, spec)
+		path, err := ew.Write(data, spec)
 		require.NoError(t, err)
 		assert.NotEmpty(t, path)
 
