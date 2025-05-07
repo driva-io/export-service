@@ -4,15 +4,16 @@ import (
 	"errors"
 	"export-service/internal/adapters"
 	"fmt"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-	"go.uber.org/zap"
 	"io"
 	"log"
 	"net"
 	"net/http"
 	"os"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
 )
 
 func TestSheetExportUseCase_downloadData(t *testing.T) {
@@ -47,6 +48,20 @@ func TestSheetExportUseCase_downloadData(t *testing.T) {
 
 		_, err := s.downloadData(r)
 		assert.Errorf(t, err, "Should fail if status is not 200")
+	})
+
+	t.Run("Should send sheet to email", func(t *testing.T) {
+		r := ExportRequest{
+			DataDownloadURL: "https://applications.s3.bhs.io.cloud.ovh.net/exports/request/e0775745-f311-4431-9db1-50ae452f4adf-e3c88c29",
+			ListID:          "e0775745-f311-4431-9db1-50ae452f4adf",
+			ListName:        "skate",
+			DataSource:      "empresas",
+			UserCompany:     "fc1f3fdf-372d-4180-9e37-763c49b89792",
+			UserEmail:       "henrique.ramalho@driva.com.br",
+			UserName:        "Henrique",
+		}
+		_, err := s.Execute(r)
+		require.NoError(t, err)
 	})
 }
 
