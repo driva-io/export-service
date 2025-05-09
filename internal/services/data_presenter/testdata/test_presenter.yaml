@@ -43,9 +43,9 @@
         - instagram.com/instagram2
       testeForObjeto:
         - url: instagram.com/instagram1
-          cnpj: 1111.0
+          cnpj: 35984223000112.0
         - url: instagram.com/instagram2
-          cnpj: 1111.0
+          cnpj: 35984223000112.0
       testeForIndex: instagram.com/instagram2
       testeForLimit:
         - instagram.com/instagram1
@@ -160,7 +160,7 @@
 
   expected:
     Tab1:
-      testeCNPJ: "00.000.000/0011-11"
+      testeCNPJ: "35.984.223/0001-12"
 
 - name: Test $ncnpj
   spec:
@@ -170,7 +170,7 @@
 
   expected:
     Tab1:
-      testeNCNPJ: "00000000001111"
+      testeNCNPJ: "35984223000112"
 
 - name: Test $date
   spec:
@@ -291,13 +291,13 @@
       testeFlat:
         - entity:
             url: "instagram.com/instagram1"
-            cnpj: 1111.0
+            cnpj: 35984223000112.0
         - entity:
             url: "instagram.com/instagram2"
-            cnpj: 1111.0
+            cnpj: 35984223000112.0
         - entity:
             tc: "99 944444444"
-            cnpj: 1111.0
+            cnpj: 35984223000112.0
 
 - name: Test $flat obj
   spec:
@@ -323,7 +323,7 @@
       Razão Social: razao_social
   expected:
     CNES:
-      CNPJ: "00000000001111"
+      CNPJ: "35984223000112"
       Atividade: "INTERNACAO"
       Razão Social: "RAZAO SOCIAL"
 - name: Test Inexistente
@@ -335,5 +335,5 @@
       Razão Social: razao_social
   expected:
     Inexistente:
-      CNPJ: "00000000001111"
+      CNPJ: "35984223000112"
       Razão Social: "RAZAO SOCIAL"

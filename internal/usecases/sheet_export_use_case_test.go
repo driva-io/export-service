@@ -3,21 +3,41 @@ package usecases
 import (
 	"errors"
 	"export-service/internal/adapters"
+	"export-service/internal/repositories/presentation_spec_repo"
+	"export-service/internal/writers"
 	"fmt"
 	"io"
 	"log"
 	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"testing"
 
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 )
 
 func TestSheetExportUseCase_downloadData(t *testing.T) {
-	s := SheetExportUseCase{downloader: &adapters.HTTPDownloader{}, logger: zap.NewExample()}
+	godotenv.Load("../../.env")
+	config, err := pgxpool.ParseConfig(getPostgresConnStr())
+	if err != nil {
+		log.Fatalf("Unable to parse connection string: %v", err)
+	}
+
+	conn, err := pgxpool.NewWithConfig(t.Context(), config)
+	if err != nil {
+		log.Fatalf("Unable to create connection pool: %v", err)
+	}
+	defer conn.Close()
+
+	p := presentation_spec_repo.NewPgPresentationSpecRepository(conn, zap.NewExample())
+	u := getS3Uploader(zap.NewExample())
+	m := adapters.NewDrivaMailer(zap.NewExample())
+	s := SheetExportUseCase{presentationSpecRepo: p, uploader: u, dataWriter: &writers.ExcelWriter{}, downloader: &adapters.HTTPDownloader{}, logger: zap.NewExample(), mailer: m}
 	t.Run("Should download data", func(t *testing.T) {
 		r := ExportRequest{
 			DataDownloadURL: getTestURL(t, serveJSON),
@@ -56,7 +76,7 @@ func TestSheetExportUseCase_downloadData(t *testing.T) {
 			ListID:          "e0775745-f311-4431-9db1-50ae452f4adf",
 			ListName:        "skate",
 			DataSource:      "empresas",
-			UserCompany:     "fc1f3fdf-372d-4180-9e37-763c49b89792",
+			UserCompany:     "ramalho_company",
 			UserEmail:       "henrique.ramalho@driva.com.br",
 			UserName:        "Henrique",
 		}
@@ -94,6 +114,29 @@ func serveErrorStatus(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusNotFound)
 	w.Write([]byte("[]"))
+}
+
+func getPostgresConnStr() string {
+	host := os.Getenv("POSTGRES_HOST")
+	port := os.Getenv("POSTGRES_PORT")
+	user := os.Getenv("POSTGRES_USER")
+	password := os.Getenv("POSTGRES_PASSWORD")
+	dbname := os.Getenv("POSTGRES_EXPORTS_DATABASE")
+	escapedUser := url.QueryEscape(user)
+	escapedPassword := url.QueryEscape(password)
+
+	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s", escapedUser, escapedPassword, host, port, dbname)
+}
+
+func getS3Uploader(logger *zap.Logger) *adapters.S3Uploader {
+	bucket := os.Getenv("S3_BUCKET")
+	endpoint := os.Getenv("S3_ENDPOINT")
+	folder := "exports/sheet"
+	key := os.Getenv("S3_KEY")
+	region := os.Getenv("S3_REGION")
+	secretKey := os.Getenv("S3_SECRET_KEY")
+
+	return adapters.NewS3Uploader(key, secretKey, endpoint, region, bucket, folder, logger)
 }
 
 func getTestURL(t *testing.T, handler http.HandlerFunc) string {

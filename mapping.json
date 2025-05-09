@@ -1,0 +1,742 @@
+{
+    "sheet_options": [
+        {
+            "key": "Empresa",
+            "active_columns": [
+                "CNPJ",
+                "Razão Social",
+                "Raiz CNPJ",
+                "Nome Fantasia",
+                "Matriz",
+                "Quantidade de Filiais",
+                "Situação Cadastral",
+                "Natureza Jurídica",
+                "Público ou Privada",
+                "Data de Abertura",
+                "Setor",
+                "Subsetor",
+                "CNAE Principal Subclasse",
+                "CNAE Principal Desc. Seção",
+                "CNAE Principal Desc. Divisão",
+                "CNAE Principal Desc. Grupo",
+                "CNAE Principal Desc. Classe",
+                "CNAE Principal Desc. Subclasse",
+                "UF",
+                "Município",
+                "CEP",
+                "Endereço",
+                "Logradouro",
+                "Bairro",
+                "Latitude",
+                "Longitude",
+                "Capital Social",
+                "Total em Dívidas",
+                "Forma de Tributação",
+                "Faixa de Funcionários Grupo",
+                "Faixa de Faturamento Grupo",
+                "Frota de Caminhão Grupo",
+                "Frota de Ônibus Grupo",
+                "Site Melhor Resultado",
+                "Linkedin Melhor Resultado",
+                "Facebook Melhor Resultado",
+                "Instagram Melhor Resultado"
+            ],
+            "position": 0,
+            "should_explode": false
+        },
+        {
+            "key": "Telefones",
+            "active_columns": [
+                "CNPJ",
+                "Razão Social",
+                "Telefone Completo",
+                "Fixo Ou Móvel",
+                "Pertence a Contador",
+                "WhatsApp",
+                "Status",
+                "Score"
+            ],
+            "position": 1,
+            "should_explode": true
+        },
+        {
+            "key": "Emails de Empresas",
+            "active_columns": [
+                "CNPJ",
+                "Razão Social",
+                "Email",
+                "Pertence ao Contador",
+                "Nome",
+                "Cargo",
+                "Linkedin"
+            ],
+            "position": 2,
+            "should_explode": true
+        },
+        {
+            "key": "Contatos de Pessoas",
+            "active_columns": [
+                "CNPJ",
+                "Razão Social",
+                "Nome Fantasia",
+                "Email",
+                "Nome",
+                "Cargo",
+                "Linkedin",
+                "Status"
+            ],
+            "position": 3,
+            "should_explode": true
+        },
+        {
+            "key": "Sites",
+            "active_columns": [
+                "CNPJ",
+                "Razão Social",
+                "URL",
+                "Pertence ao Contador",
+                "Tecnologias"
+            ],
+            "position": 4,
+            "should_explode": true
+        },
+        {
+            "key": "Funcionários Linkedin",
+            "active_columns": [
+                "CNPJ",
+                "Razão Social",
+                "Cargo",
+                "Certificações",
+                "Município",
+                "Nome",
+                "Qtde. Seguindo",
+                "Sobre",
+                "URL"
+            ],
+            "position": 5,
+            "should_explode": true
+        },
+        {
+            "key": "Educação",
+            "active_columns": [
+                "CNPJ",
+                "Razão Social",
+                "Matrículas",
+                "Matrículas Básico",
+                "Matrículas Infantil",
+                "Matrículas Fundamental",
+                "Matrículas Médio",
+                "Matrículas Profissional",
+                "Matrículas Especial",
+                "Matrículas EJA",
+                "Docentes",
+                "Docentes Básico",
+                "Docentes Infantil",
+                "Docentes Fundamental",
+                "Docentes Médio",
+                "Docentes Profissional",
+                "Docentes Especial",
+                "Docentes EJA"
+            ],
+            "position": 6,
+            "should_explode": false
+        },
+        {
+            "key": "CNAEs Secundários",
+            "active_columns": [
+                "CNPJ",
+                "Razão Social",
+                "Ramo de Atividade",
+                "Segmento",
+                "Grupo",
+                "Desc. Grupo",
+                "Classe",
+                "Desc. Classe",
+                "Divisão",
+                "Desc. Divisão",
+                "Subclasse",
+                "Desc. Subclasse",
+                "Seção",
+                "Desc. Seção"
+            ],
+            "position": 7,
+            "should_explode": true
+        },
+        {
+            "key": "Sócios",
+            "active_columns": [
+                "CNPJ",
+                "Razão Social",
+                "Nome",
+                "CNPJ/CPF Sócio",
+                "Data de Entrada na Sociedade",
+                "Identificador",
+                "Código de Qualificação",
+                "Qualificação Representante Legal",
+                "Qualificação",
+                "Código Faixa Etária",
+                "Faixa Etária",
+                "Código País",
+                "País"
+            ],
+            "position": 8,
+            "should_explode": true
+        },
+        {
+            "key": "COMEX",
+            "active_columns": ["CNPJ", "Razão Social", "Ano", "Atividade"],
+            "position": 9,
+            "should_explode": true
+        },
+        {
+            "key": "CNES",
+            "active_columns": [
+                "CNPJ",
+                "Razão Social",
+                "Qtd. Leitos SUS",
+                "Qtd. Total de Leitos Não SUS",
+                "Qtd. Total de Leitos",
+                "Atividade",
+                "Tipo de Estabelecimento",
+                "Estabelecimento"
+            ],
+            "position": 10,
+            "should_explode": false
+        },
+        {
+            "key": "ANP",
+            "active_columns": [
+                "CNPJ",
+                "Razão Social",
+                "Situação",
+                "Cód. Agente",
+                "Tipo de Ato",
+                "Data Inicio da Situação",
+                "Número de Autorização",
+                "Data Fim da Situação",
+                "Data Publicação"
+            ],
+            "position": 11,
+            "should_explode": false
+        },
+        {
+            "key": "Veículos",
+            "active_columns": [
+                "CNPJ",
+                "Razão Social",
+                "Ano de Fabricação",
+                "Marca",
+                "Grupo",
+                "Modelo",
+                "Tipo de Veículo",
+                "Placa",
+                "Aro"
+            ],
+            "position": 12,
+            "should_explode": true
+        },
+        {
+            "key": "Forma de Tributação",
+            "active_columns": [
+                "CNPJ",
+                "Razão Social",
+                "Ano",
+                "Forma de Tributação"
+            ],
+            "position": 13,
+            "should_explode": true
+        },
+        {
+            "key": "Serviços Entrega de Comida",
+            "active_columns": ["CNPJ", "Razão Social", "Preço", "Categoria"],
+            "position": 14,
+            "should_explode": false
+        }
+    ],
+    "spec": {
+        "ANP": {
+            "CNPJ": {
+                "$ncnpj": "cnpj"
+            },
+            "Cód. Agente": "anp.cod_agente",
+            "Data Fim da Situação": "anp.data_fim_situacao",
+            "Data Inicio da Situação": "anp.data_inicio_situacao",
+            "Data Publicação": "anp.data_publicacao",
+            "Número de Autorização": "anp.numero_autorizacao",
+            "Razão Social": "razao_social",
+            "Situação": "anp.situacao",
+            "Tipo de Ato": "anp.tipo_ato"
+        },
+        "CNAEs Secundários": {
+            "$for": {
+                "$format": {
+                    "CNPJ": {
+                        "$ncnpj": "super$.cnpj"
+                    },
+                    "Classe": "classe",
+                    "Desc. Classe": "desc_classe",
+                    "Desc. Divisão": "desc_divisao",
+                    "Desc. Grupo": "desc_grupo",
+                    "Desc. Seção": "desc_secao",
+                    "Desc. Subclasse": "desc_subclasse",
+                    "Divisão": "divisao",
+                    "Grupo": "grupo",
+                    "Ramo de Atividade": "ramo_de_atividade",
+                    "Razão Social": "super$.razao_social",
+                    "Segmento": "segmento",
+                    "Seção": "secao",
+                    "Subclasse": "subclasse"
+                },
+                "$prop": "atividades_secundarias"
+            }
+        },
+        "CNES": {
+            "Atividade": "cnes.atividade",
+            "CNPJ": {
+                "$ncnpj": "cnpj"
+            },
+            "Estabelecimento": "cnes.tipo_estabelecimento",
+            "Qtd. Leitos SUS": "cnes.qtde_leitos_sus",
+            "Qtd. Total de Leitos": "cnes.qtde_leitos_sus",
+            "Qtd. Total de Leitos Não SUS": "cnes.qtde_leitos_sus",
+            "Razão Social": "razao_social",
+            "Tipo de Estabelecimento": "cnes.estabelecimento"
+        },
+        "COMEX": {
+            "$for": {
+                "$format": {
+                    "Ano": "ano",
+                    "Atividade": "tipo_atividade",
+                    "CNPJ": {
+                        "$ncnpj": "super$.cnpj"
+                    },
+                    "Razão Social": "super$.razao_social"
+                },
+                "$prop": "comex"
+            }
+        },
+        "Educação": {
+            "CNPJ": {
+                "$ncnpj": "cnpj"
+            },
+            "Docentes": "educacao.qtde_docentes",
+            "Docentes Básico": "educacao.qtde_docentes_basico",
+            "Docentes EJA": "educacao.qtde_docentes_especial",
+            "Docentes Especial": "educacao.qtde_docentes_especial",
+            "Docentes Fundamental": "educacao.qtde_docentes_fundamental",
+            "Docentes Infantil": "educacao.qtde_docentes_infantil",
+            "Docentes Médio": "educacao.qtde_docentes_medio",
+            "Docentes Profissional": "educacao.qtde_docentes_profissional",
+            "Matrículas": "educacao.qtde_matriculas",
+            "Matrículas Básico": "educacao.qtde_matriculas__basico",
+            "Matrículas EJA": "educacao.qtde_matriculas_especial",
+            "Matrículas Especial": "educacao.qtde_matriculas_especial",
+            "Matrículas Fundamental": "educacao.qtde_matriculas_fundamental",
+            "Matrículas Infantil": "educacao.qtde_matriculas_infantil",
+            "Matrículas Médio": "educacao.qtde_matriculas_medio",
+            "Matrículas Profissional": "educacao.qtde_matriculas_profissional",
+            "Razão Social": "razao_social"
+        },
+        "Emails": {
+            "$for": {
+                "$format": {
+                    "CNPJ": {
+                        "$ncnpj": "super$.cnpj"
+                    },
+                    "Cargo": "cargo",
+                    "Email": "email",
+                    "Linkedin": "linkedin",
+                    "Nome": "nome",
+                    "Pertence ao Contador": "pertence_contador",
+                    "Razão Social": "super$.razao_social"
+                },
+                "$prop": "emails_nao_filtrados"
+            }
+        },
+        "Contatos de Pessoas": {
+            "$for": {
+                "$filter": {
+                    "cargo": {
+                        "$exists": true
+                    }
+                },
+                "$format": {
+                    "CNPJ": {
+                        "$ncnpj": "super$.cnpj"
+                    },
+                    "Cargo": { "$upper": "cargo" },
+                    "Email": { "$lower": "email" },
+                    "Linkedin": "linkedin",
+                    "Nome": "nome",
+                    "Nome Fantasia": "super$.nome_fantasia",
+                    "Razão Social": "super$.razao_social",
+                    "Status": "validacao"
+                },
+                "$prop": "emails"
+            }
+        },
+        "Empresa": {
+            "Bairro": "bairro",
+            "CEP": {
+                "$string": "cep"
+            },
+            "CNAE Principal Desc. Subclasse": "cnae_principal_desc_subclasse",
+            "CNPJ": {
+                "$ncnpj": "cnpj"
+            },
+            "Endereço": "endereco",
+            "Faixa de Faturamento Grupo": "faixa_faturamento_grupo",
+            "Faixa de Funcionários Grupo": "faixa_funcionarios_grupo",
+            "Matriz": {
+                "$switch": {
+                    "$cases": [
+                        {
+                            "$case": {
+                                "matriz": true
+                            },
+                            "$use": {
+                                "$literal": "Sim"
+                            }
+                        },
+                        {
+                            "$case": {
+                                "matriz": false
+                            },
+                            "$use": {
+                                "$literal": "Não"
+                            }
+                        }
+                    ]
+                }
+            },
+            "Município": "municipio",
+            "Nome Fantasia": "nome_fantasia",
+            "Quantidade de Filiais": "qtde_filiais",
+            "Raiz CNPJ": {
+                "$string": "raiz_cnpj"
+            },
+            "Razão Social": "razao_social",
+            "Setor": "segmento",
+            "Situação Cadastral": "situacao_cadastral",
+            "Subsetor": "ramo_de_atividade",
+            "UF": "uf"
+        },
+        "Facebook": {
+            "$for": {
+                "$format": {
+                    "CNPJ": {
+                        "$ncnpj": "super$.cnpj"
+                    },
+                    "Razão Social": "super$.razao_social",
+                    "URL": "url"
+                },
+                "$prop": "facebook"
+            }
+        },
+        "Forma de Tributação": {
+            "$for": {
+                "$format": {
+                    "Ano": "ano",
+                    "CNPJ": {
+                        "$ncnpj": "super$.cnpj"
+                    },
+                    "Forma de Tributação": "forma_tributacao",
+                    "Razão Social": "super$.razao_social"
+                },
+                "$prop": "forma_tributacao"
+            }
+        },
+        "Frotas": {
+            "CNPJ": {
+                "$ncnpj": "cnpj"
+            },
+            "Frota de Automóvel": "qtde_automovel_grupo",
+            "Frota de Caminhão": "qtde_caminhao_grupo",
+            "Frota de Moto": "qtde_moto_grupo",
+            "Frota de Ônibus": "qtde_onibus_grupo",
+            "Razão Social": "razao_social"
+        },
+        "Funcionários Linkedin": {
+            "$for": {
+                "$format": {
+                    "CNPJ": {
+                        "$ncnpj": "super$.cnpj"
+                    },
+                    "Cargo": "cargo",
+                    "Certificações": {
+                        "$joinby": {
+                            "$prop": "certificacoes",
+                            "$separator": ", "
+                        }
+                    },
+                    "Município": "municipio_funcionario",
+                    "Nome": "nome",
+                    "Qtde. Seguindo": "qtde_seguindo",
+                    "Razão Social": "super$.razao_social",
+                    "Sobre": "sobre",
+                    "URL": "url_funcionario"
+                },
+                "$prop": "linkedin.funcionarios"
+            }
+        },
+        "Histórico de Funcionários": {
+            "$for": {
+                "$format": {
+                    "Ano": "ano",
+                    "CNPJ": {
+                        "$ncnpj": "super$.cnpj"
+                    },
+                    "Quantidade de Funcionários": "qtde_funcionarios_grupo",
+                    "Razão Social": "super$.razao_social"
+                },
+                "$prop": "historico_funcionarios_grupo"
+            }
+        },
+        "Instagram": {
+            "$for": {
+                "$format": {
+                    "CNPJ": {
+                        "$ncnpj": "super$.cnpj"
+                    },
+                    "Razão Social": "super$.razao_social",
+                    "URL": "url"
+                },
+                "$prop": "instagram"
+            }
+        },
+        "Processos": {
+            "CNPJ": {
+                "$ncnpj": "cnpj"
+            },
+            "Processos Justiça Eleitoral": "qtde_processos_justica_eleitoral",
+            "Processos Justiça Estadual": "qtde_processos_justica_estadual",
+            "Processos Justiça Federal": "qtde_processos_justica_federal",
+            "Processos Justiça do Trabalho": "qtde_processos_justica_do_trabalho",
+            "Processos Sócios": "qtde_processos_socios_total",
+            "Razão Social": "razao_social"
+        },
+        "RFB": {
+            "Bairro": "bairro",
+            "CEP": {
+                "$string": "cep"
+            },
+            "CNAE Fiscal Secundaria": {
+                "$joinby": {
+                    "$prop": "cnae_fiscal_secundaria",
+                    "$separator": ", "
+                }
+            },
+            "CNAE Principal Desc. Classe": "cnae_principal_desc_classe",
+            "CNAE Principal Desc. Divisão": "cnae_principal_desc_divisao",
+            "CNAE Principal Desc. Grupo": "cnae_principal_desc_grupo",
+            "CNAE Principal Desc. Seção": "cnae_principal_desc_secao",
+            "CNAE Principal Desc. Subclasse": "cnae_principal_desc_subclasse",
+            "CNAE Principal Subclasse": "cnae_principal_subclasse",
+            "CNPJ": {
+                "$ncnpj": "cnpj"
+            },
+            "Capital Social": "capital_social",
+            "Complemento": "complemento",
+            "Data de Abertura": {
+                "$date": "data_inicio_atividade"
+            },
+            "Emails Concatenados": {
+                "$joinby": {
+                    "$prop": {
+                        "$for": {
+                            "$filter": {
+                                "pertence_contador": false
+                            },
+                            "$format": "email",
+                            "$prop": "emails"
+                        }
+                    },
+                    "$separator": ", "
+                }
+            },
+            "Endereço": "endereco",
+            "Facebook Concatenado": {
+                "$joinby": {
+                    "$prop": "facebook.url",
+                    "$separator": ", "
+                }
+            },
+            "Faixa de Faturamento Grupo": "faixa_faturamento_grupo",
+            "Faixa de Funcionários Grupo": "faixa_funcionarios_grupo",
+            "Forma de Tributação": "forma_tributacao",
+            "Frota de Caminhão Grupo": "qtde_caminhao_grupo",
+            "Frota de Ônibus Grupo": "qtde_onibus_grupo",
+            "Instagram Concatenado": {
+                "$joinby": {
+                    "$prop": "instagram.url",
+                    "$separator": ", "
+                }
+            },
+            "Latitude": "lat",
+            "Linkedin Concatenado": {
+                "$joinby": {
+                    "$prop": "linkedin.url",
+                    "$separator": ", "
+                }
+            },
+            "Logradouro": "logradouro",
+            "Longitude": "lon",
+            "Macrorregião": "macrorregiao",
+            "Matriz": "matriz",
+            "Mesorregião": "mesorregiao",
+            "Microrregião": "microrregiao",
+            "Municipio": "municipio",
+            "Natureza Jurídica": "natureza_juridica",
+            "Nome Fantasia": "nome_fantasia",
+            "Número": "numero",
+            "Opção Pelo Simples": "opcao_pelo_simples",
+            "Opção pelo MEI": "opcao_pelo_mei",
+            "Porte": "porte",
+            "Produto NCM": {
+                "$joinby": {
+                    "$prop": "produto_ncm",
+                    "$separator": ", "
+                }
+            },
+            "Público ou Privada": "empresa_publico_privada",
+            "Qualificação Responsável": "qualificacao_responsavel",
+            "Quantidade de Filiais": "qtde_filiais",
+            "Raiz CNPJ": {
+                "$string": "raiz_cnpj"
+            },
+            "Ramo de Atividade": "ramo_de_atividade",
+            "Razão Social": "razao_social",
+            "Segmento": "segmento",
+            "Sites Concatenados": {
+                "$joinby": {
+                    "$prop": "sites.site",
+                    "$separator": ", "
+                }
+            },
+            "Situação Cadastral": "situacao_cadastral",
+            "Sócios": {
+                "$joinby": {
+                    "$prop": "socios.nome_socio_com_cpf_cnpj",
+                    "$separator": ", "
+                }
+            },
+            "Telefones Concatenados": {
+                "$joinby": {
+                    "$prop": {
+                        "$for": {
+                            "$filter": {
+                                "pertence_contador": false
+                            },
+                            "$format": "telefone_completo",
+                            "$prop": "telefones"
+                        }
+                    },
+                    "$separator": ", "
+                }
+            },
+            "Tipo de Logradouro": "descricao_tipo_logradouro",
+            "Total em Dívidas": "divida.total",
+            "UF": "uf"
+        },
+        "Serviços Entrega de Comida": {
+            "CNPJ": {
+                "$ncnpj": "cnpj"
+            },
+            "Categoria": "servico_entrega_comida.categoria",
+            "Preço": "servico_entrega_comida.preco",
+            "Razão Social": "razao_social"
+        },
+        "Sites": {
+            "$for": {
+                "$format": {
+                    "CNPJ": {
+                        "$ncnpj": "super$.cnpj"
+                    },
+                    "Pertence ao Contador": "pertence_contador",
+                    "Razão Social": "super$.razao_social",
+                    "Tecnologias": {
+                        "$joinby": {
+                            "$prop": "tecnologias",
+                            "$separator": ", "
+                        }
+                    },
+                    "URL": "site"
+                },
+                "$prop": "sites"
+            }
+        },
+        "Sócios": {
+            "$for": {
+                "$format": {
+                    "CNPJ": {
+                        "$ncnpj": "super$.cnpj"
+                    },
+                    "CNPJ/CPF Sócio": "cnpj_cpf_socio",
+                    "Código Faixa Etária": "faixa_etaria_socio",
+                    "Código País": "pais",
+                    "Código de Qualificação": "qualificacao_socio",
+                    "Data de Entrada na Sociedade": {
+                        "$date": "data_entrada_sociedade"
+                    },
+                    "Faixa Etária": "faixa_etaria_socio",
+                    "Identificador": "identificador_socio",
+                    "Nome": "nome_socio",
+                    "País": "pais",
+                    "Qualificação": "qualificacao_socio",
+                    "Qualificação Representante Legal": "qualificacao_representante_legal",
+                    "Razão Social": "super$.razao_social"
+                },
+                "$prop": "socios"
+            }
+        },
+        "Telefones": {
+            "$for": {
+                "$format": {
+                    "CNPJ": {
+                        "$ncnpj": "super$.cnpj"
+                    },
+                    "Fixo Ou Móvel": "fixo_movel",
+                    "Pertence a Contador": "pertence_contador",
+                    "Razão Social": "super$.razao_social",
+                    "Score": "validacao_score",
+                    "Status": "status_ligacao",
+                    "Telefone Completo": "telefone_completo",
+                    "WhatsApp": "whatsapp"
+                },
+                "$prop": "telefones"
+            }
+        },
+        "Twitter": {
+            "$for": {
+                "$format": {
+                    "CNPJ": {
+                        "$ncnpj": "super$.cnpj"
+                    },
+                    "Razão Social": "super$.razao_social",
+                    "URL": "url"
+                },
+                "$prop": "twitter"
+            }
+        },
+        "Veículos": {
+            "$for": {
+                "$format": {
+                    "Ano de Fabricação": {
+                        "$fallback": ["ano", "ano_fabricacao"]
+                    },
+                    "Aro": "aro",
+                    "CNPJ": {
+                        "$ncnpj": "super$.cnpj"
+                    },
+                    "Grupo": "grupo",
+                    "Marca": "marca",
+                    "Modelo": "modelo",
+                    "Placa": "placa",
+                    "Razão Social": "super$.razao_social",
+                    "Tipo de Veículo": "tipo_veiculo"
+                },
+                "$prop": "veiculos"
+            }
+        }
+    }
+}
