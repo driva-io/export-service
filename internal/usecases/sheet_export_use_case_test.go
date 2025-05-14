@@ -72,11 +72,11 @@ func TestSheetExportUseCase_downloadData(t *testing.T) {
 
 	t.Run("Should send sheet to email", func(t *testing.T) {
 		r := ExportRequest{
-			DataDownloadURL: "https://applications.s3.bhs.io.cloud.ovh.net/exports/request/e0775745-f311-4431-9db1-50ae452f4adf-e3c88c29",
-			ListID:          "e0775745-f311-4431-9db1-50ae452f4adf",
-			ListName:        "skate",
+			DataDownloadURL: "https://applications.s3.bhs.io.cloud.ovh.net/exports/request/d911cfe9-59fe-4044-ae15-ee1f35e00b3c-9edd08be",
+			ListID:          "d911cfe9-59fe-4044-ae15-ee1f35e00b3c",
+			ListName:        "Teste Emails",
 			DataSource:      "empresas",
-			UserCompany:     "ramalho_company",
+			UserCompany:     "Driva",
 			UserEmail:       "henrique.ramalho@driva.com.br",
 			UserName:        "Henrique",
 		}

@@ -65,10 +65,7 @@
                 "CNPJ",
                 "Razão Social",
                 "Email",
-                "Pertence ao Contador",
-                "Nome",
-                "Cargo",
-                "Linkedin"
+                "Pertence ao Contador"
             ],
             "position": 2,
             "should_explode": true
@@ -98,22 +95,6 @@
                 "Tecnologias"
             ],
             "position": 4,
-            "should_explode": true
-        },
-        {
-            "key": "Funcionários Linkedin",
-            "active_columns": [
-                "CNPJ",
-                "Razão Social",
-                "Cargo",
-                "Certificações",
-                "Município",
-                "Nome",
-                "Qtde. Seguindo",
-                "Sobre",
-                "URL"
-            ],
-            "position": 5,
             "should_explode": true
         },
         {
@@ -337,20 +318,38 @@
             "Matrículas Profissional": "educacao.qtde_matriculas_profissional",
             "Razão Social": "razao_social"
         },
-        "Emails": {
+        "Emails de Empresas": {
             "$for": {
                 "$format": {
                     "CNPJ": {
                         "$ncnpj": "super$.cnpj"
                     },
-                    "Cargo": "cargo",
                     "Email": "email",
-                    "Linkedin": "linkedin",
-                    "Nome": "nome",
-                    "Pertence ao Contador": "pertence_contador",
+                    "Pertence ao Contador": {
+                        "$switch": {
+                            "$cases": [
+                                {
+                                    "$case": {
+                                        "pertence_contador": true
+                                    },
+                                    "$use": {
+                                        "$literal": "Sim"
+                                    }
+                                },
+                                {
+                                    "$case": {
+                                        "pertence_contador": false
+                                    },
+                                    "$use": {
+                                        "$literal": "Não"
+                                    }
+                                }
+                            ]
+                        }
+                    },
                     "Razão Social": "super$.razao_social"
                 },
-                "$prop": "emails_nao_filtrados"
+                "$prop": "emails"
             }
         },
         "Contatos de Pessoas": {
@@ -372,21 +371,38 @@
                     "Razão Social": "super$.razao_social",
                     "Status": "validacao"
                 },
-                "$prop": "emails"
+                "$prop": "profiles"
             }
         },
         "Empresa": {
             "Bairro": "bairro",
+            "Capital Social": { "$string": "capital_social" },
             "CEP": {
                 "$string": "cep"
             },
+            "CNAE Principal Desc. Divisão": "cnae_principal_desc_divisao",
             "CNAE Principal Desc. Subclasse": "cnae_principal_desc_subclasse",
+            "CNAE Principal Desc. Grupo": "cnae_principal_desc_grupo",
+            "CNAE Principal Desc. Seção": "cnae_principal_desc_secao",
+            "CNAE Principal Desc. Classe": "cnae_principal_desc_classe",
+            "CNAE Principal Subclasse": {
+                "$string": "cnae_principal_subclasse"
+            },
             "CNPJ": {
                 "$ncnpj": "cnpj"
+            },
+            "Data de Abertura": {
+                "$date": "data_inicio_atividade"
             },
             "Endereço": "endereco",
             "Faixa de Faturamento Grupo": "faixa_faturamento_grupo",
             "Faixa de Funcionários Grupo": "faixa_funcionarios_grupo",
+            "Forma de Tributação": "forma_tributacao",
+            "Frota de Caminhão Grupo": "qtde_caminhao_grupo",
+            "Frota de Ônibus Grupo": "qtde_onibus_grupo",
+            "Latitude": "lat",
+            "Logradouro": "logradouro",
+            "Longitude": "lon",
             "Matriz": {
                 "$switch": {
                     "$cases": [
@@ -410,7 +426,9 @@
                 }
             },
             "Município": "municipio",
+            "Natureza Jurídica": "natureza_juridica",
             "Nome Fantasia": "nome_fantasia",
+            "Público ou Privada": "empresa_publico_privada",
             "Quantidade de Filiais": "qtde_filiais",
             "Raiz CNPJ": {
                 "$string": "raiz_cnpj"
@@ -419,19 +437,8 @@
             "Setor": "segmento",
             "Situação Cadastral": "situacao_cadastral",
             "Subsetor": "ramo_de_atividade",
+            "Total em Dívidas": "divida.total",
             "UF": "uf"
-        },
-        "Facebook": {
-            "$for": {
-                "$format": {
-                    "CNPJ": {
-                        "$ncnpj": "super$.cnpj"
-                    },
-                    "Razão Social": "super$.razao_social",
-                    "URL": "url"
-                },
-                "$prop": "facebook"
-            }
         },
         "Forma de Tributação": {
             "$for": {
@@ -445,198 +452,6 @@
                 },
                 "$prop": "forma_tributacao"
             }
-        },
-        "Frotas": {
-            "CNPJ": {
-                "$ncnpj": "cnpj"
-            },
-            "Frota de Automóvel": "qtde_automovel_grupo",
-            "Frota de Caminhão": "qtde_caminhao_grupo",
-            "Frota de Moto": "qtde_moto_grupo",
-            "Frota de Ônibus": "qtde_onibus_grupo",
-            "Razão Social": "razao_social"
-        },
-        "Funcionários Linkedin": {
-            "$for": {
-                "$format": {
-                    "CNPJ": {
-                        "$ncnpj": "super$.cnpj"
-                    },
-                    "Cargo": "cargo",
-                    "Certificações": {
-                        "$joinby": {
-                            "$prop": "certificacoes",
-                            "$separator": ", "
-                        }
-                    },
-                    "Município": "municipio_funcionario",
-                    "Nome": "nome",
-                    "Qtde. Seguindo": "qtde_seguindo",
-                    "Razão Social": "super$.razao_social",
-                    "Sobre": "sobre",
-                    "URL": "url_funcionario"
-                },
-                "$prop": "linkedin.funcionarios"
-            }
-        },
-        "Histórico de Funcionários": {
-            "$for": {
-                "$format": {
-                    "Ano": "ano",
-                    "CNPJ": {
-                        "$ncnpj": "super$.cnpj"
-                    },
-                    "Quantidade de Funcionários": "qtde_funcionarios_grupo",
-                    "Razão Social": "super$.razao_social"
-                },
-                "$prop": "historico_funcionarios_grupo"
-            }
-        },
-        "Instagram": {
-            "$for": {
-                "$format": {
-                    "CNPJ": {
-                        "$ncnpj": "super$.cnpj"
-                    },
-                    "Razão Social": "super$.razao_social",
-                    "URL": "url"
-                },
-                "$prop": "instagram"
-            }
-        },
-        "Processos": {
-            "CNPJ": {
-                "$ncnpj": "cnpj"
-            },
-            "Processos Justiça Eleitoral": "qtde_processos_justica_eleitoral",
-            "Processos Justiça Estadual": "qtde_processos_justica_estadual",
-            "Processos Justiça Federal": "qtde_processos_justica_federal",
-            "Processos Justiça do Trabalho": "qtde_processos_justica_do_trabalho",
-            "Processos Sócios": "qtde_processos_socios_total",
-            "Razão Social": "razao_social"
-        },
-        "RFB": {
-            "Bairro": "bairro",
-            "CEP": {
-                "$string": "cep"
-            },
-            "CNAE Fiscal Secundaria": {
-                "$joinby": {
-                    "$prop": "cnae_fiscal_secundaria",
-                    "$separator": ", "
-                }
-            },
-            "CNAE Principal Desc. Classe": "cnae_principal_desc_classe",
-            "CNAE Principal Desc. Divisão": "cnae_principal_desc_divisao",
-            "CNAE Principal Desc. Grupo": "cnae_principal_desc_grupo",
-            "CNAE Principal Desc. Seção": "cnae_principal_desc_secao",
-            "CNAE Principal Desc. Subclasse": "cnae_principal_desc_subclasse",
-            "CNAE Principal Subclasse": "cnae_principal_subclasse",
-            "CNPJ": {
-                "$ncnpj": "cnpj"
-            },
-            "Capital Social": "capital_social",
-            "Complemento": "complemento",
-            "Data de Abertura": {
-                "$date": "data_inicio_atividade"
-            },
-            "Emails Concatenados": {
-                "$joinby": {
-                    "$prop": {
-                        "$for": {
-                            "$filter": {
-                                "pertence_contador": false
-                            },
-                            "$format": "email",
-                            "$prop": "emails"
-                        }
-                    },
-                    "$separator": ", "
-                }
-            },
-            "Endereço": "endereco",
-            "Facebook Concatenado": {
-                "$joinby": {
-                    "$prop": "facebook.url",
-                    "$separator": ", "
-                }
-            },
-            "Faixa de Faturamento Grupo": "faixa_faturamento_grupo",
-            "Faixa de Funcionários Grupo": "faixa_funcionarios_grupo",
-            "Forma de Tributação": "forma_tributacao",
-            "Frota de Caminhão Grupo": "qtde_caminhao_grupo",
-            "Frota de Ônibus Grupo": "qtde_onibus_grupo",
-            "Instagram Concatenado": {
-                "$joinby": {
-                    "$prop": "instagram.url",
-                    "$separator": ", "
-                }
-            },
-            "Latitude": "lat",
-            "Linkedin Concatenado": {
-                "$joinby": {
-                    "$prop": "linkedin.url",
-                    "$separator": ", "
-                }
-            },
-            "Logradouro": "logradouro",
-            "Longitude": "lon",
-            "Macrorregião": "macrorregiao",
-            "Matriz": "matriz",
-            "Mesorregião": "mesorregiao",
-            "Microrregião": "microrregiao",
-            "Municipio": "municipio",
-            "Natureza Jurídica": "natureza_juridica",
-            "Nome Fantasia": "nome_fantasia",
-            "Número": "numero",
-            "Opção Pelo Simples": "opcao_pelo_simples",
-            "Opção pelo MEI": "opcao_pelo_mei",
-            "Porte": "porte",
-            "Produto NCM": {
-                "$joinby": {
-                    "$prop": "produto_ncm",
-                    "$separator": ", "
-                }
-            },
-            "Público ou Privada": "empresa_publico_privada",
-            "Qualificação Responsável": "qualificacao_responsavel",
-            "Quantidade de Filiais": "qtde_filiais",
-            "Raiz CNPJ": {
-                "$string": "raiz_cnpj"
-            },
-            "Ramo de Atividade": "ramo_de_atividade",
-            "Razão Social": "razao_social",
-            "Segmento": "segmento",
-            "Sites Concatenados": {
-                "$joinby": {
-                    "$prop": "sites.site",
-                    "$separator": ", "
-                }
-            },
-            "Situação Cadastral": "situacao_cadastral",
-            "Sócios": {
-                "$joinby": {
-                    "$prop": "socios.nome_socio_com_cpf_cnpj",
-                    "$separator": ", "
-                }
-            },
-            "Telefones Concatenados": {
-                "$joinby": {
-                    "$prop": {
-                        "$for": {
-                            "$filter": {
-                                "pertence_contador": false
-                            },
-                            "$format": "telefone_completo",
-                            "$prop": "telefones"
-                        }
-                    },
-                    "$separator": ", "
-                }
-            },
-            "Tipo de Logradouro": "descricao_tipo_logradouro",
-            "Total em Dívidas": "divida.total",
-            "UF": "uf"
         },
         "Serviços Entrega de Comida": {
             "CNPJ": {
@@ -652,7 +467,28 @@
                     "CNPJ": {
                         "$ncnpj": "super$.cnpj"
                     },
-                    "Pertence ao Contador": "pertence_contador",
+                    "Pertence ao Contador": {
+                        "$switch": {
+                            "$cases": [
+                                {
+                                    "$case": {
+                                        "pertence_contador": true
+                                    },
+                                    "$use": {
+                                        "$literal": "Sim"
+                                    }
+                                },
+                                {
+                                    "$case": {
+                                        "pertence_contador": false
+                                    },
+                                    "$use": {
+                                        "$literal": "Não"
+                                    }
+                                }
+                            ]
+                        }
+                    },
                     "Razão Social": "super$.razao_social",
                     "Tecnologias": {
                         "$joinby": {
@@ -696,26 +532,56 @@
                         "$ncnpj": "super$.cnpj"
                     },
                     "Fixo Ou Móvel": "fixo_movel",
-                    "Pertence a Contador": "pertence_contador",
+                    "Pertence a Contador": {
+                        "$switch": {
+                            "$cases": [
+                                {
+                                    "$case": {
+                                        "pertence_contador": true
+                                    },
+                                    "$use": {
+                                        "$literal": "Sim"
+                                    }
+                                },
+                                {
+                                    "$case": {
+                                        "pertence_contador": false
+                                    },
+                                    "$use": {
+                                        "$literal": "Não"
+                                    }
+                                }
+                            ]
+                        }
+                    },
                     "Razão Social": "super$.razao_social",
                     "Score": "validacao_score",
                     "Status": "status_ligacao",
                     "Telefone Completo": "telefone_completo",
-                    "WhatsApp": "whatsapp"
+                    "WhatsApp": {
+                        "$switch": {
+                            "$cases": [
+                                {
+                                    "$case": {
+                                        "whatsapp": true
+                                    },
+                                    "$use": {
+                                        "$literal": "Sim"
+                                    }
+                                },
+                                {
+                                    "$case": {
+                                        "whatsapp": false
+                                    },
+                                    "$use": {
+                                        "$literal": "Não"
+                                    }
+                                }
+                            ]
+                        }
+                    }
                 },
-                "$prop": "telefones"
-            }
-        },
-        "Twitter": {
-            "$for": {
-                "$format": {
-                    "CNPJ": {
-                        "$ncnpj": "super$.cnpj"
-                    },
-                    "Razão Social": "super$.razao_social",
-                    "URL": "url"
-                },
-                "$prop": "twitter"
+                "$prop": "phones"
             }
         },
         "Veículos": {
